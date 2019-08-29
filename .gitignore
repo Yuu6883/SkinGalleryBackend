@@ -1,0 +1,7 @@
+# CLI
+cli/logs
+log-config.json
+
+# NPM
+node_modules
+package-lock.json

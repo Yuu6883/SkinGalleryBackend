@@ -29,6 +29,7 @@ class SkinCollection {
      * @param {string} skinName
      */
     static async create(ownerID, skinName) {
+        // TODO: Get a lib or algo for smaller ID
         const skinID = uniqid();
         return await SkinModel.create({ skinID, ownerID, skinName });
     }

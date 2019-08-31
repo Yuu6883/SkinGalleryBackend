@@ -1,9 +1,14 @@
 const mongoose = require("mongoose");
-const express = require("express");
 
-const API = require("./api/auth");
-const Bot = require("./bot");
-const Logger = require("./logger");
+// Modules
+const Bot = require("./modules/DiscordBot");
+const Logger = require("./modules/Logger");
+const Webserver = require("./modules/Webserver");
+
+// Models
+const SkinCollection = require("./models/Skins");
+const UserCollection = require("./models/Users");
+const Unique = require("./models/Unique");
 
 class VanisSkinsApp {
     /**
@@ -11,13 +16,16 @@ class VanisSkinsApp {
      */
     constructor(config) {
         this.config = config;
-        this.logger = new Logger();
 
-        /** @type {import("http").Server} */
-        this.webserver = null;
-
-        /** @type {Bot} */
+        // Modules
         this.bot = new Bot(this);
+        this.logger = new Logger();
+        this.webserver = new Webserver(this);
+
+        // Models
+        this.skins = new SkinCollection(this);
+        this.users = new UserCollection(this);
+        this.unique = new Unique(this);
     }
 
     async init() {
@@ -27,17 +35,12 @@ class VanisSkinsApp {
         });
         this.logger.inform("connected to database");
         await this.bot.init();
-        this.logger.inform("webserver opening @", this.config.httpLocation);
-        this.webserver = express()
-            .use("/", express.static("../web"))
-            .use("/api", API)
-            .listen(this.config.httpLocation, () => this.logger.inform("ready"));
+        await this.webserver.init();
     }
 
     async stop() {
         this.logger.inform("stop");
-        this.webserver.close();
-        this.logger.inform("webserver closed");
+        await this.webserver.stop();
         await this.bot.stop();
         await mongoose.disconnect();
         this.logger.inform("disconnected from database");

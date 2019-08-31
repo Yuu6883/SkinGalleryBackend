@@ -152,4 +152,4 @@ process.once("exit", function(code) {
  */
 module.exports = (app) => app.logger.onlog = write;
 
-const App = require("../src/app");
+const App = require("../src/App");

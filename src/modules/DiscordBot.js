@@ -16,7 +16,7 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
     get logger() { return this.app.logger; }
 
     async init() {
-        await this.login(this.config.discordToken);
+        await this.login(this.config.discordBotToken);
         this.logger.inform("Discord bot logged in");
     }
     async stop() {
@@ -27,4 +27,4 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
 
 module.exports = VanisSkinsDiscordBot;
 
-const App = require("./app");
+const App = require("../App");

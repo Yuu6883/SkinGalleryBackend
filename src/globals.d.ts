@@ -4,9 +4,16 @@ declare type LogMessageData = any[];
 
 interface AppConfig {
     env: "production" | "development";
+
     dbPath: string;
-    httpLocation: string | number;
-    discordToken: string;
+
+    webLocation: string | number;
+    webDomain: string;
+
+    discordAppId: string;
+    discordAppSecret: string;
+    discordAppRedirect: string;
+    discordBotToken: string;
 }
 
 interface UserEntry {
@@ -23,3 +30,9 @@ interface SkinEntry {
     approvedStamp?: Date;
 }
 declare type SkinDocument = import("mongoose").Document & SkinEntry;
+
+interface APIEndpointHandler {
+    handler(this: import("./App"), req: import("express").Request, res: import("express").Response): void;
+    method: "get" | "post" | "patch" | "put" | "delete" | "head" | "options";
+    path: string;
+};

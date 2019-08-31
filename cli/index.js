@@ -1,6 +1,6 @@
 process.once("unhandledRejection", err => { throw err; });
 
-const App = require("../src/app");
+const App = require("../src/App");
 /** @type {AppConfig} */
 const config = require("./config.js");
 const app = new App(config);
@@ -8,5 +8,8 @@ const app = new App(config);
 require("./log-handler")(app);
 
 app.init().then(() => {
-    process.once("SIGINT", () => app.stop());
+    process.once("SIGINT", () => {
+        app.logger.inform("SIGINT");
+        app.stop();
+    });
 });

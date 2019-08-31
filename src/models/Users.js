@@ -1,12 +1,12 @@
 const mongoose = require("mongoose");
-const uniqid = require("uniqid");
 
 /** @type {mongoose.Schema<UserEntry>} */
 const UserSchema = new mongoose.Schema({
     discordID:      { type: String, required: true },
     discordToken:   { type: String, required: false },
     vanisToken:     { type: String, required: false },
-    bannedUntil:    { type: Date, required: false }
+    bannedUntil:    { type: Date, required: false },
+    moderator:      { type: Boolean, default: false }
 });
 UserSchema.index({ discordID: 1 }, { unique: true });
 UserSchema.index({ discordToken: 1 }, { unique: true, sparse: true });
@@ -17,15 +17,22 @@ const UserModel = mongoose.model("users", UserSchema);
 
 class UserCollection {
     /**
+     * @param {import("../App")} app
+     */
+    constructor(app) {
+        this.app = app;
+    }
+
+    /**
      * @param {string} discordID
      */
-    static async find(discordID) {
+    async find(discordID) {
         return await UserModel.findOne({ discordID });
     }
     /**
      * @param {string} discordID
      */
-    static async findOrCreate(discordID) {
+    async findOrCreate(discordID) {
         const user = await UserCollection.find(discordID);
         if (user != null) return user;
         return await UserModel.create({ discordID });
@@ -34,31 +41,38 @@ class UserCollection {
     /**
      * @param {string} vanisToken
      */
-    static async findAuthedVanis(vanisToken) {
+    async findAuthedVanis(vanisToken) {
         return await UserModel.findOne({ vanisToken });
+    }
+    /**
+     * @param {string} vanisToken
+     */
+    async countAuthedVanis(vanisToken) {
+        return await UserModel.count({ vanisToken });
     }
     /**
      * @param {string} discordToken
      */
-    static async findAuthedDiscord(discordToken) {
+    async findAuthedDiscord(discordToken) {
         return await UserModel.findOne({ discordToken });
     }
 
     /**
      * @param {string} discordID
      */
-    static async authVanis(discordID) {
+    async authVanis(discordID) {
         const doc = await this.find(discordID);
         if (doc == null) return null;
-        const id = doc.vanisToken = uniqid();
+        const token = this.app.unique.generateVanisToken();
+        doc.vanisToken = token;
         await doc.save();
-        return id;
+        return token;
     }
     /**
      * @param {string} discordID
      * @param {string} discordToken
      */
-    static async authDiscord(discordID, discordToken) {
+    async authDiscord(discordID, discordToken) {
         const user = await this.find(discordID);
         if (user == null) return null;
         user.discordToken = discordToken;
@@ -67,7 +81,7 @@ class UserCollection {
     /**
      * @param {string} discordID
      */
-    static async deauthVanis(discordID) {
+    async deauthVanis(discordID) {
         const user = await this.find(discordID);
         if (user == null) return false;
         user.vanisToken = undefined;
@@ -77,7 +91,7 @@ class UserCollection {
     /**
      * @param {string} discordID
      */
-    static async deauthDiscord(discordID) {
+    async deauthDiscord(discordID) {
         const user = await this.find(discordID);
         if (user == null) return false;
         if (user.discordToken == null) return false;

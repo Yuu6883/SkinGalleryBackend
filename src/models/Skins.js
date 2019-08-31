@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const uniqid = require("uniqid");
 
 /** @type {mongoose.Schema<SkinEntry>} */
 const SkinSchema = new mongoose.Schema({
@@ -14,13 +13,20 @@ SkinSchema.index({ ownerID: 1 }, { unique: true });
 SkinSchema.index({ skinName: "text" });
 
 /** @type {mongoose.Model<SkinDocument, {}>} */
-const SkinModel = mongoose.model("users", SkinSchema);
+const SkinModel = mongoose.model("skins", SkinSchema);
 
 class SkinCollection {
     /**
+     * @param {import("../App")} app
+     */
+    constructor(app) {
+        this.app = app;
+    }
+
+    /**
      * @param {string} skinID
      */
-    static async find(skinID) {
+    async find(skinID) {
         return await SkinModel.findOne({ skinID });
     }
 
@@ -28,16 +34,18 @@ class SkinCollection {
      * @param {string} ownerID
      * @param {string} skinName
      */
-    static async create(ownerID, skinName) {
-        // TODO: Get a lib or algo for smaller ID
-        const skinID = uniqid();
+    async create(ownerID, skinName) {
+        let skinID;
+        // Duplicate check
+        while (await this.find(skinID = this.app.unique.generateSkinId()) == null)
+            ;
         return await SkinModel.create({ skinID, ownerID, skinName });
     }
 
     /**
      * @param {string} skinID
      */
-    static async approve(skinID) {
+    async approve(skinID) {
         const doc = await SkinCollection.find(skinID);
         if (doc == null) return false;
         doc.approvedStamp = new Date();
@@ -47,7 +55,7 @@ class SkinCollection {
     /**
      * @param {string} skinID
      */
-    static async reject(skinID) {
+    async reject(skinID) {
         const doc = await SkinCollection.find(skinID);
         if (doc == null) return false;
         await doc.remove();
@@ -57,7 +65,7 @@ class SkinCollection {
     /**
      * @param {string} skinID
      */
-    static async editSkinName(skinID) {
+    async editSkinName(skinID) {
         const doc = await SkinCollection.find(skinID);
         if (doc == null) return false;
         doc.approvedStamp = new Date();

@@ -17,7 +17,7 @@ const SkinModel = mongoose.model("skins", SkinSchema);
 
 class SkinCollection {
     /**
-     * @param {import("../App")} app
+     * @param {import("../app")} app
      */
     constructor(app) {
         this.app = app;

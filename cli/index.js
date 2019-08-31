@@ -1,6 +1,6 @@
 process.once("unhandledRejection", err => { throw err; });
 
-const App = require("../src/App");
+const App = require("../src/app");
 /** @type {AppConfig} */
 const config = require("./config.js");
 const app = new App(config);

@@ -88,4 +88,4 @@ class Webserver {
 
 module.exports = Webserver;
 
-const App = require("../App");
+const App = require("../app");

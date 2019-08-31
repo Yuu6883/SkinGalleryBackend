@@ -17,7 +17,7 @@ const UserModel = mongoose.model("users", UserSchema);
 
 class UserCollection {
     /**
-     * @param {import("../App")} app
+     * @param {import("../app")} app
      */
     constructor(app) {
         this.app = app;

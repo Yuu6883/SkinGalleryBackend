@@ -32,7 +32,7 @@ interface SkinEntry {
 declare type SkinDocument = import("mongoose").Document & SkinEntry;
 
 interface APIEndpointHandler {
-    handler(this: import("./App"), req: import("express").Request, res: import("express").Response): void;
+    handler(this: import("./app"), req: import("express").Request, res: import("express").Response): void;
     method: "get" | "post" | "patch" | "put" | "delete" | "head" | "options";
     path: string;
 };

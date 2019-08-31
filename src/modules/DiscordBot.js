@@ -27,4 +27,4 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
 
 module.exports = VanisSkinsDiscordBot;
 
-const App = require("../App");
+const App = require("../app");

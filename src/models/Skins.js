@@ -17,7 +17,7 @@ const SkinModel = mongoose.model("skins", SkinSchema);
 
 class SkinCollection {
     /**
-     * @param {import("../app")} app
+     * @param {import("../App")} app
      */
     constructor(app) {
         this.app = app;
@@ -37,7 +37,7 @@ class SkinCollection {
     async create(ownerID, skinName) {
         let skinID;
         // Duplicate check
-        while (await this.find(skinID = this.app.unique.generateSkinId()) == null)
+        while (await this.find(skinID = this.app.provision.generateSkinId()) == null)
             ;
         return await SkinModel.create({ skinID, ownerID, skinName });
     }

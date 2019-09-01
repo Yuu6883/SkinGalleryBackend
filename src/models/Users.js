@@ -63,7 +63,7 @@ class UserCollection {
     async authVanis(discordID) {
         const doc = await this.find(discordID);
         if (doc == null) return null;
-        const token = this.app.unique.generateVanisToken();
+        const token = this.app.provisionion.generateVanisToken();
         doc.vanisToken = token;
         await doc.save();
         return token;

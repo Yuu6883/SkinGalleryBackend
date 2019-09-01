@@ -3,6 +3,7 @@ const path = require("path");
 
 const express = require("express");
 const expressCookies = require("cookie-parser");
+const expressForms = require("body-parser");
 const expressLogger = require("./ExpressLogger");
 
 class Webserver {
@@ -26,8 +27,9 @@ class Webserver {
         const apiRouter = express.Router();
         const apiEndpointRouter = express.Router();
 
-        // Cookie parser
+        // Required parser middleware
         apiRouter.use(expressCookies());
+        apiRouter.use(expressForms.json());
 
         // Prevent cross-origin requests
         apiRouter.use((req, res, next) => {
@@ -60,7 +62,6 @@ class Webserver {
 
     async init() {
         const app = express();
-        // Logger
         app.use(expressLogger(this.logger));
         app.use("/", express.static("../web"));
         app.use("/", this.generateAPIRouter());

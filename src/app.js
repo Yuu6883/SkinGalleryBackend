@@ -8,7 +8,7 @@ const Webserver = require("./modules/Webserver");
 // Models
 const SkinCollection = require("./models/Skins");
 const UserCollection = require("./models/Users");
-const Unique = require("./models/Unique");
+const Provision = require("./models/Provision");
 
 class VanisSkinsApp {
     /**
@@ -25,7 +25,7 @@ class VanisSkinsApp {
         // Models
         this.skins = new SkinCollection(this);
         this.users = new UserCollection(this);
-        this.unique = new Unique(this);
+        this.provision = new Provision(this);
     }
 
     async init() {

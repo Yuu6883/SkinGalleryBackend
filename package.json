@@ -3,6 +3,9 @@
     "version": "0.1.0",
     "description": "Vanis.io skin system",
     "license": "Apache-2.0",
+    "scripts": {
+        "bundle": "browserify frontend_modules/main.js -o web/assets/js/bundle.js"
+    },
     "repository": {
         "type": "git",
         "url": "https://github.com/Yuu6883/VanisSkins.git"
@@ -17,6 +20,8 @@
         "express": "^4.17.1",
         "fetch": "^1.1.0",
         "jsonwebtoken": "^8.5.1",
-        "mongoose": "^5.6.9"
+        "mongoose": "^5.6.9",
+        "jquery": "^3.4.1",
+        "sweetalert2": "^8.17.1"
     }
 }

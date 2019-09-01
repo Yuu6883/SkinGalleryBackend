@@ -3,6 +3,9 @@
     "version": "0.1.0",
     "description": "Vanis.io skin system",
     "license": "Apache-2.0",
+    "scripts": {
+        "bundle": "browserify frontend_modules/main.js -o web/bundle.js"
+    },
     "repository": {
         "type": "git",
         "url": "https://github.com/Yuu6883/VanisSkins.git"

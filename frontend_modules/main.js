@@ -11,7 +11,7 @@ $(window).on("load", () => {
 
     new Starfield($("#starfield")[0]).start();
 
-    API.on("needToLogin", () => Prompt.login().then(() => API.login()));
+    API.on("needToLogin", () => Prompt.login().then(() => API.redirectLogin()));
 
     API.init();
 });

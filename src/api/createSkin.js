@@ -8,7 +8,7 @@ const endpoint = {
 
     },
     method: "post",
-    path: "/api/skins/create"
+    path: "/skins/create"
 };
 
 module.exports = endpoint;

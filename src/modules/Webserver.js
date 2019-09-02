@@ -5,6 +5,7 @@ const express = require("express");
 const expressCookies = require("cookie-parser");
 const expressForms = require("body-parser");
 const expressLogger = require("./ExpressLogger");
+const chalk = require("chalk");
 
 class Webserver {
     /**
@@ -24,8 +25,8 @@ class Webserver {
     get logger() { return this.app.logger; }
 
     generateAPIRouter() {
+        
         const apiRouter = express.Router();
-        const apiEndpointRouter = express.Router();
 
         // Required parser middleware
         apiRouter.use(expressCookies());
@@ -36,7 +37,7 @@ class Webserver {
             const origin = req.get("origin");
 
             if (this.webDomainRegex && !this.webDomainRegex.test(origin))
-                return status(403)();
+                return void res.sendStatus(403);
 
             res.header("Access-Control-Allow-Origin", origin || "*");
             res.header("Access-Control-Allow-Credentials", "true");
@@ -47,15 +48,9 @@ class Webserver {
         fs.readdirSync(path.resolve(__dirname, "../api")).forEach(file => {
             /** @type {APIEndpointHandler} */
             const endpoint = require(path.resolve(__dirname, "../api", file));
-            apiEndpointRouter[endpoint.method](endpoint.path, endpoint.handler.bind(this));
-        });
+            apiRouter[endpoint.method](endpoint.path, endpoint.handler.bind(this.app));
 
-        apiRouter.use("/", apiEndpointRouter);
-
-        // Redirect lurkers
-        apiRouter.use((req, res, next) => {
-            // this.logger.inform("Redirecting Lurker");
-            res.redirect("/");
+            this.logger.inform(`Registering route ${endpoint.method} at /api${endpoint.path}`);
         });
 
         return apiRouter;
@@ -65,14 +60,20 @@ class Webserver {
         const app = express();
         app.disable("x-powered-by");
         app.use(expressLogger(this.logger));
-        app.use("/", express.static("../web/"));
-        // app.use("/api", this.generateAPIRouter());
+        app.use("/", express.static("web"));
+        app.use("/api", this.generateAPIRouter());
 
-        this.logger.inform("webserver opening @", this.config.webLocation);
+        // Redirect lurkers
+        app.use((req, res) => {
+            this.logger.inform(`Redirecting Lurker from ${req.originalUrl}`);
+            res.redirect("/");
+        });
+
+        this.logger.inform("Webserver opening @", this.config.webLocation);
         return new Promise((res, rej) => {
             this.webserver = app.listen(this.config.webLocation, err => {
                 if (err) return void rej(err);
-                this.logger.inform("webserver open");
+                this.logger.inform("Webserver open");
                 res();
             });
         });
@@ -81,7 +82,7 @@ class Webserver {
         return new Promise((res, rej) => {
             this.webserver.close(err => {
                 if (err) return void rej(err);
-                this.logger.inform("webserver closed");
+                this.logger.inform("Webserver closed");
                 res();
             });
             this.webserver = null;

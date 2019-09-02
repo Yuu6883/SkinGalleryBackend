@@ -546,14 +546,18 @@ module.exports = new class API extends EventEmitter {
         else this.emit("needToLogin");
     }
 
-    /**
-     * @fires loginSuccess
-     */
+    redirectLogin() {
+        localStorage.autoLogin = "ha";
+        window.location.replace(window.location.href.match(/^https?:\/\/\w+\//)[0] + "api/login");
+    }
+
     login() {
         $.ajax({
+            method: "POST",
             url: "/api/login",
             success: res => {
                 this.emit("loginSuccess");
+                console.log(res);
             },
             error: err => {
                 this.emit("loginFail");
@@ -588,8 +592,7 @@ $(window).on("load", () => {
 
     new Starfield($("#starfield")[0]).start();
 
-
-    API.on("needToLogin", () => Prompt.login().then(() => API.login()));
+    API.on("needToLogin", () => Prompt.login().then(() => API.redirectLogin()));
 
     API.init();
 });

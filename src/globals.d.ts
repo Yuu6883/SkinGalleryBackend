@@ -19,7 +19,10 @@ interface AppConfig {
 interface UserEntry {
     discordID: string;
     discordToken: string;
+    discordRefresh: string;
     vanisToken: string;
+    moderator: boolean;
+    bannedUntil: Date;
 }
 declare type UserDocument = import("mongoose").Document & UserEntry;
 

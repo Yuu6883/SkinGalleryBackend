@@ -29,11 +29,12 @@ class VanisSkinsApp {
     }
 
     async init() {
-        this.logger.inform("init");
+        this.logger.inform("Init");
         await mongoose.connect(this.config.dbPath, {
-            useNewUrlParser: true
+            useNewUrlParser: true,
+            useCreateIndex: true
         });
-        this.logger.inform("connected to database");
+        this.logger.inform("Connected to database");
         await this.bot.init();
         await this.webserver.init();
     }
@@ -43,7 +44,7 @@ class VanisSkinsApp {
         await this.webserver.stop();
         await this.bot.stop();
         await mongoose.disconnect();
-        this.logger.inform("disconnected from database");
+        this.logger.inform("Disconnected from database");
     }
 }
 

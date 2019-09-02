@@ -25,6 +25,8 @@ let settings = {
 
 const { EOL } = require("os");
 const fs = require("fs");
+const chalk = require("chalk");
+const logColors = require("./log-colors");
 
 if (fs.existsSync("./log-config.json"))
     settings = Object.assign(settings, JSON.parse(fs.readFileSync("./log-config.json", "utf-8")));
@@ -41,7 +43,7 @@ function dateTime(date) {
     const tm = ("00" + (date.getMinutes())).slice(-2);
     const ts = ("00" + (date.getSeconds())).slice(-2);
     const tz = ("000" + (date.getMilliseconds())).slice(-3);
-    return `${dy}-${dm}-${dd} ${th}:${tm}:${ts}.${tz}`;
+    return chalk.cyan(`${dy}-${dm}-${dd} ${th}:${tm}:${ts}.${tz}`);
 }
 
 /**
@@ -111,8 +113,12 @@ function formatFile(date, level, message) {
  * @param {string} message
  */
 function write(date, level, message) {
-    if (settings.showingConsole[level])
+
+    if (settings.showingConsole[level]) {
+        if (logColors[level]) level = logColors[level](level);
         console.log(formatConsole(date, level, message));
+    }
+    
     if (settings.showingFile[level]) {
         fqueue.push(formatFile(date, level, message) + EOL);
         if (!fprocessing && !synchronous) fprocess();

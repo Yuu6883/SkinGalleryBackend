@@ -24,7 +24,8 @@ module.exports = new class Prompt {
 
     login() {
         return this.alert.fire({
-            title: "Log In with Discord",
+            title: "Vanis Skin Library",
+            text: "Log in with your Discord to visit skin library and manage your skins.",
             confirmButtonColor: "#7289da",
             confirmButtonText: "Continue"
         });

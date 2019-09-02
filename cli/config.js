@@ -4,7 +4,7 @@ module.exports = {
 
     dbPath: "mongodb://localhost:27017/vanis-skins",
 
-    webLocation: 3000,
+    webLocation: 80,
     webDomain: null,
 
     discordAppId: "614712004644438047",

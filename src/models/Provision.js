@@ -52,7 +52,7 @@ class Provision {
 
     }
 
-    authorize
+    // authorize
 }
 
 module.exports = Provision;

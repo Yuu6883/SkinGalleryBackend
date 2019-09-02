@@ -54,6 +54,7 @@ class Webserver {
 
         // Redirect lurkers
         apiRouter.use((req, res, next) => {
+            // this.logger.inform("Redirecting Lurker");
             res.redirect("/");
         });
 
@@ -62,9 +63,10 @@ class Webserver {
 
     async init() {
         const app = express();
+        app.disable("x-powered-by");
         app.use(expressLogger(this.logger));
-        app.use("/", express.static("../web"));
-        app.use("/", this.generateAPIRouter());
+        app.use("/", express.static("../web/"));
+        // app.use("/api", this.generateAPIRouter());
 
         this.logger.inform("webserver opening @", this.config.webLocation);
         return new Promise((res, rej) => {

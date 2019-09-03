@@ -1,11 +1,12 @@
 const fs = require("fs");
 const path = require("path");
 
+const { WEB_STATIC_SOURCE } = require("../constant");
+
 const express = require("express");
 const expressCookies = require("cookie-parser");
 const expressForms = require("body-parser");
 const expressLogger = require("./ExpressLogger");
-const chalk = require("chalk");
 
 class Webserver {
     /**
@@ -25,7 +26,6 @@ class Webserver {
     get logger() { return this.app.logger; }
 
     generateAPIRouter() {
-        
         const apiRouter = express.Router();
 
         // Required parser middleware
@@ -48,9 +48,17 @@ class Webserver {
         fs.readdirSync(path.resolve(__dirname, "../api")).forEach(file => {
             /** @type {APIEndpointHandler} */
             const endpoint = require(path.resolve(__dirname, "../api", file));
+            if (!endpoint.handler || !endpoint.method || !endpoint.path)
+                return void this.logger.warn(`ignoring endpoint file ${file}: module export not properly defined`);
             apiRouter[endpoint.method](endpoint.path, endpoint.handler.bind(this.app));
 
-            this.logger.inform(`Registering route ${endpoint.method} at /api${endpoint.path}`);
+            this.logger.inform(`registering route ${endpoint.method.toUpperCase()} /api${endpoint.path}`);
+        });
+
+        // Redirect lurkers
+        apiRouter.use((req, res) => {
+            this.logger.onAccess(`redirecting lurker from ${req.originalUrl}`);
+            res.redirect("/");
         });
 
         return apiRouter;
@@ -60,20 +68,14 @@ class Webserver {
         const app = express();
         app.disable("x-powered-by");
         app.use(expressLogger(this.logger));
-        app.use("/", express.static("web"));
+        app.use("/", express.static(WEB_STATIC_SOURCE));
         app.use("/api", this.generateAPIRouter());
 
-        // Redirect lurkers
-        app.use((req, res) => {
-            this.logger.inform(`Redirecting Lurker from ${req.originalUrl}`);
-            res.redirect("/");
-        });
-
-        this.logger.inform("Webserver opening @", this.config.webLocation);
+        this.logger.inform("webserver opening @", this.config.webLocation);
         return new Promise((res, rej) => {
             this.webserver = app.listen(this.config.webLocation, err => {
                 if (err) return void rej(err);
-                this.logger.inform("Webserver open");
+                this.logger.inform("webserver open");
                 res();
             });
         });
@@ -82,7 +84,7 @@ class Webserver {
         return new Promise((res, rej) => {
             this.webserver.close(err => {
                 if (err) return void rej(err);
-                this.logger.inform("Webserver closed");
+                this.logger.inform("webserver closed");
                 res();
             });
             this.webserver = null;

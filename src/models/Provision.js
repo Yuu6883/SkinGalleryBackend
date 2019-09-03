@@ -51,8 +51,6 @@ class Provision {
     confirmVanisAuthed(str) {
 
     }
-
-    // authorize
 }
 
 module.exports = Provision;

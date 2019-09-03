@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const Bot = require("./modules/DiscordBot");
 const Logger = require("./modules/Logger");
 const Webserver = require("./modules/Webserver");
+const DiscordAPI = require("./modules/DiscordAPI");
 
 // Models
 const SkinCollection = require("./models/Skins");
@@ -21,6 +22,7 @@ class VanisSkinsApp {
         this.bot = new Bot(this);
         this.logger = new Logger();
         this.webserver = new Webserver(this);
+        this.discordAPI = new DiscordAPI(this);
 
         // Models
         this.skins = new SkinCollection(this);
@@ -29,12 +31,12 @@ class VanisSkinsApp {
     }
 
     async init() {
-        this.logger.inform("Init");
+        this.logger.inform("init");
         await mongoose.connect(this.config.dbPath, {
             useNewUrlParser: true,
             useCreateIndex: true
         });
-        this.logger.inform("Connected to database");
+        this.logger.inform("connected to database");
         await this.bot.init();
         await this.webserver.init();
     }
@@ -44,7 +46,7 @@ class VanisSkinsApp {
         await this.webserver.stop();
         await this.bot.stop();
         await mongoose.disconnect();
-        this.logger.inform("Disconnected from database");
+        this.logger.inform("disconnected from database");
     }
 }
 

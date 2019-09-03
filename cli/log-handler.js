@@ -25,8 +25,6 @@ let settings = {
 
 const { EOL } = require("os");
 const fs = require("fs");
-const chalk = require("chalk");
-const logColors = require("./log-colors");
 
 if (fs.existsSync("./log-config.json"))
     settings = Object.assign(settings, JSON.parse(fs.readFileSync("./log-config.json", "utf-8")));
@@ -43,7 +41,7 @@ function dateTime(date) {
     const tm = ("00" + (date.getMinutes())).slice(-2);
     const ts = ("00" + (date.getSeconds())).slice(-2);
     const tz = ("000" + (date.getMilliseconds())).slice(-3);
-    return chalk.cyan(`${dy}-${dm}-${dd} ${th}:${tm}:${ts}.${tz}`);
+    return `${dy}-${dm}-${dd} ${th}:${tm}:${ts}.${tz}`;
 }
 
 /**
@@ -86,11 +84,20 @@ let synchronous = false;
  * @param {string} message
  */
 function formatConsole(date, level, message) {
+    /** @type {{ [level: string]: string }} */
+    const levelFormat = {
+        DEBUG:  "\x1b[90m DEBUG\x1b[0m",
+        ACCESS:         "ACCESS",
+        INFO:   "\x1b[92m  INFO\x1b[0m",
+        WARN:   "\x1b[93m  WARN\x1b[0m",
+        ERROR:  "\x1b[91m ERROR\x1b[0m",
+        FATAL:  "\x1b[31m FATAL\x1b[0m"
+    };
     switch (level) {
         case "PRINT":
         case "FILE":
             return message;
-        default: return `${dateTime(date)} [${level}] ${message}`;
+        default: return `\x1b[90m${dateTime(date)}\x1b[0m ${levelFormat[level]} ${message}`;
     }
 }
 /**
@@ -113,12 +120,8 @@ function formatFile(date, level, message) {
  * @param {string} message
  */
 function write(date, level, message) {
-
-    if (settings.showingConsole[level]) {
-        if (logColors[level]) level = logColors[level](level);
+    if (settings.showingConsole[level])
         console.log(formatConsole(date, level, message));
-    }
-    
     if (settings.showingFile[level]) {
         fqueue.push(formatFile(date, level, message) + EOL);
         if (!fprocessing && !synchronous) fprocess();

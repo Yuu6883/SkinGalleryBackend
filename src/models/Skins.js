@@ -46,7 +46,7 @@ class SkinCollection {
      * @param {string} skinID
      */
     async approve(skinID) {
-        const doc = await SkinCollection.find(skinID);
+        const doc = await this.find(skinID);
         if (doc == null) return false;
         doc.approvedStamp = new Date();
         await doc.save();
@@ -56,7 +56,7 @@ class SkinCollection {
      * @param {string} skinID
      */
     async reject(skinID) {
-        const doc = await SkinCollection.find(skinID);
+        const doc = await this.find(skinID);
         if (doc == null) return false;
         await doc.remove();
         return true;
@@ -64,11 +64,12 @@ class SkinCollection {
 
     /**
      * @param {string} skinID
+     * @param {string} newName
      */
-    async editSkinName(skinID) {
-        const doc = await SkinCollection.find(skinID);
+    async editSkinName(skinID, newName) {
+        const doc = await this.find(skinID);
         if (doc == null) return false;
-        doc.approvedStamp = new Date();
+        doc.skinName
         await doc.save();
         return true;
     }

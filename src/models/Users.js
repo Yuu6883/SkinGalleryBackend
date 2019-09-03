@@ -30,7 +30,6 @@ class UserCollection {
     async find(discordID) {
         return await UserModel.findOne({ discordID });
     }
-
     /**
      * @param {string} discordID
      */
@@ -52,25 +51,22 @@ class UserCollection {
      * @param {string} discordToken
      * @param {string} discordRefresh
      */
-    async auth(discordID, discordToken, discordRefresh) {
-
+    async authorizeDiscord(discordID, discordToken, discordRefresh) {
         const user = await this.findOrCreate(discordID);
         if (user == null) return null;
         user.discordToken = discordToken;
         user.discordRefresh = discordRefresh;
 
-        let token = this.app.provision.generateVanisToken();
+        const token = this.app.provision.generateVanisToken();
         user.vanisToken = token;
         await user.save();
 
         return token;
     }
-
     /**
      * @param {string} discordID
      */
-    async deauth(discordID) {
-
+    async deauthorizeDiscord(discordID) {
         const user = await this.find(discordID);
         if (user == null) return false;
         user.discordToken = undefined;

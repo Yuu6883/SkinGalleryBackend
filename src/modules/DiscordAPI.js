@@ -1,59 +1,65 @@
-/** @typedef {{ error: String, error_description: String, access_token: String, refresh_token: String }} DiscordAuthResponse */
-/** @typedef {{ username: String, locale: String, avatar: String, discriminator: String, id: String, error: String }} DiscordUserResponse */
-/** @typedef {{ error: String }} DiscordRevokeResponse */
+/** @typedef {{ error: string, error_description: string, access_token: string, refresh_token: string }} DiscordAuthResponse */
+/** @typedef {{ username: string, locale: string, avatar: string, discriminator: string, id: string, error: string }} DiscordUserResponse */
+/** @typedef {{ error: string }} DiscordRevokeResponse */
 
 const btoa = require("btoa");
 const fetch = require("node-fetch");
 
-const { discordAppId, discordAppSecret, discordAppRedirect } = require("../../cli/config");
+class DiscordAPI {
+    /**
+     * @param {import("../app")} app
+     */
+    constructor(app) {
+        this.app = app;
 
-const OAuth2 = "https://discordapp.com/api/oauth2/";
-const UserEndpoint = "http://discordapp.com/api/v6/users/@me";
-const Authorization = `Basic ${btoa(`${discordAppId}:${discordAppSecret}`)}`;
+        this.oAuth2 = "https://discordapp.com/api/oauth2/";
+        this.userEndpoint = "http://discordapp.com/api/v6/users/@me";
+        this.authorization = `Basic ${btoa(`${this.config.discordAppId}:${this.config.discordAppSecret}`)}`;
+    }
 
-module.exports = class DiscordAPI {
+    get config() { return this.app.config; }
+    get logger() { return this.app.logger; }
 
-    /** 
-     * @param {String} code 
+    /**
+     * @param {String} code
      * @param {Boolean} refresh
      * @returns {DiscordAuthResponse}
      */
-    static async exchange(code, refresh) {
-        
-        let type = refresh ? "refresh_token" : "authorization_code";
-        let alias = refresh ? "refresh_token" : "code";
-        let url = `${OAuth2}token?grant_type=${type}&${alias}=${code}&redirect_uri=${discordAppRedirect}`;
+    async exchange(code, refresh) {
+        const type = refresh ? "refresh_token" : "authorization_code";
+        const alias = refresh ? "refresh_token" : "code";
+        const url = `${this.oAuth2}token?grant_type=${type}&${alias}=${code}&redirect_uri=${this.config.discordAppRedirect}`;
 
-        let response = await fetch(url, {
+        const response = await fetch(url, {
             method: "POST",
-            headers: { Authorization }
+            headers: { Authorization: this.authorization }
         });
-
         return await response.json();
     }
 
     /**
-     * 
-     * @param {String} access_token 
+     * @param {String} discordAccessToken
      * @returns {DiscordUserResponse}
      */
-    static async fetchInfo(access_token) {
-        let discRes = await fetch(UserEndpoint, { headers: { "Authorization" : `Bearer ${access_token}` } });
-        return await discRes.json();
+    async fetchInfo(discordAccessToken) {
+        const response = await fetch(this.userEndpoint, {
+            method: "GET",
+            headers: { Authorization : `Bearer ${discordAccessToken}` }
+        });
+        return await response.json();
     }
 
     /**
-     * 
-     * @param {String} access_token 
+     * @param {String} discordAccessToken
      * @returns {DiscordRevokeResponse}
      */
-    static async revoke(access_token) {
-
-        let discRes = await fetch(`${OAuth2}revoke?token=${access_token}`, {
+    async revoke(discordAccessToken) {
+        const response = await fetch(`${this.oAuth2}revoke?token=${discordAccessToken}`, {
             method: "POST",
-            headers: { Authorization }
+            headers: { Authorization: this.authorization }
         });
-
-        return await discRes.json();
+        return await response.json();
     }
 }
+
+module.exports = DiscordAPI;

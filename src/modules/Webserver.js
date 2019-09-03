@@ -49,15 +49,15 @@ class Webserver {
             /** @type {APIEndpointHandler} */
             const endpoint = require(path.resolve(__dirname, "../api", file));
             if (!endpoint.handler || !endpoint.method || !endpoint.path)
-                return void this.logger.warn(`ignoring endpoint file ${file}: module export not properly defined`);
+                return void this.logger.warn(`Ignoring endpoint file ${file}: module export not properly defined`);
             apiRouter[endpoint.method](endpoint.path, endpoint.handler.bind(this.app));
 
-            this.logger.inform(`registering route ${endpoint.method.toUpperCase()} /api${endpoint.path}`);
+            this.logger.inform(`Registering route ${endpoint.method.toUpperCase()} /api${endpoint.path}`);
         });
 
         // Redirect lurkers
         apiRouter.use((req, res) => {
-            this.logger.onAccess(`redirecting lurker from ${req.originalUrl}`);
+            this.logger.onAccess(`Redirecting lurker from ${req.originalUrl}`);
             res.redirect("/");
         });
 
@@ -71,11 +71,11 @@ class Webserver {
         app.use("/", express.static(WEB_STATIC_SOURCE));
         app.use("/api", this.generateAPIRouter());
 
-        this.logger.inform("webserver opening @", this.config.webLocation);
+        this.logger.debug("Webserver opening @", this.config.webLocation);
         return new Promise((res, rej) => {
             this.webserver = app.listen(this.config.webLocation, err => {
                 if (err) return void rej(err);
-                this.logger.inform("webserver open");
+                this.logger.inform("Webserver open");
                 res();
             });
         });
@@ -84,7 +84,7 @@ class Webserver {
         return new Promise((res, rej) => {
             this.webserver.close(err => {
                 if (err) return void rej(err);
-                this.logger.inform("webserver closed");
+                this.logger.inform("Webserver closed");
                 res();
             });
             this.webserver = null;

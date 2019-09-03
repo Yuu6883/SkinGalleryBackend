@@ -31,22 +31,22 @@ class VanisSkinsApp {
     }
 
     async init() {
-        this.logger.inform("init");
+        this.logger.inform("App init");
         await mongoose.connect(this.config.dbPath, {
             useNewUrlParser: true,
             useCreateIndex: true
         });
-        this.logger.inform("connected to database");
+        this.logger.inform("Connected to database");
         await this.bot.init();
         await this.webserver.init();
     }
 
     async stop() {
-        this.logger.inform("stop");
+        this.logger.inform("App stop");
         await this.webserver.stop();
         await this.bot.stop();
         await mongoose.disconnect();
-        this.logger.inform("disconnected from database");
+        this.logger.inform("Disconnected from database");
     }
 }
 

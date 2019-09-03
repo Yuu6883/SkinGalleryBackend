@@ -55,7 +55,8 @@ module.exports = new class API extends EventEmitter {
 
     logout() {
         $.ajax({
-            url: "/api/login",
+            method: "POST",
+            url: "/api/logout",
             success: res => {
                 this.emit("logoutSuccess");
             },

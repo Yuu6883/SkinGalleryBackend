@@ -1,5 +1,6 @@
 const { EventEmitter } = require("events");
 
+/** @typedef {{ username: String, discriminator: String, avatar: String, id: String }} UserInfo */
 /** @type {import("jquery")} */
 const $ = window.$;
 
@@ -8,6 +9,7 @@ module.exports = new class API extends EventEmitter {
     constructor() {
         super();
         this.jwt = "";
+        /** @type {UserInfo} */
         this.userInfo = null;
     }
 
@@ -41,6 +43,14 @@ module.exports = new class API extends EventEmitter {
                 this.emit("loginFail");
             }
         });
+    }
+
+    get fullName() {
+        return this.userInfo.username + "#" + this.userInfo.discriminator;
+    }
+
+    get avatarURL() {
+        return `https://cdn.discordapp.com/avatars/${this.userInfo.id}/${this.userInfo.avatar}.png`;
     }
 
     logout() {

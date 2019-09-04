@@ -23,7 +23,7 @@ const endpoint = {
         }
 
         // Delete Vanis cookie
-        res.cookie(VANIS_TOKEN_COOKIE, "", { maxAge: 0 });
+        res.clearCookie(VANIS_TOKEN_COOKIE);
         res.sendStatus(200);
     },
     method: "post",

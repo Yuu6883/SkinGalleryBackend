@@ -559,10 +559,9 @@ module.exports = new class API extends EventEmitter {
         $.ajax({
             method: "POST",
             url: "/api/login",
+            dataType: "json",
             success: res => {
-                this.userInfo = this.parseJwt(res);
-                this.jwt = res;
-                this.logJwt();
+                this.userInfo = res;
                 this.emit("loginSuccess");
             },
             error: err => {
@@ -590,18 +589,6 @@ module.exports = new class API extends EventEmitter {
                 this.emit("logoutFail");
             }
         });
-    }
-
-    parseJwt(jwt) {
-        var base64Url = jwt.split('.')[1];
-        var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        return JSON.parse(window.atob(base64));
-    }
-
-    logJwt() {
-        let jwt2 = this.jwt.split(/[.]/);
-        console.log("%cJWT:", "font-weight:bold;");
-        console.log("%c" + jwt2[0] + ".%c" + jwt2[1] + ".%c" + jwt2[2], "font-size:10px;color:#fb015b;", "font-size:10px;color:#d63aff;", "font-size:10px;color:#00b9f1;", '');
     }
 }
 

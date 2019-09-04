@@ -1,5 +1,4 @@
-const { VANIS_TOKEN_COOKIE, VANIS_TOKEN_AGE, JWT_SECRET } = require("../constant");
-const Jwt = require("jsonwebtoken");
+const { VANIS_TOKEN_COOKIE, VANIS_TOKEN_AGE } = require("../constant");
 
 /** @type {APIEndpointHandler} */
 const endpoint = {
@@ -18,22 +17,28 @@ const endpoint = {
         if (discordInfo.error) {
             // Discord token is invalid - must refresh it
             let discordResponse = await this.discordAPI.exchange(userDoc.discordRefresh, true);
+
+            if (discordResponse.error || !discordResponse.access_token) {
+                this.logger.onError(`Discord refused info fetch with refresh token: ${discordResponse.error}`);
+                return void res.sendStatus(502);
+            }
+
             discordInfo = await this.discordAPI.fetchInfo(discordResponse.access_token);
 
             if (discordInfo.error) {
-                this.logger.onError(`Discord refused info fetch after refreshing token: ${discordInfo.error}`);
+                this.logger.onError(`Discord refused info fetch with refreshed access token: ${discordInfo.error}`);
                 return void res.sendStatus(502);
             }
 
             vanisToken = await this.users.authorizeDiscord(discordInfo.id, discordResponse.access_token, discordResponse.refresh_token);
-            res.cookie(VANIS_TOKEN_COOKIE, token, { maxAge: VANIS_TOKEN_AGE });
         }
+        
+        res.cookie(VANIS_TOKEN_COOKIE, vanisToken, { maxAge: VANIS_TOKEN_AGE });
 
         discordInfo.moderator = userDoc.moderator;
         discordInfo.bannedUntil = userDoc.bannedUntil;
 
-        // Maybe we don't need JWT at all
-        res.json(Jwt.sign(discordInfo, JWT_SECRET, { expiresIn: "1h" }));
+        res.json(discordInfo);
     },
     method: "post",
     path: "/login"

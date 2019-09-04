@@ -38,7 +38,7 @@ module.exports = new class API extends EventEmitter {
                 this.userInfo = res;
                 this.emit("loginSuccess");
             },
-            error: err => {
+            error: () => {
                 this.emit("loginFail");
             }
         });
@@ -56,10 +56,10 @@ module.exports = new class API extends EventEmitter {
         $.ajax({
             method: "POST",
             url: "/api/logout",
-            success: res => {
+            success: () => {
                 this.emit("logoutSuccess");
             },
-            error: err => {
+            error: () => {
                 this.emit("logoutFail");
             }
         });

@@ -30,4 +30,7 @@ $(window).on("load", () => {
     });
 
     API.init();
+
+    $(document).ajaxStart(() => Prompt.showLoader());
+    $(document).ajaxComplete(() => Prompt.hideLoader());
 });

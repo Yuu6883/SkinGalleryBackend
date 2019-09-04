@@ -564,7 +564,7 @@ module.exports = new class API extends EventEmitter {
                 this.userInfo = res;
                 this.emit("loginSuccess");
             },
-            error: err => {
+            error: () => {
                 this.emit("loginFail");
             }
         });
@@ -582,10 +582,10 @@ module.exports = new class API extends EventEmitter {
         $.ajax({
             method: "POST",
             url: "/api/logout",
-            success: res => {
+            success: () => {
                 this.emit("logoutSuccess");
             },
-            error: err => {
+            error: () => {
                 this.emit("logoutFail");
             }
         });
@@ -625,6 +625,9 @@ $(window).on("load", () => {
     });
 
     API.init();
+
+    $(document).ajaxStart(() => Prompt.showLoader());
+    $(document).ajaxComplete(() => Prompt.hideLoader());
 });
 },{"./api":2,"./prompt":4,"./starfield":5}],4:[function(require,module,exports){
 /** @type {import("sweetalert2").default} */
@@ -648,16 +651,29 @@ module.exports = new class Prompt {
                 content: "text"
             }
         });
+        this.isLoading = false;
 
     }
 
-    login() {
+    /** @param {string} text */
+    showLoader(text) {
+        this.isLoading = true;
+
         return this.alert.fire({
-            title: "Vanis Skin Library",
-            text: "Log in with your Discord to visit skin library and manage your skins.",
-            confirmButtonColor: "#7289da",
-            confirmButtonText: "Continue"
+            background: "transparent",
+            showConfirmButton: false,
+            showCancelButton: false,
+            title: $(`<div class="lds-spinner">${"<div></div>".repeat(12)}<div>`),
+            text: text || "",
+            timer: 10000,
         });
+    }
+
+    hideLoader() {
+        if (this.isLoading) {
+            this.alert.close();
+            this.isLoading = false;
+        } 
     }
 
 }

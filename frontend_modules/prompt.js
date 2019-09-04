@@ -19,16 +19,29 @@ module.exports = new class Prompt {
                 content: "text"
             }
         });
+        this.isLoading = false;
 
     }
 
-    login() {
+    /** @param {string} text */
+    showLoader(text) {
+        this.isLoading = true;
+
         return this.alert.fire({
-            title: "Vanis Skin Library",
-            text: "Log in with your Discord to visit skin library and manage your skins.",
-            confirmButtonColor: "#7289da",
-            confirmButtonText: "Continue"
+            background: "transparent",
+            showConfirmButton: false,
+            showCancelButton: false,
+            title: $(`<div class="lds-spinner">${"<div></div>".repeat(12)}<div>`),
+            text: text || "",
+            timer: 10000,
         });
+    }
+
+    hideLoader() {
+        if (this.isLoading) {
+            this.alert.close();
+            this.isLoading = false;
+        } 
     }
 
 }

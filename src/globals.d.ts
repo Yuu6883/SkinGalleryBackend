@@ -29,6 +29,7 @@ declare type UserDocument = import("mongoose").Document & UserEntry;
 interface SkinEntry {
     skinID: string;
     ownerID: string;
+    status: "pending" | "rejected" | "approved";
     skinName: string;
     createdStamp: Date;
     approvedStamp?: Date;

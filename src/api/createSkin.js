@@ -5,10 +5,10 @@ const fetch = require("node-fetch");
 /** @type {APIEndpointHandler} */
 const endpoint = {
     handler(req, res) {
-
+        
     },
-    method: "post",
-    path: "/skins/create"
+    method: "put",
+    path: "/skins"
 };
 
 module.exports = endpoint;

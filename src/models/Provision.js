@@ -6,7 +6,7 @@ const vanisTokenChars = "abcdef1234567890";
  * @param {number} length
  */
 function generateToken(chars, length) {
-    return new Array(length).fill(null).map(v => chars[~~Math.random() * chars.length]).join("");
+    return new Array(length).fill(null).map(v => chars[~~(Math.random() * chars.length)]).join("");
 }
 /**
  * @param {string} chars

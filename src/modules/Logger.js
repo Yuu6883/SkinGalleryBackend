@@ -56,6 +56,13 @@ class Logger {
     }
 
     /**
+     * @param  {LogMessageData} message 
+     */
+    test(...message) {
+        this._onLog && this._onLog(new Date(), "TEST", this._formatMessage(message));
+    }
+
+    /**
      * @param {LogMessageData} message
      */
     warn(...message) {

@@ -13,3 +13,5 @@ app.init().then(() => {
         app.stop();
     });
 });
+
+module.exports = app;

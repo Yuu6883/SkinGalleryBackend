@@ -7,7 +7,8 @@ let settings = {
         INFO: true,
         WARN: true,
         ERROR: true,
-        FATAL: true
+        FATAL: true,
+        TEST: true,
     },
     showingFile: {
         PRINT: true,
@@ -17,7 +18,8 @@ let settings = {
         INFO: true,
         WARN: true,
         ERROR: true,
-        FATAL: true
+        FATAL: true,
+        TEST: true
     },
     fileLogDirectory: "./logs/",
     fileLogSaveOld: true
@@ -25,10 +27,11 @@ let settings = {
 
 const { EOL } = require("os");
 const fs = require("fs");
+const configPath = __dirname + "/log-config.json";
 
-if (fs.existsSync("./log-config.json"))
-    settings = Object.assign(settings, JSON.parse(fs.readFileSync("./log-config.json", "utf-8")));
-fs.writeFileSync("./log-config.json", JSON.stringify(settings, null, 4), "utf-8");
+if (fs.existsSync(configPath))
+    settings = Object.assign(settings, JSON.parse(fs.readFileSync(configPath, "utf-8")));
+fs.writeFileSync(configPath, JSON.stringify(settings, null, 4), "utf-8");
 
 /**
  * @param {Date=} date
@@ -91,7 +94,8 @@ function formatConsole(date, level, message) {
         INFO:   "\x1b[92m  INFO\x1b[0m",
         WARN:   "\x1b[93m  WARN\x1b[0m",
         ERROR:  "\x1b[91m ERROR\x1b[0m",
-        FATAL:  "\x1b[31m FATAL\x1b[0m"
+        FATAL:  "\x1b[31m FATAL\x1b[0m",
+        TEST:   "\x1b[36m  TEST\x1b[0m"
     };
     switch (level) {
         case "PRINT":

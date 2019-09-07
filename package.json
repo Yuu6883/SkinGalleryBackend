@@ -4,7 +4,8 @@
     "description": "Vanis.io skin system",
     "license": "Apache-2.0",
     "scripts": {
-        "bundle": "browserify frontend_modules/main.js -o web/assets/js/bundle.js"
+        "bundle": "browserify frontend_modules/main.js -o web/assets/js/bundle.js",
+        "skinTest": "node src/test/skinDocTest.js"
     },
     "repository": {
         "type": "git",

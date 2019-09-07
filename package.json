@@ -15,16 +15,16 @@
         "url": "https://github.com/Yuu6883/VanisSkins/issues"
     },
     "dependencies": {
-        "@tensorflow/tfjs": "^1.2.9",
+        "@tensorflow/tfjs-node": "^1.2.9",
         "body-parser": "^1.19.0",
         "btoa": "^1.2.1",
+        "canvas": "^2.6.0",
         "cookie-parser": "^1.4.4",
         "discord.js": "^11.5.1",
         "express": "^4.17.1",
         "jquery": "^3.4.1",
         "mongoose": "^5.6.9",
         "node-fetch": "^2.6.0",
-        "nsfwjs": "^2.1.0",
         "sweetalert2": "^8.17.1"
     }
 }

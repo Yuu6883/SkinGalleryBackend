@@ -7,7 +7,8 @@ const SkinSchema = new mongoose.Schema({
     skinName:       { type: String, required: true },
     createdStamp:   { type: Date, default: Date.now },
     approvedStamp:  { type: Date, required: false },
-    status:         { type: String, default: "pending" }
+    status:         { type: String, default: "pending" },
+    messageID:      { type: String, required: false }
 });
 
 SkinSchema.index({ skinID: 1 }, { unique: true });
@@ -36,7 +37,7 @@ class SkinCollection {
      * @param {string} ownerID
      */
     findByOwnerID(ownerID) {
-        let projection = { skinID: true, status: true, skinName: true, _id: false };
+        let projection = { skinID: true, status: true, skinName: true, _id: false, messageID: true };
         return SkinModel.find({ ownerID }, projection).exec();
     }
 

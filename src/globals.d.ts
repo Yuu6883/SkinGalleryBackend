@@ -32,6 +32,7 @@ interface SkinEntry {
     status: "pending" | "rejected" | "approved";
     skinName: string;
     createdStamp: Date;
+    messageID?: string;
     approvedStamp?: Date;
 }
 declare type SkinDocument = import("mongoose").Document & SkinEntry;
@@ -40,4 +41,4 @@ interface APIEndpointHandler {
     handler(this: import("./app"), req: import("express").Request, res: import("express").Response): void;
     method: "get" | "post" | "patch" | "put" | "delete" | "head" | "options";
     path: string;
-};
+}

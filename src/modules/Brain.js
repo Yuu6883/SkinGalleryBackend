@@ -1,8 +1,9 @@
 const tf = require("@tensorflow/tfjs-node");
 const { Canvas, loadImage } = require("canvas");
 const express = require("express");
+const NSFW_CLASSES = ['drawing', 'hentai', 'neutral', 'porn', 'sexy'];
 
-const NSFW_CLASSES = ['Drawing', 'Hentai', 'Neutral', 'Porn', 'Sexy'];
+/** @typedef {{ drawing: number, hentai: number, neutral: number, porn: number, sexy: number }} NSFWResult */
 
 class Brain {
 
@@ -38,7 +39,10 @@ class Brain {
         // }, {});
     }
 
-    /** @param {string} src */
+    /** 
+     * @param {string} src
+     * @returns {NSFWResult}
+     */
     async classify(src) {
         let img = await loadImage(src);
 

@@ -556,8 +556,7 @@ module.exports = new class API extends EventEmitter {
     }
 
     login() {
-        $.ajax({
-            method: "POST",
+        $.post({
             url: "/api/login",
             dataType: "json",
             success: res => {
@@ -579,14 +578,42 @@ module.exports = new class API extends EventEmitter {
     }
 
     logout() {
-        $.ajax({
-            method: "POST",
+        $.post({
             url: "/api/logout",
             success: () => {
                 this.emit("logoutSuccess");
             },
             error: () => {
                 this.emit("logoutFail");
+            }
+        });
+    }
+
+    uploadSkin(name, data) {
+        $.post({
+            url: "/api/skins/" + name,
+            data,
+            /** @param {{status:SkinStatus}} res */
+            success: res => {
+                this.emit("skinUploaded", res);
+            },
+            error: e => {
+                console.error(e);
+            }
+        });
+    }
+
+    listSkin(owner = "@me") {
+        $.get({
+            url: "/api/skins/" + owner,
+            dataType: "json",
+            success: res => {
+                if (owner === "@me") {
+                    this.emit("myskin", res);
+                }
+            },
+            error: e => {
+                console.error(e);
             }
         });
     }
@@ -602,6 +629,32 @@ const API = require("./api");
 const Prompt = require("./prompt");
 const Starfield = require("./starfield");
 
+const emptySkinPanel = 
+`<div class="uk-width-1-5@m uk-card uk-margin-top">
+    <div class="uk-padding-small uk-inline-clip uk-transition-toggle pointer uk-text-center card">
+        <img src="assets/img/logo-grey.png" class="skin-preview skin-empty">
+        <div class="uk-position-center">
+            <span class="text uk-transition-fade" uk-icon="icon:cloud-upload;ratio:2"></span>
+        </div>
+    </div>
+</div>`;
+
+/** @param {{skinID:string,skinName:string,status:SkinStatus}} skinObject */
+const linkedSkinPanel = skinObject => {
+
+    let link = skinObject.status === "approved" ? `/s/${skinObject.skinID}` : `/api/p/skin/${skinObject.skinID}`;
+    let labelClass = { "approved": "success", "pending": "warning", "rejected": "danger" }[skinObject.status];
+    return "" +
+    `<div class="uk-width-1-5@m uk-card uk-margin-top">
+        <div class="uk-padding-small uk-inline-clip pointer uk-text-center card">
+            <div class="uk-position-top-center uk-label uk-label-${labelClass}">${skinObject.status}</div>
+            <img src="${link}" class="skin-preview">
+        </div>
+    </div>`
+}
+
+window.API = API;
+
 $(window).on("load", () => {
 
     new Starfield($("#starfield")[0]).start();
@@ -616,6 +669,8 @@ $(window).on("load", () => {
         $("#user-pfp").attr("src", API.avatarURL);
         $("#username").text(API.fullName);
         $("#skin-panel").show();
+
+        API.listSkin();
     });
 
     API.on("logoutSuccess", () => {
@@ -623,6 +678,21 @@ $(window).on("load", () => {
         $("#user-panel").hide();
         $("#skin-panel").hide();
     });
+
+    API.on("myskin", skins => {
+        console.log(skins);
+
+        let skinsHTML = skins.map(linkedSkinPanel).join("");
+        let emptySkinsHTML = emptySkinPanel.repeat(10 - skins.length);            
+
+        let panel = $("#skin-panel").children().first();
+        panel.children().remove();
+        panel.append($(skinsHTML), $(emptySkinsHTML).click(() => Prompt.inputImage()));
+    });
+
+    API.on("skinUploaded", res => {
+        Prompt.skinResult(res).then(() => API.listSkin());
+    })
 
     API.init();
 
@@ -632,6 +702,17 @@ $(window).on("load", () => {
 },{"./api":2,"./prompt":4,"./starfield":5}],4:[function(require,module,exports){
 /** @type {import("sweetalert2").default} */
 const Swal = window.Swal;
+const API = require("./api");
+
+/** 
+ * @param {File} file 
+ * @returns {Promise.<{name:String,img:HTMLImageElement}>}
+ */
+const readImage = file => new Promise(resolve => {
+    let img = new Image();
+    img.onload = () => resolve({ name: file.name, img });
+    img.src = URL.createObjectURL(file);
+});
 
 module.exports = new class Prompt {
     
@@ -648,16 +729,16 @@ module.exports = new class Prompt {
             allowEscapeKey: false,
             customClass: {
                 title: "text",
-                content: "text"
+                content: "text",
+                confirmButton: "btn",
+                cancelButton: "btn danger"
             }
         });
-        this.isLoading = false;
 
     }
 
     /** @param {string} text */
     showLoader(text) {
-        this.isLoading = true;
 
         return this.alert.fire({
             background: "transparent",
@@ -670,14 +751,87 @@ module.exports = new class Prompt {
     }
 
     hideLoader() {
-        if (this.isLoading) {
+        if ($(".lds-spinner").length) {
             this.alert.close();
-            this.isLoading = false;
         } 
     }
 
+    inputImage() {
+        this.alert.fire({
+            title: "Upload Skin",
+            html:   `<div class="uk-placeholder uk-margin-top uk-text-center upload-holder pointer uk-width-expand uk-vertical-align-middle upload-panel" uk-form-custom>
+                        <span class="uk-text-middle text">Attach skin by dropping here <br> or click to select one </span>
+                        <span class="text" uk-icon="icon: cloud-upload"></span>
+                        <input class="pointer" type="file" accept="image/*" id="skin-input">
+                    </div>`,
+            confirmButtonText: "Cancel",
+            confirmButtonClass: "btn danger",
+            onOpen: () => {
+                let self = this;
+                $("#skin-input").change(function() {
+                    readImage(this.files.item(0)).then(skin => self.editSkin(skin));
+                });
+            }
+        });
+    }
+
+    /** @param {{name:String,img:HTMLImageElement}} skin */
+    editSkin(skin) {
+        let canvas = document.createElement("canvas");
+        canvas.width = canvas.height = 512;
+        $(canvas).addClass("skin-preview");
+
+        let ctx = canvas.getContext("2d");
+        ctx.arc(256, 256, 256, 256, 0, 2 * Math.PI);
+        ctx.clip();
+        ctx.drawImage(skin.img, 0, 0, 512, 512);
+
+        let extraMessage = "";
+        if (skin.img.width != 512 || skin.img.height != 512) 
+            extraMessage = `Warning: Your image dimension is ${skin.img.width}x${skin.img.height}.` + 
+                           ` 512x512 skin recommended. Other size will be force scaled.`
+
+        this.alert.fire({
+            title: "Preview",
+            text: extraMessage,
+            input: "text",
+            inputClass: "text",
+            inputAttributes: {
+                maxLength: 16
+            },
+            inputAutoTrim: true,
+            confirmButtonText: "Submit",
+            showCancelButton: true,
+            onOpen: () => {
+                $(this.alert.getContent()).prepend(canvas);
+                $(this.alert.getInput()).val(skin.name.split(".").slice(0, -1).join("."));
+            }
+        }).then(result => {
+            if (result.dismiss) return;
+            API.uploadSkin($(this.alert.getInput()).val(), canvas.toDataURL("image/jpeg", 1));
+        });
+    }
+
+    /** @param {{status:SkinStatus}} res */
+    skinResult(res) {
+        switch (res.status) {
+            case "approved":
+                return this.alert.fire("Skin Approved", "Congratulations. Your skin passed the NSFW detection. " + 
+                "Be aware that if the detection fails, your skin will still be banned.", "success");
+
+            case "pending":
+                return this.alert.fire("Skin Pending", "Moderators are reviewing your skin " + 
+                                    "because it might contain NSFW content.", "warning");
+
+            case "rejected":
+                return this.alert.fire("Skin Rejected", "Your skin most likely contains NSFW content." + 
+                                    " You can appeal to moderators on discord if it's actually SFW.");
+
+        }
+    }
+
 }
-},{}],5:[function(require,module,exports){
+},{"./api":2}],5:[function(require,module,exports){
 /** @typedef {{ x: Number, y: Number }} Vector */
 
 class Starfield {

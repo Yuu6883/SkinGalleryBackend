@@ -30,8 +30,7 @@ module.exports = new class API extends EventEmitter {
     }
 
     login() {
-        $.ajax({
-            method: "POST",
+        $.post({
             url: "/api/login",
             dataType: "json",
             success: res => {
@@ -53,14 +52,42 @@ module.exports = new class API extends EventEmitter {
     }
 
     logout() {
-        $.ajax({
-            method: "POST",
+        $.post({
             url: "/api/logout",
             success: () => {
                 this.emit("logoutSuccess");
             },
             error: () => {
                 this.emit("logoutFail");
+            }
+        });
+    }
+
+    uploadSkin(name, data) {
+        $.post({
+            url: "/api/skins/" + name,
+            data,
+            /** @param {{status:SkinStatus}} res */
+            success: res => {
+                this.emit("skinUploaded", res);
+            },
+            error: e => {
+                console.error(e);
+            }
+        });
+    }
+
+    listSkin(owner = "@me") {
+        $.get({
+            url: "/api/skins/" + owner,
+            dataType: "json",
+            success: res => {
+                if (owner === "@me") {
+                    this.emit("myskin", res);
+                }
+            },
+            error: e => {
+                console.error(e);
             }
         });
     }

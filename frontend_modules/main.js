@@ -24,9 +24,13 @@ const linkedSkinPanel = skinObject => {
     let labelClass = { "approved": "success", "pending": "warning", "rejected": "danger" }[skinObject.status];
     return "" +
     `<div class="uk-width-1-5@m uk-card uk-margin-top">
-        <div class="uk-padding-small uk-inline-clip pointer uk-text-center card">
+        <div class="uk-padding-small uk-inline-clip pointer uk-text-center uk-transition-toggle card">
+            <div>
+                <a href="${link}" data-type="image" data-caption="${skinObject.skinName}">
+                    <img src="${link}" class="skin-preview uk-transition-scale-up uk-transition-opaque">
+                </a>
+            </div>
             <div class="uk-position-top-center uk-label uk-label-${labelClass}">${skinObject.status}</div>
-            <img src="${link}" class="skin-preview">
         </div>
     </div>`
 }

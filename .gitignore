@@ -6,6 +6,9 @@ cli/log-config.json
 test/logs
 test/log-config.json
 
+# Skins
+*.jpg
+
 # NPM
 node_modules
 package-lock.json

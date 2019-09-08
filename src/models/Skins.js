@@ -29,12 +29,21 @@ class SkinCollection {
     async findBySkinID(skinID) {
         return await SkinModel.findOne({ skinID });
     }
+
     /**
      * @param {string} ownerID
      */
     async findByOwnerID(ownerID) {
         const projection = { skinID: true, status: true, skinName: true, _id: false };
         return await SkinModel.find({ ownerID }, projection);
+    }
+
+    /**
+     * @param {string} ownerID
+     * @param {string} skinID 
+     */
+    async checkOwnership(ownerID, skinID) {
+        return (await SkinModel.findOne({ ownerID, skinID })) !== null;
     }
 
     /**
@@ -47,19 +56,21 @@ class SkinCollection {
      * @param {string} ownerID
      */
     async countByOwnerID(ownerID) {
-        return await SkinModel.countDocuments({ ownerID, status: { $regex: /^(pending)|(approved)$/ } });
+        return await SkinModel.countDocuments({ ownerID });
     }
 
     /**
      * @param {string} ownerID
      * @param {string} skinName
+     * @param {SkinStatus} status
      * @returns {SkinDocument}
      */
-    async create(ownerID, skinName) {
+    async create(ownerID, skinName, status = "pending") {
         return SkinModel.create({
             skinID: await this.app.provision.generateSkinID(),
             ownerID,
-            skinName
+            skinName,
+            status
         });
     }
 

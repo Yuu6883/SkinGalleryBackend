@@ -1,7 +1,8 @@
 const fs = require("fs");
 const path = require("path");
 
-const { WEB_STATIC_SOURCE, VANIS_TOKEN_COOKIE, AUTH_LEVELS } = require("../constant");
+const { WEB_STATIC_SOURCE, SKIN_STATIC, 
+        VANIS_TOKEN_COOKIE, AUTH_LEVELS } = require("../constant");
 
 const express = require("express");
 const expressCookies = require("cookie-parser");
@@ -28,10 +29,6 @@ class Webserver {
     generateAPIRouter() {
         const apiRouter = express.Router();
 
-        // Required parser middleware
-        apiRouter.use(expressCookies());
-        apiRouter.use(expressForms.json());
-
         // Prevent cross-origin requests
         apiRouter.use((req, res, next) => {
             const origin = req.get("origin");
@@ -43,6 +40,10 @@ class Webserver {
             res.header("Access-Control-Allow-Credentials", "true");
             next();
         });
+        
+        // Required parser middleware
+        apiRouter.use(expressCookies());
+        apiRouter.use(expressForms.text({ limit: "2mb", type: "*/*" }));
 
         // Try to authorize the Vanis side
         apiRouter.use(async (req, res, next) => {
@@ -90,6 +91,7 @@ class Webserver {
         app.disable("x-powered-by");
         app.use(expressLogger(this.logger));
         app.use("/", express.static(WEB_STATIC_SOURCE));
+        app.use("/s", express.static(SKIN_STATIC, { extensions: ["png", "jpg"] }), (_, res) => res.redirect("/s/404.png"));
         app.use("/api", this.generateAPIRouter());
 
         this.logger.debug("Webserver opening @", this.config.webLocation);

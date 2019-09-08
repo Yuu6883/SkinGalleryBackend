@@ -30,6 +30,7 @@ class Provision {
         while (await this.app.skins.countBySkinID(iteration = generateToken(skinIDChars, 6)) > 0) ;
         return iteration;
     }
+    
     async generateVanisToken() {
         /** @type {string} */
         let iteration;
@@ -43,23 +44,34 @@ class Provision {
     confirmDiscordID(str) {
         return /^[0-9]+$/.test(str);
     }
+
     /**
      * @param {string} str
      */
     confirmSkinID(str) {
         return confirmToken(str, skinIDChars, 6);
     }
+    
     /**
      * @param {string} str
      */
     confirmSkinName(str) {
         return /^[\w]{1,16}$/.test(str);
     }
+
     /**
      * @param {string} str
      */
     confirmVanisToken(str) {
         return confirmToken(str, vanisTokenChars, 32);
+    }
+
+    /**
+     * @param {string} str
+     */
+    confirmJPEG(str) {
+        // Image header and Base64 regex
+        return /^data:image\/jpeg;base64,(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(str);
     }
 
     /**

@@ -14,6 +14,9 @@ interface AppConfig {
     discordAppSecret: string;
     discordAppRedirect: string;
     discordBotToken: string;
+
+    nsfwLowThreshold: number;
+    nsfwHighThreshold: number;
 }
 
 interface UserEntry {
@@ -76,6 +79,6 @@ declare type APIResponse = import("express").Response;
 
 interface APIEndpointHandler {
     handler(this: import("./app"), req: APIRequest, res: APIResponse): void;
-    method: "get" | "post" | "patch" | "put" | "delete" | "head" | "options";
+    method: "get" | "post" | "patch" | "put" | "delete" | "head" | "options" | "use";
     path: string;
 }

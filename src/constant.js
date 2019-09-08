@@ -28,8 +28,12 @@ const USER_BANNED_AUTH_LEVEL    = USER_BASE_AUTH_LEVEL;
 const USER_BASIC_AUTH_LEVEL     = USER_BASE_AUTH_LEVEL | p.UPLOAD_SKIN | p.MODIFY_SKIN | p.DELETE_SKIN;
 const USER_MOD_AUTH_LEVEL       = USER_BASE_AUTH_LEVEL | p.APPROVE_SKIN | p.REJECT_SKIN | p.BAN_USER | p.UNBAN_USER;
 
+const path = require("path");
+
 module.exports = {
-    WEB_STATIC_SOURCE: require("path").resolve(__dirname, "..", "web"),
+    WEB_STATIC_SOURCE: path.resolve(__dirname, "..", "web"),
+    SKIN_STATIC: path.resolve(__dirname, "..", "skins"),
+    PENDING_SKIN_STATIC: path.resolve(__dirname, "..", "pending_skins"),
 
     VANIS_TOKEN_COOKIE: "vanis_skin_token",
     VANIS_TOKEN_AGE: 30 * 24 * 60 * 60 * 1000,

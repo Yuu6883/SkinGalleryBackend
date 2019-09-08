@@ -27,7 +27,8 @@ let settings = {
 
 const { EOL } = require("os");
 const fs = require("fs");
-const configPath = __dirname + "/log-config.json";
+const path = require("path");
+const configPath = "./log-config.json";
 
 if (fs.existsSync(configPath))
     settings = Object.assign(settings, JSON.parse(fs.readFileSync(configPath, "utf-8")));

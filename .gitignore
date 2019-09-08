@@ -1,9 +1,14 @@
-# CLI
+# CLI logs
 cli/logs
-log-config.json
+cli/log-config.json
+
+# Test logs
+test/logs
+test/log-config.json
 
 # NPM
 node_modules
 package-lock.json
 
-*.log
+# JS config
+jsconfig.json

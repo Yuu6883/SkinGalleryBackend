@@ -5,10 +5,7 @@ const SkinSchema = new mongoose.Schema({
     skinID:         { type: String, required: true },
     ownerID:        { type: String, required: true },
     skinName:       { type: String, required: true },
-    createdStamp:   { type: Date, default: Date.now },
-    approvedStamp:  { type: Date, required: false },
-    status:         { type: String, default: "pending" },
-    messageID:      { type: String, required: false }
+    status:         { type: String, default: "pending", enum: [ "pending", "rejected", "approved" ] }
 });
 
 SkinSchema.index({ skinID: 1 }, { unique: true });
@@ -29,99 +26,76 @@ class SkinCollection {
     /**
      * @param {string} skinID
      */
-    findById(skinID) {
-        return SkinModel.findOne({ skinID }).exec();
+    async findBySkinID(skinID) {
+        return await SkinModel.findOne({ skinID });
     }
-
     /**
      * @param {string} ownerID
      */
-    findByOwnerID(ownerID) {
-        let projection = { skinID: true, status: true, skinName: true, _id: false, messageID: true };
-        return SkinModel.find({ ownerID }, projection).exec();
+    async findByOwnerID(ownerID) {
+        const projection = { skinID: true, status: true, skinName: true, _id: false };
+        return await SkinModel.find({ ownerID }, projection);
     }
 
-    /** 
-     * @param {string} ownerID
+    /**
+     * @param {string} skinID
      */
-    count(ownerID) {
-        return SkinModel.countDocuments({ ownerID, status: { $regex: /^(pending)|(approved)$/ } }).exec();
+    async countBySkinID(skinID) {
+        return await SkinModel.countDocuments({ skinID });
     }
-
-    /** 
+    /**
      * @param {string} ownerID
      */
-    count(ownerID) {
-        return SkinModel.countDocuments({ ownerID, status: { $regex: /^(pending)|(approved)$/ } }).exec();
+    async countByOwnerID(ownerID) {
+        return await SkinModel.countDocuments({ ownerID, status: { $regex: /^(pending)|(approved)$/ } });
     }
 
     /**
      * @param {string} ownerID
      * @param {string} skinName
-     * @returns {SkinDocument} Skin document created
+     * @returns {SkinDocument}
      */
-    create(ownerID, skinName) {
-
-        let skinID = this.app.provision.generateSkinId();
-        this.app.logger.debug(`Skin ID: ${skinID}`);
-
-        try {
-            return SkinModel.create({ skinID, ownerID, skinName });
-        } catch (e) {
-            this.app.logger.onError(e);
-            return this.create(ownerID, skinName);
-        }
+    async create(ownerID, skinName) {
+        return SkinModel.create({
+            skinID: await this.app.provision.generateSkinID(),
+            ownerID,
+            skinName
+        });
     }
 
     /**
      * @param {string} skinID
+     * @param {SkinStatus} status
      */
-    async approve(skinID) {
-        const doc = await this.findById(skinID);
+    async setState(skinID, status) {
+        const doc = await this.findBySkinID(skinID);
         if (doc == null) return false;
-        doc.approvedStamp = new Date();
-        doc.status = "approved";
+        doc.status = status;
         await doc.save();
         return true;
     }
     /**
      * @param {string} skinID
+     * @param {string} name
      */
-    async reject(skinID) {
-        const doc = await this.findById(skinID);
+    async editName(skinID, name) {
+        const doc = await this.findBySkinID(skinID);
         if (doc == null) return false;
-        doc.status = "rejected";
+        doc.skinName = name;
         await doc.save();
         return true;
     }
 
     /**
-     * @param {string} skinID
-     * @param {string} newName
-     */
-    async editSkinName(skinID, newName) {
-        const doc = await this.findById(skinID);
-        if (doc == null) return false;
-        doc.skinName = newName;
-        await doc.save();
-        return true;
-    }
-
-    /** 
      * @param {string} ownerID
-     * @returns deleted count
      */
-    dropByOwnerID(ownerID) {
-        return SkinModel.deleteMany({ ownerID }).exec().then(r => r.deletedCount);
+    async dropByOwnerID(ownerID) {
+        return await SkinModel.deleteMany({ ownerID });
     }
-
     async dropAll() {
-        if (this.app.config.env === "development") {
-            let result = await SkinModel.deleteMany({}).exec();
-            this.app.logger.warn(`${result.deletedCount} Skin Doument deleted`);
-        } else {
-            this.app.logger.warn("You shouldn't be dropping DB in production env");
-        }
+        if (this.app.config.env === "production")
+            throw new Error("Call to drop all skin documents in production environment")
+        return await SkinModel.deleteMany({});
     }
 }
 

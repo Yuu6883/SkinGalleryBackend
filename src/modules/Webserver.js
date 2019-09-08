@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const { WEB_STATIC_SOURCE } = require("../constant");
+const { WEB_STATIC_SOURCE, VANIS_TOKEN_COOKIE, AUTH_LEVELS } = require("../constant");
 
 const express = require("express");
 const expressCookies = require("cookie-parser");
@@ -41,6 +41,27 @@ class Webserver {
 
             res.header("Access-Control-Allow-Origin", origin || "*");
             res.header("Access-Control-Allow-Credentials", "true");
+            next();
+        });
+
+        // Try to authorize the Vanis side
+        apiRouter.use(async (req, res, next) => {
+            /** @type {string} */
+            const vanisToken = req.cookies[VANIS_TOKEN_COOKIE];
+            /** @type {UserDocument} */
+            let vanisUser;
+
+            if (this.app.provision.confirmVanisToken(vanisToken))
+                vanisUser = req.vanisUser = await this.app.users.findAuthedVanis(vanisToken);
+            if (vanisUser == null) {
+                req.vanisPermissions = AUTH_LEVELS.NONE;
+                res.clearCookie(VANIS_TOKEN_COOKIE);
+            } else if (vanisUser.moderator)
+                req.vanisPermissions = AUTH_LEVELS.MOD;
+            else if (vanisUser.bannedUntil > new Date())
+                req.vanisPermissions = AUTH_LEVELS.USER_BANNED;
+            else
+                req.vanisPermissions = AUTH_LEVELS.USER;
             next();
         });
 

@@ -48,16 +48,29 @@ class UserCollection {
 
     /**
      * @param {string} discordID
+     */
+    async count(discordID) {
+        return await UserModel.countDocuments({ discordID });
+    }
+    /**
+     * @param {string} vanisToken
+     */
+    async countAuthedVanis(vanisToken) {
+        return await UserModel.countDocuments({ vanisToken });
+    }
+
+    /**
+     * @param {string} discordID
      * @param {string} discordToken
      * @param {string} discordRefresh
      */
-    async authorizeDiscord(discordID, discordToken, discordRefresh) {
+    async authorize(discordID, discordToken, discordRefresh) {
         const user = await this.findOrCreate(discordID);
         if (user == null) return null;
         user.discordToken = discordToken;
         user.discordRefresh = discordRefresh;
 
-        const token = this.app.provision.generateVanisToken();
+        const token = await this.app.provision.generateVanisToken();
         user.vanisToken = token;
         await user.save();
 
@@ -66,7 +79,7 @@ class UserCollection {
     /**
      * @param {string} discordID
      */
-    async deauthorizeDiscord(discordID) {
+    async deauthorize(discordID) {
         const user = await this.find(discordID);
         if (user == null) return false;
         user.discordToken = undefined;

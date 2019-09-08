@@ -1,12 +1,8 @@
-const tf = require("@tensorflow/tfjs-node");
+const TensorFlow = require("@tensorflow/tfjs-node");
 const { Canvas, loadImage } = require("canvas");
-const express = require("express");
-const NSFW_CLASSES = ['drawing', 'hentai', 'neutral', 'porn', 'sexy'];
+const NSFW_CLASSES = ["drawing", "hentai", "neutral", "porn", "sexy"];
 
-/** @typedef {{ drawing: number, hentai: number, neutral: number, porn: number, sexy: number }} NSFWResult */
-
-class Brain {
-
+class NSFWbot {
     /**
      * @param {import("../app")} app
      */
@@ -25,23 +21,23 @@ class Brain {
 
         let now = Date.now();
         logger.inform("Loading NSFW model");
-        this.model = await tf.loadLayersModel(tf.io.fileSystem(__dirname + "/../../nsfw_model/model.json"));
+        this.model = await TensorFlow.loadLayersModel(TensorFlow.io.fileSystem(__dirname + "/../../nsfw_model/model.json"));
         logger.inform(`NSFW model loaded, time elasped: ${Date.now() - now}ms`);
 
         // /** @type {tf.Tensor<tf.Rank>} */
         // let testResult = await tf.tidy(() => this.model.predict(tf.zeros([1, this.size, this.size, 3])));
 
         // let resultArray = testResult.arraySync()[0];
-        
+
         // let result = resultArray.reduce((prev, curr, index) =>{
         //     prev[NSFW_CLASSES[index]] = curr;
         //     return prev;
         // }, {});
     }
 
-    /** 
+    /**
      * @param {string} src
-     * @returns {NSFWResult}
+     * @returns {NSFWPrediction}
      */
     async classify(src) {
         let img = await loadImage(src);
@@ -50,15 +46,15 @@ class Brain {
         this.ctx.clip();
         this.ctx.drawImage(img, 0, 0, this.size, this.size);
 
-        let input = tf.browser
+        let input = TensorFlow.browser
             .fromPixels(this.canvas)
             .toFloat()
-            .div(tf.scalar(255));
+            .div(TensorFlow.scalar(255));
 
-        let testResult = await tf.tidy(() => this.model.predict(tf.expandDims(input, 0)));
+        let testResult = await TensorFlow.tidy(() => this.model.predict(TensorFlow.expandDims(input, 0)));
 
         let resultArray = testResult.arraySync()[0];
-        
+
         let result = resultArray.reduce((prev, curr, index) =>{
             prev[NSFW_CLASSES[index]] = curr;
             return prev;
@@ -69,4 +65,4 @@ class Brain {
 
 }
 
-module.exports = Brain;
+module.exports = NSFWbot;

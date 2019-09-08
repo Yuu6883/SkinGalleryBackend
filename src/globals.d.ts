@@ -10,7 +10,7 @@ interface AppConfig {
     webLocation: string | number;
     webDomain: string;
 
-    discordAppId: string;
+    discordAppID: string;
     discordAppSecret: string;
     discordAppRedirect: string;
     discordBotToken: string;
@@ -29,16 +29,53 @@ declare type UserDocument = import("mongoose").Document & UserEntry;
 interface SkinEntry {
     skinID: string;
     ownerID: string;
-    status: "pending" | "rejected" | "approved";
     skinName: string;
-    createdStamp: Date;
-    messageID?: string;
-    approvedStamp?: Date;
+    status: SkinStatus;
 }
+declare type SkinStatus = "pending" | "rejected" | "approved";
 declare type SkinDocument = import("mongoose").Document & SkinEntry;
 
+interface DiscordResponse {
+    error?: string;
+    error_description?: string;
+}
+interface DiscordAuthorization {
+    access_token: string;
+    refresh_token: string;
+}
+interface DiscordUser {
+    id: string;
+    username: string;
+    discriminator: string;
+    avatar: string;
+    locale: string;
+}
+
+interface VanisLoginInfo {
+    id: string;
+    username: string;
+    discriminator: string;
+    avatar: string;
+    moderator: boolean;
+    bannedUntil: Date;
+}
+
+interface NSFWPrediction {
+    drawing: number;
+    hentai: number;
+    neutral: number;
+    porn: number;
+    sexy: number;
+}
+
+declare type APIRequest = import("express").Request & {
+    vanisPermissions: number;
+    vanisUser?: UserDocument;
+};
+declare type APIResponse = import("express").Response;
+
 interface APIEndpointHandler {
-    handler(this: import("./app"), req: import("express").Request, res: import("express").Response): void;
+    handler(this: import("./app"), req: APIRequest, res: APIResponse): void;
     method: "get" | "post" | "patch" | "put" | "delete" | "head" | "options";
     path: string;
 }

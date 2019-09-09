@@ -117,8 +117,8 @@ module.exports = new class Prompt {
                 "Be aware that if the detection fails, your skin will still be banned.", "success");
 
             case "pending":
-                return this.alert.fire("Skin Pending", "Moderators are reviewing your skin " + 
-                                    "because it might contain NSFW content.", "warning");
+                return this.alert.fire("Skin Pending", "Your skin will need to be manually reviewed because" + 
+                    " it might contain NSFW content.", "warning");
 
             case "rejected":
                 return this.alert.fire("Skin Rejected", "Your skin most likely contains NSFW content." + 

@@ -676,7 +676,7 @@ const linkedSkinPanel = skinObject => {
             </div>
             <div class="top-right uk-label uk-label-${labelClass} uk-transition-slide-top">${skinObject.status}</div>
             <h3 class="text uk-position-bottom-center uk-margin-small-bottom">${skinObject.skinName}</h3>
-            <div class="bottom-left">
+            <div class="bottom-right">
                 <span uk-icon="icon:link;ratio:1.5"      class="text uk-transition-slide-bottom skin-link"
                         link="${window.location.origin}${link}"></span><br>
                 <span uk-icon="icon:file-edit;ratio:1.5" class="text uk-transition-slide-bottom skin-edit"
@@ -909,8 +909,8 @@ module.exports = new class Prompt {
                 "Be aware that if the detection fails, your skin will still be banned.", "success");
 
             case "pending":
-                return this.alert.fire("Skin Pending", "Moderators are reviewing your skin " + 
-                                    "because it might contain NSFW content.", "warning");
+                return this.alert.fire("Skin Pending", "Your skin will need to be manually reviewed because" + 
+                    " it might contain NSFW content.", "warning");
 
             case "rejected":
                 return this.alert.fire("Skin Rejected", "Your skin most likely contains NSFW content." + 

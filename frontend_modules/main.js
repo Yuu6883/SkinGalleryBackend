@@ -32,7 +32,7 @@ const linkedSkinPanel = skinObject => {
             </div>
             <div class="top-right uk-label uk-label-${labelClass} uk-transition-slide-top">${skinObject.status}</div>
             <h3 class="text uk-position-bottom-center uk-margin-small-bottom">${skinObject.skinName}</h3>
-            <div class="bottom-left">
+            <div class="bottom-right">
                 <span uk-icon="icon:link;ratio:1.5"      class="text uk-transition-slide-bottom skin-link"
                         link="${window.location.origin}${link}"></span><br>
                 <span uk-icon="icon:file-edit;ratio:1.5" class="text uk-transition-slide-bottom skin-edit"

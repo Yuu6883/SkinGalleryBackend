@@ -96,6 +96,7 @@ body, html {
 
 .skin-edit {
     color: #b1700f!important;
+    margin-bottom: 10px;
 }
 
 .skin-edit:hover {
@@ -112,6 +113,7 @@ body, html {
 
 .skin-link {
     color: rgb(100, 149, 194)!important;
+    margin-bottom: 10px;
 }
 
 .skin-link:hover {

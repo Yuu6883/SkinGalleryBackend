@@ -676,12 +676,14 @@ const linkedSkinPanel = skinObject => {
             </div>
             <div class="top-right uk-label uk-label-${labelClass} uk-transition-slide-top">${skinObject.status}</div>
             <h3 class="text uk-position-bottom-center uk-margin-small-bottom">${skinObject.skinName}</h3>
-            <span uk-icon="file-edit" class="text bottom-left uk-transition-slide-bottom btn skin-edit" ` + 
-                    `skin-id="${skinObject.skinID}" skin-name="${skinObject.skinName}"></span>
-            <span uk-icon="trash" class="text bottom-right uk-transition-slide-bottom btn danger skin-delete"` + 
-                    `skin-id="${skinObject.skinID}" skin-name="${skinObject.skinName}"></span></span>
-            <span uk-icon="link" class="text top-left uk-transition-slide-top btn skin-link"` + 
-                    `link="${window.location.origin}${link}"></span></span>
+            <div class="bottom-left">
+                <span uk-icon="icon:link;ratio:1.5"      class="text uk-transition-slide-bottom skin-link"
+                        link="${window.location.origin}${link}"></span><br>
+                <span uk-icon="icon:file-edit;ratio:1.5" class="text uk-transition-slide-bottom skin-edit"
+                        skin-id="${skinObject.skinID}" skin-name="${skinObject.skinName}"></span><br>
+                <span uk-icon="icon:trash;ratio:1.5"     class="text uk-transition-slide-bottom skin-delete"
+                        skin-id="${skinObject.skinID}" skin-name="${skinObject.skinName}"></span>
+            </div>
         </div>
     </div>`
 }

@@ -17,19 +17,18 @@ module.exports = new class Prompt {
     constructor() {
         
         this.alert = Swal.mixin({
-            background: '#222',
-            width: "50%",
+            background: '#172535',
             heightAuto: false,
             focusConfirm: false,
             focusCancel: true,
-            allowEnterKey: false,
             allowOutsideClick: false,
             allowEscapeKey: false,
             customClass: {
+                popup: "uk-width-1-2@l uk-width-2-3@m uk-width-4-5",
                 title: "text",
                 content: "text",
                 confirmButton: "btn",
-                cancelButton: "btn danger"
+                cancelButton: "btn danger",
             }
         });
 
@@ -100,9 +99,9 @@ module.exports = new class Prompt {
             inputAutoTrim: true,
             confirmButtonText: "Submit",
             showCancelButton: true,
+            inputValue: skin.name.split(".").slice(0, -1).join("."),
             onOpen: () => {
                 $(this.alert.getContent()).prepend(canvas);
-                $(this.alert.getInput()).val(skin.name.split(".").slice(0, -1).join("."));
             }
         }).then(result => {
             if (result.dismiss) return;
@@ -128,4 +127,64 @@ module.exports = new class Prompt {
         }
     }
 
+    skinEditResult(newName) {
+        return this.alert.fire("Success", `Skin name changed to ${newName}`, "success");
+    }
+
+    skinDeleteResult(skinName) {
+        return this.alert.fire("Success", `Skin ${skinName} deleted`, "success");
+    }
+
+    editSkinName(skinID, oldName) {
+        this.alert.fire({
+            title: "Edit Skin Name",
+            input: "text",
+            inputAttributes: {
+                maxLength: 16
+            },
+            inputAutoTrim: true,
+            confirmButtonText: "Save",
+            showCancelButton: true,
+            inputValue: oldName
+        }).then(result => {
+            if (result.dismiss) return;
+            if (result.value == oldName) return;
+            API.editSkinName(skinID, result.value);
+        });
+    }
+    
+    deleteSkin(skinID, name) {
+        this.alert.fire({
+            title: `Delete Skin`,
+            type: "warning",
+            text: `You are about to delete skin ${name}`,
+            confirmButtonClass: "btn danger",
+            confirmButtonText: "Delete",
+            showCancelButton: true
+        }).then(result => {
+            if (result.dismiss) return;
+            API.deleteSkin(skinID, name);
+        });
+    }
+
+    copied(url) {
+        this.alert.fire({
+            allowOutsideClick: true,
+            showConfirmButton: false,
+            timer: 2000,
+            type: "success",
+            title: "Linked Copied to Clipboard",
+            text: url
+        });
+    }
+
+    copyFail(url) {
+        this.alert.fire({
+            allowOutsideClick: true,
+            title: "Failed to Copy to Clipboard",
+            text: "You can copy the link manually",
+            inputValue: url,
+            type: "error"
+        });
+    }
 }

@@ -612,9 +612,31 @@ module.exports = new class API extends EventEmitter {
                     this.emit("myskin", res);
                 }
             },
-            error: e => {
-                console.error(e);
-            }
+            error: console.error
+        });
+    }
+
+    editSkinName(skinID, newName) {
+        $.ajax({
+            method: "PUT",
+            url: `/api/skins/${skinID}?name=${newName}`,
+            dataType: "json",
+            success: res => {
+                if (res.success) this.emit("skinEditSuccess", newName);
+            },
+            error: console.error
+        });
+    }
+
+    deleteSkin(skinID, name) {
+        $.ajax({
+            method: "DELETE",
+            url: `/api/skins/${skinID}`,
+            dataType: "json",
+            success: res => {
+                if (res.success) this.emit("skinDeleteSuccess", name);
+            },
+            error: console.error
         });
     }
 }
@@ -630,11 +652,11 @@ const Prompt = require("./prompt");
 const Starfield = require("./starfield");
 
 const emptySkinPanel = 
-`<div class="uk-width-1-5@m uk-card uk-margin-top">
-    <div class="uk-padding-small uk-inline-clip uk-transition-toggle pointer uk-text-center card">
+`<div class="uk-width-1-5@l uk-width-1-2@m uk-card uk-margin-top">
+    <div class="padding-s uk-inline-clip uk-transition-toggle uk-text-center card">
         <img src="assets/img/logo-grey.png" class="skin-preview skin-empty">
         <div class="uk-position-center">
-            <span class="text uk-transition-fade" uk-icon="icon:cloud-upload;ratio:2"></span>
+            <span class="text uk-transition-fade pointer btn skin-upload" uk-icon="icon:cloud-upload;ratio:2"></span>
         </div>
     </div>
 </div>`;
@@ -645,21 +667,29 @@ const linkedSkinPanel = skinObject => {
     let link = skinObject.status === "approved" ? `/s/${skinObject.skinID}` : `/api/p/skin/${skinObject.skinID}`;
     let labelClass = { "approved": "success", "pending": "warning", "rejected": "danger" }[skinObject.status];
     return "" +
-    `<div class="uk-width-1-5@m uk-card uk-margin-top">
-        <div class="uk-padding-small uk-inline-clip pointer uk-text-center uk-transition-toggle card">
+    `<div class="uk-width-1-5@l uk-width-1-2@m uk-card uk-margin-top">
+        <div class="padding-s uk-inline-clip pointer uk-text-center uk-transition-toggle card">
             <div>
-                <a href="${link}" data-type="image" data-caption="${skinObject.skinName}">
+                <a href="${link}" data-type="image" data-caption="<h1 class='text uk-margin-large-bottom'>${skinObject.skinName}</h1>">
                     <img src="${link}" class="skin-preview uk-transition-scale-up uk-transition-opaque">
                 </a>
             </div>
-            <div class="uk-position-top-center uk-label uk-label-${labelClass}">${skinObject.status}</div>
+            <div class="top-right uk-label uk-label-${labelClass} uk-transition-slide-top">${skinObject.status}</div>
+            <h3 class="text uk-position-bottom-center uk-margin-small-bottom">${skinObject.skinName}</h3>
+            <span uk-icon="file-edit" class="text bottom-left uk-transition-slide-bottom btn skin-edit" ` + 
+                    `skin-id="${skinObject.skinID}" skin-name="${skinObject.skinName}"></span>
+            <span uk-icon="trash" class="text bottom-right uk-transition-slide-bottom btn danger skin-delete"` + 
+                    `skin-id="${skinObject.skinID}" skin-name="${skinObject.skinName}"></span></span>
+            <span uk-icon="link" class="text top-left uk-transition-slide-top btn skin-link"` + 
+                    `link="${window.location.origin}${link}"></span></span>
         </div>
     </div>`
 }
 
-window.API = API;
-
+let copyEl;
 $(window).on("load", () => {
+
+    copyEl = document.getElementById("copy");
 
     new Starfield($("#starfield")[0]).start();
 
@@ -683,26 +713,80 @@ $(window).on("load", () => {
         $("#skin-panel").hide();
     });
 
-    API.on("myskin", skins => {
-        console.log(skins);
-
-        let skinsHTML = skins.map(linkedSkinPanel).join("");
-        let emptySkinsHTML = emptySkinPanel.repeat(10 - skins.length);            
-
-        let panel = $("#skin-panel").children().first();
-        panel.children().remove();
-        panel.append($(skinsHTML), $(emptySkinsHTML).click(() => Prompt.inputImage()));
-    });
+    API.on("myskin", skins => updateSkinPanel(skins));
 
     API.on("skinUploaded", res => {
+        if (res.error) return console.error(res.error);
         Prompt.skinResult(res).then(() => API.listSkin());
-    })
+    });
+
+    API.on("skinEditSuccess", newName => {
+        Prompt.skinEditResult(newName).then(() => API.listSkin());
+    });
+
+    API.on("skinDeleteSuccess", name => {
+        Prompt.skinDeleteResult(name).then(() => API.listSkin());
+    });
 
     API.init();
 
     $(document).ajaxStart(() => Prompt.showLoader());
     $(document).ajaxComplete(() => Prompt.hideLoader());
 });
+
+const updateSkinPanel = skins => {
+    let skinsHTML = skins.map(linkedSkinPanel).join("");
+    let emptySkinsHTML = emptySkinPanel.repeat(10 - skins.length);            
+
+    let panel = $("#skin-panel").children().first();
+    panel.children().remove();
+    panel.append($(skinsHTML + emptySkinsHTML));
+
+    $(".skin-upload").click(() => Prompt.inputImage());
+
+    $(".skin-edit").click(function() {
+        Prompt.editSkinName($(this).attr("skin-id"), $(this).attr("skin-name"));
+    });
+
+    $(".skin-delete").click(function() {
+        Prompt.deleteSkin($(this).attr("skin-id"), $(this).attr("skin-name"));
+    });
+
+    $(".skin-link").click(function() {
+
+        $(copyEl).val($(this).attr("link"));
+        $(copyEl).text($(this).attr("link"));
+        
+        if (copyText(copyEl))
+            Prompt.copied($(copyEl).val());
+        else
+            Prompt.copyFail($(copyEl).val());
+    });
+}
+
+const copyText = element => {
+    let range, selection;
+  
+    if (document.body.createTextRange) {
+        range = document.body.createTextRange();
+        range.moveToElementText(element);
+        range.select();
+    } else if (window.getSelection) {
+        selection = window.getSelection();        
+        range = document.createRange();
+        range.selectNodeContents(element);
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
+    
+    try {
+        document.execCommand('copy');
+        return true;
+    }
+    catch (err) {
+        return false;
+    }
+}
 },{"./api":2,"./prompt":4,"./starfield":5}],4:[function(require,module,exports){
 /** @type {import("sweetalert2").default} */
 const Swal = window.Swal;
@@ -723,19 +807,18 @@ module.exports = new class Prompt {
     constructor() {
         
         this.alert = Swal.mixin({
-            background: '#222',
-            width: "50%",
+            background: '#172535',
             heightAuto: false,
             focusConfirm: false,
             focusCancel: true,
-            allowEnterKey: false,
             allowOutsideClick: false,
             allowEscapeKey: false,
             customClass: {
+                popup: "uk-width-1-2@l uk-width-2-3@m uk-width-4-5",
                 title: "text",
                 content: "text",
                 confirmButton: "btn",
-                cancelButton: "btn danger"
+                cancelButton: "btn danger",
             }
         });
 
@@ -806,9 +889,9 @@ module.exports = new class Prompt {
             inputAutoTrim: true,
             confirmButtonText: "Submit",
             showCancelButton: true,
+            inputValue: skin.name.split(".").slice(0, -1).join("."),
             onOpen: () => {
                 $(this.alert.getContent()).prepend(canvas);
-                $(this.alert.getInput()).val(skin.name.split(".").slice(0, -1).join("."));
             }
         }).then(result => {
             if (result.dismiss) return;
@@ -834,6 +917,66 @@ module.exports = new class Prompt {
         }
     }
 
+    skinEditResult(newName) {
+        return this.alert.fire("Success", `Skin name changed to ${newName}`, "success");
+    }
+
+    skinDeleteResult(skinName) {
+        return this.alert.fire("Success", `Skin ${skinName} deleted`, "success");
+    }
+
+    editSkinName(skinID, oldName) {
+        this.alert.fire({
+            title: "Edit Skin Name",
+            input: "text",
+            inputAttributes: {
+                maxLength: 16
+            },
+            inputAutoTrim: true,
+            confirmButtonText: "Save",
+            showCancelButton: true,
+            inputValue: oldName
+        }).then(result => {
+            if (result.dismiss) return;
+            if (result.value == oldName) return;
+            API.editSkinName(skinID, result.value);
+        });
+    }
+    
+    deleteSkin(skinID, name) {
+        this.alert.fire({
+            title: `Delete Skin`,
+            type: "warning",
+            text: `You are about to delete skin ${name}`,
+            confirmButtonClass: "btn danger",
+            confirmButtonText: "Delete",
+            showCancelButton: true
+        }).then(result => {
+            if (result.dismiss) return;
+            API.deleteSkin(skinID, name);
+        });
+    }
+
+    copied(url) {
+        this.alert.fire({
+            allowOutsideClick: true,
+            showConfirmButton: false,
+            timer: 2000,
+            type: "success",
+            title: "Linked Copied to Clipboard",
+            text: url
+        });
+    }
+
+    copyFail(url) {
+        this.alert.fire({
+            allowOutsideClick: true,
+            title: "Failed to Copy to Clipboard",
+            text: "You can copy the link manually",
+            inputValue: url,
+            type: "error"
+        });
+    }
 }
 },{"./api":2}],5:[function(require,module,exports){
 /** @typedef {{ x: Number, y: Number }} Vector */

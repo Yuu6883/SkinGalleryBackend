@@ -86,9 +86,31 @@ module.exports = new class API extends EventEmitter {
                     this.emit("myskin", res);
                 }
             },
-            error: e => {
-                console.error(e);
-            }
+            error: console.error
+        });
+    }
+
+    editSkinName(skinID, newName) {
+        $.ajax({
+            method: "PUT",
+            url: `/api/skins/${skinID}?name=${newName}`,
+            dataType: "json",
+            success: res => {
+                if (res.success) this.emit("skinEditSuccess", newName);
+            },
+            error: console.error
+        });
+    }
+
+    deleteSkin(skinID, name) {
+        $.ajax({
+            method: "DELETE",
+            url: `/api/skins/${skinID}`,
+            dataType: "json",
+            success: res => {
+                if (res.success) this.emit("skinDeleteSuccess", name);
+            },
+            error: console.error
         });
     }
 }

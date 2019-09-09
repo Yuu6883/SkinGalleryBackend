@@ -1,5 +1,6 @@
 const { hasPermission, PENDING_SKIN_STATIC, SKIN_STATIC } = require("../constant");
 const fs = require("fs");
+const expressForms = require("body-parser");
 
 /** @type {APIEndpointHandler} */
 const endpoint = {
@@ -12,6 +13,11 @@ const endpoint = {
 
         if (!this.provision.confirmJPEG(req.body))
             return void res.sendStatus(400);
+
+        if ((await this.skins.countByOwnerID(req.vanisUser.discordID)) >= 10) {
+            this.logger.warn(`User ${req.vanisUser.discordID} tried to create more than 10 skins`);
+            return void res.sendStatus({ error: "You have maximum of 10 slots for skins" });
+        }
 
         try {
             let result = await this.nsfwBot.classify(req.body);
@@ -40,7 +46,8 @@ const endpoint = {
 
     },
     method: "post",
-    path: "/skins/:skinName"
+    path: "/skins/:skinName",
+    pre: [expressForms.text({ limit: "2mb", type: "*/*" })]
 };
 
 module.exports = endpoint;

@@ -42,28 +42,28 @@ class Provision {
      * @param {string} str
      */
     confirmDiscordID(str) {
-        return /^[0-9]+$/.test(str);
+        return str && /^[0-9]+$/.test(str);
     }
 
     /**
      * @param {string} str
      */
     confirmSkinID(str) {
-        return confirmToken(str, skinIDChars, 6);
+        return str && confirmToken(str, skinIDChars, 6);
     }
     
     /**
      * @param {string} str
      */
     confirmSkinName(str) {
-        return /^[\w]{1,16}$/.test(str);
+        return str && str.length <= 16 && str.length > 0;
     }
 
     /**
      * @param {string} str
      */
     confirmVanisToken(str) {
-        return confirmToken(str, vanisTokenChars, 32);
+        return str && confirmToken(str, vanisTokenChars, 32);
     }
 
     /**
@@ -71,7 +71,7 @@ class Provision {
      */
     confirmJPEG(str) {
         // Image header and Base64 regex
-        return /^data:image\/jpeg;base64,(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(str);
+        return str && /^data:image\/jpeg;base64,(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(str);
     }
 
     /**

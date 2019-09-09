@@ -85,6 +85,7 @@ class SkinCollection {
         await doc.save();
         return true;
     }
+
     /**
      * @param {string} skinID
      * @param {string} name
@@ -95,6 +96,13 @@ class SkinCollection {
         doc.skinName = name;
         await doc.save();
         return true;
+    }
+
+    /**
+     * @param {string} skinID
+     */
+    async deleteByID(skinID) {
+        return (await SkinModel.deleteOne({ skinID })).deletedCount === 1;
     }
 
     /**

@@ -43,7 +43,6 @@ class Webserver {
         
         // Required parser middleware
         apiRouter.use(expressCookies());
-        apiRouter.use(expressForms.text({ limit: "2mb", type: "*/*" }));
 
         // Try to authorize the Vanis side
         apiRouter.use(async (req, res, next) => {
@@ -72,6 +71,10 @@ class Webserver {
             const endpoint = require(path.resolve(__dirname, "../api", file));
             if (!endpoint.handler || !endpoint.method || !endpoint.path)
                 return void this.logger.warn(`Ignoring endpoint file ${file}: module export not properly defined`);
+
+            if (endpoint.pre && Array.isArray(endpoint.pre))
+                apiRouter.use(endpoint.path, ...endpoint.pre);
+
             apiRouter[endpoint.method](endpoint.path, endpoint.handler.bind(this.app));
 
             this.logger.inform(`Registering route ${endpoint.method.toUpperCase()} /api${endpoint.path}`);

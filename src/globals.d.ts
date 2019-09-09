@@ -81,4 +81,5 @@ interface APIEndpointHandler {
     handler(this: import("./app"), req: APIRequest, res: APIResponse): void;
     method: "get" | "post" | "patch" | "put" | "delete" | "head" | "options" | "use";
     path: string;
+    pre: Array<import("express").Handler>;
 }

@@ -121,8 +121,7 @@ module.exports = new class Prompt {
                     " it might contain NSFW content.", "warning");
 
             case "rejected":
-                return this.alert.fire("Skin Rejected", "Your skin most likely contains NSFW content." + 
-                                    " You can appeal to moderators on discord if it's actually SFW.");
+                return this.alert.fire("Skin Rejected", "Your skin most likely contains NSFW content, which is not allowed.");
 
         }
     }

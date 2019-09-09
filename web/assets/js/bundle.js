@@ -656,7 +656,7 @@ const emptySkinPanel =
     <div class="padding-s uk-inline-clip uk-transition-toggle uk-text-center card">
         <img src="assets/img/logo-grey.png" class="skin-preview skin-empty">
         <div class="uk-position-center">
-            <span class="text uk-transition-fade pointer btn skin-upload" uk-icon="icon:cloud-upload;ratio:2"></span>
+            <span class="text uk-transition-fade pointer skin-upload" uk-icon="icon:cloud-upload;ratio:2" uk-tooltip="Upload skin"></span>
         </div>
     </div>
 </div>`;
@@ -678,11 +678,11 @@ const linkedSkinPanel = skinObject => {
             <h3 class="text uk-position-bottom-center uk-margin-small-bottom">${skinObject.skinName}</h3>
             <div class="bottom-right">
                 <span uk-icon="icon:link;ratio:1.5"      class="text uk-transition-slide-bottom skin-link"
-                        link="${window.location.origin}${link}"></span><br>
+                        link="${window.location.origin}${link}" uk-tooltip="Copy skin URL"></span><br>
                 <span uk-icon="icon:file-edit;ratio:1.5" class="text uk-transition-slide-bottom skin-edit"
-                        skin-id="${skinObject.skinID}" skin-name="${skinObject.skinName}"></span><br>
+                        skin-id="${skinObject.skinID}" skin-name="${skinObject.skinName}" uk-tooltip="Edit this skin's name"></span><br>
                 <span uk-icon="icon:trash;ratio:1.5"     class="text uk-transition-slide-bottom skin-delete"
-                        skin-id="${skinObject.skinID}" skin-name="${skinObject.skinName}"></span>
+                        skin-id="${skinObject.skinID}" skin-name="${skinObject.skinName}" uk-tooltip="Delete this skin"></span>
             </div>
         </div>
     </div>`
@@ -913,8 +913,7 @@ module.exports = new class Prompt {
                     " it might contain NSFW content.", "warning");
 
             case "rejected":
-                return this.alert.fire("Skin Rejected", "Your skin most likely contains NSFW content." + 
-                                    " You can appeal to moderators on discord if it's actually SFW.");
+                return this.alert.fire("Skin Rejected", "Your skin most likely contains NSFW content, which is not allowed.");
 
         }
     }

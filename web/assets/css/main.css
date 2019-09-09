@@ -94,12 +94,12 @@ body, html {
     background-color: rgb(73, 73, 73);
 }
 
-.skin-edit {
+.skin-upload, .skin-edit {
     color: #b1700f!important;
     margin-bottom: 10px;
 }
 
-.skin-edit:hover {
+.skin-upload:hover, .skin-edit:hover {
     color: #99610d!important;
 }
 

@@ -93,8 +93,8 @@ class Webserver {
         const app = express();
         app.disable("x-powered-by");
         app.use(expressLogger(this.logger));
-        app.use("/", express.static(WEB_STATIC_SOURCE));
-        app.use("/s", express.static(SKIN_STATIC, { extensions: ["png", "jpg"] }), (_, res) => res.redirect("/s/404.png"));
+        app.use("/", express.static(WEB_STATIC_SOURCE, { maxAge: 1e8 }));
+        app.use("/s", express.static(SKIN_STATIC, { extensions: ["png", "jpg"], maxAge: 1e8 }), (_, res) => res.redirect("/s/404.png"));
         app.use("/api", this.generateAPIRouter());
 
         this.logger.debug("Webserver opening @", this.config.webLocation);

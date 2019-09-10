@@ -26,7 +26,7 @@ module.exports = new class API extends EventEmitter {
 
     redirectLogin() {
         localStorage.autoLogin = "ha";
-        window.location.replace(window.location.href.match(/^https?:\/\/\w+\//)[0] + "api/login");
+        window.location.replace(window.location.href.match(/^https?:\/\/.+\//)[0] + "api/login");
     }
 
     login() {

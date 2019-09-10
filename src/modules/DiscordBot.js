@@ -87,6 +87,19 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
                 }
             }
         }
+
+        if (message.content.startsWith(`${this.prefix}ismod`)) {
+
+            let arr = message.mentions.users.array();
+            for (let i in arr) {
+
+                let user = arr[i];
+                let name = `${user.username}#${user.discriminator}`;
+
+                let isMod = await this.isMod(user.id);
+                await message.channel.send(name + " is " + (isMod ? "**mod**" : "pleb"));
+            }
+        }
     }
 
     startReviewCycle() {
@@ -310,6 +323,7 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
     async updateMods() {
         this.modsCache = (await this.app.users.getMods()).map(d => d.discordID);
         this.modsCacheTimestamp = Date.now();
+        // console.log("MODS: ", this.modsCache);
         return false;
     }
 

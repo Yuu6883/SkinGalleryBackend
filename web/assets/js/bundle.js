@@ -860,13 +860,26 @@ module.exports = new class Prompt {
                         <span class="text" uk-icon="icon: cloud-upload"></span>
                         <input class="pointer" type="file" accept="image/*" id="skin-input">
                     </div>`,
-            confirmButtonText: "Cancel",
-            confirmButtonClass: "btn danger",
+            showCancelButton: true,
+            confirmButtonText: "Continue",
+            input: "url",
+            inputPlaceholder: "Or enter image URL here",
             onOpen: () => {
                 let self = this;
                 $("#skin-input").change(function() {
                     readImage(this.files.item(0)).then(skin => self.editSkin(skin));
                 });
+            }
+        }).then(result => {
+            if (result.dismiss) return;
+            let url = result.value;
+
+            if (url) {
+                let img = new Image;
+                img.crossOrigin = "anonymous";
+                img.onload = () => this.editSkin({ name: url.split("/").slice(-1)[0], img });
+                img.onabort = img.onerror = () => this.alert.fire("Invalid Skin URL", `Failed to load image from ${url}`, "error");
+                img.src = url;
             }
         });
     }

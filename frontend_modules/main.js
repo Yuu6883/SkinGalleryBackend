@@ -86,11 +86,11 @@ $(window).on("load", () => {
     });
 
     API.on("skinEditSuccess", newName => {
-        Prompt.skinEditResult(newName).then(() => API.listSkin());
+        Prompt.skinEditResult(escapeHtml(newName)).then(() => API.listSkin());
     });
 
     API.on("skinDeleteSuccess", name => {
-        Prompt.skinDeleteResult(name).then(() => API.listSkin());
+        Prompt.skinDeleteResult(escapeHtml(name)).then(() => API.listSkin());
     });
 
     API.init();

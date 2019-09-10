@@ -19,7 +19,7 @@ const endpoint = {
         if (await this.users.count(discordID) === 0)
             return void res.sendStatus(404);
 
-        res.json(await this.skins.findByOwnerID(discordID));
+        res.json((await this.skins.findByOwnerID(discordID)).sort((a, b) => a.skinName.localeCompare(b.skinName)));
     },
     method: "get",
     path: "/skins/:userID"

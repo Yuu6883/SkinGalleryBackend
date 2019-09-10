@@ -37,7 +37,7 @@ class UserCollection {
     async findOrCreate(discordID) {
         const user = await this.find(discordID);
         if (user != null) return user;
-        this.app.logger.inform(`Creating new user document id: ${discordID}`);
+        this.app.logger.debug(`Creating new user document id: ${discordID}`);
         return await UserModel.create({ discordID });
     }
 
@@ -112,7 +112,7 @@ class UserCollection {
 
         return token;
     }
-    
+
     /**
      * @param {string} discordID
      */

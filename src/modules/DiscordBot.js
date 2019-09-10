@@ -81,29 +81,27 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
 
         let skinOwner = this.findUserByID(skinDoc.ownerID);
 
-        // Bruh moment
+        // Bruh moment (user not in same server with the person)
         if (!skinOwner) {
-            await skinDoc.remove();
-            this.logger.onError(`Can't find skin owner of ID ${skinDoc.ownerID}`);
-            skinOwner = {
-                id: "bruh",
-                displayAvatarURL: "https://discordapp.com/assets/dd4dbc0016779df1378e7812eabaa04d.png",
-                username: "Hacker",
-                discriminator: "6969"
-            }
+            // this.logger.onError(`Can't find skin owner of ID ${skinDoc.ownerID}`);
         }
 
         // Somehow the message is gone by magik
         if (!message) {
 
             let embed = new RichEmbed()
-                .setTitle(`${skinOwner.username}#${skinOwner.discriminator}` + 
-                          `(${skinOwner.id})`, skinOwner.displayAvatarURL)
                 .setDescription(`${skinDoc.skinName}(recovered because last message was deleted)`)
                 .setFooter(`${this.config.approveThreshold} ${this.config.approveEmoji} to approve | ` + 
                        `${this.config.rejectThreshold} ${this.config.rejectEmoji} to reject`)
                 .attachFile(new Attachment(`${PENDING_SKIN_STATIC}/${skinDoc.skinID}.jpg`, "SPOILER_" + skinDoc.skinName + ".jpg"))
                 .setTimestamp();
+
+            if (skinOwner) {
+                embed.setAuthor(`${skinOwner.username}#${skinOwner.discriminator}` + 
+                                `(${skinOwner.id})`, skinOwner.displayAvatarURL)
+            } else {
+                embed.setAuthor(`User ${skinDoc.ownerID}`);
+            }
 
             message = await this.reviewChannel.send(embed);
 
@@ -124,11 +122,11 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
      * @param {string} skinName 
      */
     async pendSkinReview(ownerID, nsfwResult, skinPath, skinName) {
+        
         let skinOwner = this.findUserByID(ownerID);
 
         if (!skinOwner) {
-            this.logger.warn(`Can't find user ID ${ownerID} while pending skin to reivew`);
-            return;
+            // this.logger.warn(`Can't find user ID ${ownerID} while pending skin to reivew`);
         }
 
         for (let i in nsfwResult) {
@@ -136,14 +134,19 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
         }
 
         let embed = new RichEmbed()
-            .setAuthor(`${skinOwner.username}#${skinOwner.discriminator}` + 
-                       `(${skinOwner.id})`, skinOwner.displayAvatarURL)
             .setDescription(`**NSFW Prediction of __${skinName}__:**\n\`\`\`\n${table(nsfwResult)}\`\`\`` + 
                             ``)
             .setFooter(`${this.config.approveThreshold} ${this.config.approveEmoji} to approve | ` + 
                        `${this.config.rejectThreshold} ${this.config.rejectEmoji} to reject`)
             .setTimestamp()
             .attachFile(new Attachment(skinPath, skinName));
+
+        if (skinOwner) {
+            embed.setAuthor(`${skinOwner.username}#${skinOwner.discriminator}` + 
+                            `(${skinOwner.id})`, skinOwner.displayAvatarURL)
+        } else {
+            embed.setAuthor(`User ${ownerID}`);
+        }
 
         /** @type {DiscordJS.Message} */
         let message = await this.reviewChannel.send(embed);

@@ -318,12 +318,16 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
 
     /** @param {string} discordID */
     async addMod(discordID) {
-        return (await this.app.users.addMod(discordID)) && this.updateMods() || true;
+        let r = await this.app.users.addMod(discordID);
+        await this.updateMods();
+        return r;
     }
 
     /** @param {string} discordID */
     async removeMod(discordID) {
-        return (await this.app.users.removeMod(discordID)) && this.updateMods() || true;
+        let r = await this.app.users.removeMod(discordID);
+        await this.updateMods();
+        return r;
     }
 
     /** 

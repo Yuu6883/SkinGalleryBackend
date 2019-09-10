@@ -122,6 +122,9 @@ module.exports = new class Prompt {
             case "rejected":
                 return this.alert.fire("Skin Rejected", "Your skin most likely contains NSFW content, which is not allowed.");
 
+            default:
+                console.error(`Unknown status: ${res.status}`);
+
         }
     }
 

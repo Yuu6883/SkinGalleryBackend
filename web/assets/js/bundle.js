@@ -591,7 +591,7 @@ module.exports = new class API extends EventEmitter {
 
     uploadSkin(name, data) {
         $.post({
-            url: "/api/skins/" + name,
+            url: "/api/skins/" + encodeURIComponent(name),
             data,
             /** @param {{status:SkinStatus}} res */
             success: res => {
@@ -619,7 +619,7 @@ module.exports = new class API extends EventEmitter {
     editSkinName(skinID, newName) {
         $.ajax({
             method: "PUT",
-            url: `/api/skins/${skinID}?name=${newName}`,
+            url: `/api/skins/${skinID}?name=${encodeURIComponent(newName)}`,
             dataType: "json",
             success: res => {
                 if (res.success) this.emit("skinEditSuccess", newName);
@@ -920,6 +920,9 @@ module.exports = new class Prompt {
 
             case "rejected":
                 return this.alert.fire("Skin Rejected", "Your skin most likely contains NSFW content, which is not allowed.");
+
+            default:
+                console.error(`Unknown status: ${res.status}`);
 
         }
     }

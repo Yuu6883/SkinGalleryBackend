@@ -1,6 +1,6 @@
 /** @type {AppConfig} */
 module.exports = {
-    env: "development",
+    env: "production",
 
     dbPath: "mongodb://localhost:27017/vanis-skins",
 

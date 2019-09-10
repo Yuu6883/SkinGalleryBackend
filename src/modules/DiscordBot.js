@@ -174,7 +174,18 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
                 let success = this.moveApprovedSkin(skinDoc.skinID);
 
                 if (success) {
-                    await this.reviewChannel.send(`${skinDoc.skinName}(${skinDoc.skinID}) ${this.config.approveEmoji}`);
+
+                    let embed = new RichEmbed()
+                        .setTitle("Skin Approved")
+                        .setDescription(`Skin ${skinDoc.skinName}(${skinDoc.skinID}) was approved by: \n**` + 
+                                         approvedReactions.users.filter(u => u !== this.user).map(u => `<@${u.id}>`).join(" ") + "**\n")
+                        .setTimestamp();
+
+                    if (this.config.env === "production") {
+                        embed.setThumbnail(`https://skin.yuu.studio/s/${skinDoc.skinID}`);
+                    }
+
+                    await this.reviewChannel.send(embed);
                 } else await this.reviewChannel.send(`Error: can't find skin ${skinDoc.skinName}(${skinDoc.skinID})`);
 
             } else if (rejectCount >= this.config.rejectThreshold) {

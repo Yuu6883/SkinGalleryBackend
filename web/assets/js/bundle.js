@@ -661,6 +661,13 @@ const emptySkinPanel =
     </div>
 </div>`;
 
+const escapeHtml = unsfe => unsafe
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+
 /** @param {{skinID:string,skinName:string,status:SkinStatus}} skinObject */
 const linkedSkinPanel = skinObject => {
 
@@ -670,12 +677,12 @@ const linkedSkinPanel = skinObject => {
     `<div class="uk-width-1-5@l uk-width-1-2@m uk-card uk-margin-top">
         <div class="padding-s uk-inline-clip pointer uk-text-center uk-transition-toggle card">
             <div>
-                <a href="${link}" data-type="image" data-caption="<h1 class='text uk-margin-large-bottom'>${skinObject.skinName}</h1>">
+                <a href="${link}" data-type="image" data-caption="<h1 class='text uk-margin-large-bottom'>${escapeHtml(skinObject.skinName)}</h1>">
                     <img src="${link}" class="skin-preview uk-transition-scale-up uk-transition-opaque">
                 </a>
             </div>
             <div class="top-right uk-label uk-label-${labelClass} uk-transition-slide-top">${skinObject.status}</div>
-            <h3 class="text uk-position-bottom-center uk-margin-small-bottom">${skinObject.skinName}</h3>
+            <h3 class="text uk-position-bottom-center uk-margin-small-bottom">${escapeHtml(skinObject.skinName)}</h3>
             <div class="bottom-right">
                 ${skinObject.status === "approved" ? `<span uk-icon="icon:link;ratio:1.5"      class="text uk-transition-slide-bottom skin-link"
                 link="${window.location.origin}${link}" uk-tooltip="Copy skin URL"></span><br>` : ""}

@@ -30,12 +30,14 @@ const endpoint = {
                         + "/" + skinDoc.skinID + ".jpg";
             fs.writeFileSync(skinPath, imageBase64Data, "base64");
             
-            let messageID = await this.bot.pendSkinReview(req.vanisUser.discordID, result, skinPath, "SPOILER_" + req.params.skinName + ".jpg");
-            if (messageID) {
-                skinDoc.messageID = messageID;
-                await skinDoc.save();
+            if (nsfwStatus === "pending") {
+                let messageID = await this.bot.pendSkinReview(req.vanisUser.discordID, result, skinPath, "SPOILER_" + req.params.skinName + ".jpg");
+                if (messageID) {
+                    skinDoc.messageID = messageID;
+                    await skinDoc.save();
+                }
             }
-
+            
             res.json({
                 id: skinDoc.skinID,
                 skinName: skinDoc.skinName,

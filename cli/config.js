@@ -18,8 +18,8 @@ module.exports = {
     approveEmoji: "✅",
     rejectEmoji: "❎",
     reviewInterval: 5000,
-    approveThreshold: 2,
-    rejectThreshold: 2,
+    approveThreshold: 3,
+    rejectThreshold: 3,
     // pro hardcode
     admins: ["214154668044058624", "297567645044310017"]
 };

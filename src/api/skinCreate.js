@@ -23,21 +23,21 @@ const endpoint = {
             let result = await this.nsfwBot.classify(req.body);
             let nsfwStatus = this.nsfwBot.nsfwStatus(result);
             
-            let skinDoc = await this.skins.create(req.vanisUser.discordID, req.params.skinName, nsfwStatus);
+            let skinID = await this.provision.generateSkinID();
             let imageBase64Data = req.body.replace("data:image/jpeg;base64,", "");
 
             let skinPath = (nsfwStatus === "approved" ? SKIN_STATIC : PENDING_SKIN_STATIC) 
-                        + "/" + skinDoc.skinID + ".jpg";
+                        + "/" + skinID + ".jpg";
             fs.writeFileSync(skinPath, imageBase64Data, "base64");
-            
+
+            let messageID;
+
             if (nsfwStatus === "pending") {
-                let messageID = await this.bot.pendSkinReview(req.vanisUser.discordID, result, skinPath, "SPOILER_" + req.params.skinName + ".jpg");
-                if (messageID) {
-                    skinDoc.messageID = messageID;
-                    await skinDoc.save();
-                }
+                messageID = await this.bot.pendSkinReview(req.vanisUser.discordID, result, skinPath, "SPOILER_" + req.params.skinName + ".jpg");
             }
-            
+
+            let skinDoc = await this.skins.create(req.vanisUser.discordID, skinID, req.params.skinName, nsfwStatus, messageID);
+
             res.json({
                 id: skinDoc.skinID,
                 skinName: skinDoc.skinName,

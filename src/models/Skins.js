@@ -64,14 +64,16 @@ class SkinCollection {
      * @param {string} ownerID
      * @param {string} skinName
      * @param {SkinStatus} status
+     * @param {string} messageID
      * @returns {SkinDocument}
      */
-    async create(ownerID, skinName, status = "pending") {
+    async create(ownerID, skinID, skinName, status = "pending", messageID) {
         return SkinModel.create({
-            skinID: await this.app.provision.generateSkinID(),
+            skinID,
             ownerID,
             skinName,
-            status
+            status,
+            messageID
         });
     }
 

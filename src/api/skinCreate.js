@@ -23,6 +23,10 @@ const endpoint = {
             let result = await this.nsfwBot.classify(req.body);
             let nsfwStatus = this.nsfwBot.nsfwStatus(result);
 
+            if (await this.bot.isMod(req.vanisUser.discordID)) {
+                if (nsfwStatus === "rejected") nsfwStatus = "pending";
+            }
+
             let skinID = await this.provision.generateSkinID();
             let imageBase64Data = req.body.replace("data:image/jpeg;base64,", "");
 

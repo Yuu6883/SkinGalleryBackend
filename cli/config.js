@@ -15,6 +15,7 @@ module.exports = {
     nsfwLowThreshold: .2,
     nsfwHighThreshold: .7,
     skinReviewChannelID: "620795314496077824",
+    skinLimit: 10,
     approveEmoji: "✅",
     rejectEmoji: "❎",
     reviewInterval: 5000,

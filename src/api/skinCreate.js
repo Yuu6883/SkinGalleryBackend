@@ -14,15 +14,15 @@ const endpoint = {
         if (!this.provision.confirmJPEG(req.body))
             return void res.sendStatus(400);
 
-        if ((await this.skins.countByOwnerID(req.vanisUser.discordID)) >= 10) {
+        if ((await this.skins.countByOwnerID(req.vanisUser.discordID)) >= this.config.skinLimit) {
             this.logger.warn(`User ${req.vanisUser.discordID} tried to create more than 10 skins`);
-            return void res.sendStatus({ error: "You have maximum of 10 slots for skins" });
+            return void res.json({ error: "You have maximum of 10 slots for skins" });
         }
 
         try {
             let result = await this.nsfwBot.classify(req.body);
             let nsfwStatus = this.nsfwBot.nsfwStatus(result);
-            
+
             let skinID = await this.provision.generateSkinID();
             let imageBase64Data = req.body.replace("data:image/jpeg;base64,", "");
 

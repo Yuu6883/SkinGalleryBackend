@@ -15,6 +15,7 @@ interface AppConfig {
     discordAppRedirect: string;
     discordBotToken: string;
 
+    skinLimit: number;
     nsfwLowThreshold: number;
     nsfwHighThreshold: number;
     skinReviewChannelID: string;

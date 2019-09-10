@@ -661,7 +661,7 @@ const emptySkinPanel =
     </div>
 </div>`;
 
-const escapeHtml = unsfe => unsafe
+const escapeHtml = unsafe => unsafe
          .replace(/&/g, "&amp;")
          .replace(/</g, "&lt;")
          .replace(/>/g, "&gt;")

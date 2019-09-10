@@ -311,7 +311,7 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
         let count = 0;
         for (let i in userArray) {
             let user = userArray[i];
-            let name = `${user.username}#${user.discriminator}`;
+            // let name = `${user.username}#${user.discriminator}`;
 
             if (!(await this.isMod(user.id))) {
                 // this.logger.inform(`${name} not a mod, removing emoji`);

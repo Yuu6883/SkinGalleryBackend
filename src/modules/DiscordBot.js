@@ -31,6 +31,10 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
 
         await this.updateMods();
         this.startReviewCycle();
+
+        // this.users.forEach(u => {
+        //     console.log(u.username + "#" + u.discriminator + "(" + u.id + ")");
+        // });
     }
 
     startReviewCycle() {
@@ -76,8 +80,6 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
             message = await this.reviewChannel.fetchMessage(skinDoc.messageID).catch(() => {});
 
         let skinOwner = this.findUserByID(skinDoc.ownerID);
-        
-        
 
         // Bruh moment
         if (!skinOwner) {

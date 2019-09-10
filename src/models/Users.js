@@ -37,6 +37,7 @@ class UserCollection {
     async findOrCreate(discordID) {
         const user = await this.find(discordID);
         if (user != null) return user;
+        this.app.logger.inform(`Creating new user document id: ${discordID}`);
         return await UserModel.create({ discordID });
     }
 
@@ -122,6 +123,10 @@ class UserCollection {
         user.vanisToken = undefined;
         await user.save();
         return true;
+    }
+
+    async dropAll() {
+        return await UserModel.deleteMany({});
     }
 }
 

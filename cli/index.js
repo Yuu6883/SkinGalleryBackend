@@ -10,6 +10,10 @@ const app = new App(config);
 require("./log-handler")(app);
 
 app.init().then(() => {
+
+    // nope
+    if (app.config.env === "production") return;
+
     const repl = readline.createInterface({
         input: process.stdin,
         output: process.stdout,

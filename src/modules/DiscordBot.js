@@ -122,7 +122,7 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
      * @param {string} skinName 
      */
     async pendSkinReview(ownerID, nsfwResult, skinPath, skinName) {
-        
+
         let skinOwner = this.findUserByID(ownerID);
 
         if (!skinOwner) {
@@ -200,7 +200,14 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
 
                 skinDoc.status = "rejected";
                 await skinDoc.save();
-                await this.reviewChannel.send(`${skinDoc.skinName}(${skinDoc.skinID}) ${this.config.rejectEmoji}`);
+
+                let embed = new RichEmbed()
+                        .setTitle("Skin Rejected")
+                        .setDescription(`Skin ${skinDoc.skinName}(${skinDoc.skinID}) was rejected by: \n**` + 
+                                         rejectReactions.users.filter(u => u !== this.user).map(u => `<@${u.id}>`).join(" ") + "**\n")
+                        .setTimestamp();
+
+                await this.reviewChannel.send(embed);
 
             } else continue;
 

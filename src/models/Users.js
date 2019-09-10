@@ -112,6 +112,7 @@ class UserCollection {
 
         return token;
     }
+    
     /**
      * @param {string} discordID
      */

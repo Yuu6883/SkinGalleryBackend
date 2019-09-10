@@ -83,6 +83,7 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
 
         // Bruh moment
         if (!skinOwner) {
+            await skinDoc.remove();
             this.logger.onError(`Can't find skin owner of ID ${skinDoc.ownerID}`);
             skinOwner = {
                 id: "bruh",

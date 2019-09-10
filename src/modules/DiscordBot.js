@@ -76,6 +76,8 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
             message = await this.reviewChannel.fetchMessage(skinDoc.messageID).catch(() => {});
 
         let skinOwner = this.findUserByID(skinDoc.ownerID);
+        
+        
 
         // Bruh moment
         if (!skinOwner) {

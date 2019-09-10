@@ -20,7 +20,7 @@ class VanisSkinsApp {
         this.config = config;
 
         // Modules
-        this.bot = new Bot(this);
+        this.bot = new Bot(this, { sync: true });
         this.logger = new Logger();
         this.webserver = new Webserver(this);
         this.discordAPI = new DiscordAPI(this);

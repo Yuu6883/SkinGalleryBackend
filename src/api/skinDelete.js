@@ -26,6 +26,9 @@ const endpoint = {
             this.logger.warn(`Can't find skin at ${skinPath}`);
         } else fs.unlinkSync(skinPath);
 
+        if (skinDoc.status === "pending" && !(await this.bot.deleteReview(skinDoc.messageID)))
+            this.logger.warn("Bot failed to delete review");
+
         res.json({ success: await this.skins.deleteByID(req.params.skinID) });
         
     },

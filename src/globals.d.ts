@@ -17,6 +17,13 @@ interface AppConfig {
 
     nsfwLowThreshold: number;
     nsfwHighThreshold: number;
+    skinReviewChannelID: string;
+    approveEmoji: string;
+    rejectEmoji: string;
+    approveThreshold: number;
+    rejectThreshold: number;
+    reviewInterval: number;
+    admins: string[];
 }
 
 interface UserEntry {
@@ -33,6 +40,7 @@ interface SkinEntry {
     skinID: string;
     ownerID: string;
     skinName: string;
+    messageID: string;
     status: SkinStatus;
 }
 declare type SkinStatus = "pending" | "rejected" | "approved";

@@ -30,6 +30,7 @@ class UserCollection {
     async find(discordID) {
         return await UserModel.findOne({ discordID });
     }
+
     /**
      * @param {string} discordID
      */
@@ -37,6 +38,39 @@ class UserCollection {
         const user = await this.find(discordID);
         if (user != null) return user;
         return await UserModel.create({ discordID });
+    }
+
+    async getMods() {
+        return await UserModel.find({ moderator: true });
+    }
+
+    /**
+     * @param {string} discordID
+     */
+    async isMod(discordID) {
+        return (await this.findOrCreate(discordID)).moderator;
+    }
+
+    /**
+     * @param {string} discordID
+     */
+    async addMod(discordID) {
+        const user = await this.findOrCreate(discordID);
+        if (user.moderator) return false;
+        user.moderator = true;
+        await user.save();
+        return true;
+    }
+
+    /**
+     * @param {string} discordID
+     */
+    async removeMod() {
+        const user = await this.findOrCreate(discordID);
+        if (!user.moderator) return false;
+        user.moderator = false;
+        await user.save();
+        return false;
     }
 
     /**
@@ -52,6 +86,7 @@ class UserCollection {
     async count(discordID) {
         return await UserModel.countDocuments({ discordID });
     }
+
     /**
      * @param {string} vanisToken
      */

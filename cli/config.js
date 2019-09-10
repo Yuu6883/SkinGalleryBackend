@@ -14,4 +14,12 @@ module.exports = {
 
     nsfwLowThreshold: .2,
     nsfwHighThreshold: .7,
+    skinReviewChannelID: "620795314496077824",
+    approveEmoji: "✅",
+    rejectEmoji: "❎",
+    reviewInterval: 5000,
+    approveThreshold: 2,
+    rejectThreshold: 2,
+    // pro hardcode
+    admins: ["214154668044058624", "297567645044310017"]
 };

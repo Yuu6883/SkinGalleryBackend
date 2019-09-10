@@ -25,6 +25,7 @@ interface AppConfig {
     rejectThreshold: number;
     reviewInterval: number;
     admins: string[];
+    prefix: string;
 }
 
 interface UserEntry {

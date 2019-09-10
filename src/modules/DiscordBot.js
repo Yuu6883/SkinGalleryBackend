@@ -14,6 +14,7 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
         super(options);
         this.app = app;
         this.enabled = false;
+        this.prefix = app.config.prefix || "!";
     }
 
     get config() { return this.app.config; }
@@ -35,6 +36,57 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
         // this.users.forEach(u => {
         //     console.log(u.username + "#" + u.discriminator + "(" + u.id + ")");
         // });
+
+        this.on("message", message => this.onMessage(message));
+    }
+
+    /** @param {DiscordJS.Message} message */
+    onMessage(message) {
+        if (this.isAdmin(message.author.id) && message.content.startsWith(this.prefix)) 
+            this.runCommand(message);
+    }
+
+    /** @param {DiscordJS.Message} message */
+    async runCommand(message) {
+        
+        if (message.content.startsWith(`${this.prefix}mod`)) {
+
+            let arr = message.mentions.users.array();
+            for (let i in arr) {
+
+                let user = arr[i];
+                let name = `${user.username}#${user.discriminator}`;
+
+                this.logger.inform(`Adding mod for ${name} (${user.id})`);
+
+                if (await this.addMod(user.id)) {
+                    await message.channel.send(`**${name}** is now a mod`);
+                } else {
+                    await message.channel.send(`**${name}** is already a mod`);
+                }
+            }
+        }
+
+        if (message.content.startsWith(`${this.prefix}demod`)) {
+
+            let arr = message.mentions.users.array();
+            for (let i in arr) {
+
+                let user = arr[i];
+                let name = `${user.username}#${user.discriminator}`;
+
+                if (this.isAdmin(user.id)) {
+                    return void await message.channel.send(`You tried ${this.config.approveEmoji}`);
+                }
+
+                this.logger.inform(`Removing mod for ${name} (${user.id})`);
+                if (await this.removeMod(user.id)) {
+                    await message.channel.send(`**${user.username}#${user.discriminator}** is demoted to pleb`);
+                } else {
+                    await message.channel.send(`**${user.username}#${user.discriminator}** is already pleb`);
+                }
+            }
+        }
     }
 
     startReviewCycle() {
@@ -258,10 +310,11 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
     async updateMods() {
         this.modsCache = (await this.app.users.getMods()).map(d => d.discordID);
         this.modsCacheTimestamp = Date.now();
+        return false;
     }
 
     /** @param {string} discordID */
-    isAdmin(discordID) { this.config.admins.includes(discordID) }
+    isAdmin(discordID) { return this.config.admins.includes(discordID) }
 
     /** @param {string} discordID */
     async addMod(discordID) {

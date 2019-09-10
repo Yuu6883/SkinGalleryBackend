@@ -66,7 +66,7 @@ class UserCollection {
     /**
      * @param {string} discordID
      */
-    async removeMod() {
+    async removeMod(discordID) {
         const user = await this.findOrCreate(discordID);
         if (!user.moderator) return false;
         user.moderator = false;

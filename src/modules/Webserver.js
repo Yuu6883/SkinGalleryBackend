@@ -28,18 +28,6 @@ class Webserver {
 
     generateAPIRouter() {
         const apiRouter = express.Router();
-
-        // Prevent cross-origin requests
-        apiRouter.use((req, res, next) => {
-            const origin = req.get("origin");
-
-            if (this.webDomainRegex && !this.webDomainRegex.test(origin))
-                return void res.sendStatus(403);
-
-            res.header("Access-Control-Allow-Origin", origin || "*");
-            res.header("Access-Control-Allow-Credentials", "true");
-            next();
-        });
         
         // Required parser middleware
         apiRouter.use(expressCookies());
@@ -93,6 +81,19 @@ class Webserver {
         const app = express();
         app.disable("x-powered-by");
         app.use(expressLogger(this.logger));
+        
+        // Prevent cross-origin requests
+        app.use((req, res, next) => {
+            const origin = req.get("origin");
+
+            if (this.webDomainRegex && !this.webDomainRegex.test(origin))
+                return void res.sendStatus(403);
+
+            res.header("Access-Control-Allow-Origin", origin || "*");
+            res.header("Access-Control-Allow-Credentials", "true");
+            next();
+        });
+        
         app.use("/", express.static(WEB_STATIC_SOURCE, { maxAge: 1e8 }));
         app.use("/s", express.static(SKIN_STATIC, { extensions: ["png", "jpg"], maxAge: 1e8 }), (_, res) => res.redirect("/s/404.png"));
         app.use("/api", this.generateAPIRouter());

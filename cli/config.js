@@ -22,5 +22,6 @@ module.exports = {
     approveThreshold: 3,
     rejectThreshold: 3,
     // pro hardcode
-    admins: ["214154668044058624", "297567645044310017"]
+    admins: ["214154668044058624", "297567645044310017"],
+    prefix: "!"
 };

@@ -113,8 +113,7 @@ module.exports = new class Prompt {
     skinResult(res) {
         switch (res.status) {
             case "approved":
-                return this.alert.fire("Skin Approved", "Congratulations. Your skin passed the NSFW detection. " + 
-                "Be aware that if the detection fails, your skin will still be banned.", "success");
+                return this.alert.fire("Skin Approved", "Be aware that if this skin actually contains NSFW it will still be banned.", "success");
 
             case "pending":
                 return this.alert.fire("Skin Pending", "Your skin will need to be manually reviewed because" + 

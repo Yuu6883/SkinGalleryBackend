@@ -33,8 +33,8 @@ const linkedSkinPanel = skinObject => {
             <div class="top-right uk-label uk-label-${labelClass} uk-transition-slide-top">${skinObject.status}</div>
             <h3 class="text uk-position-bottom-center uk-margin-small-bottom">${skinObject.skinName}</h3>
             <div class="bottom-right">
-                <span uk-icon="icon:link;ratio:1.5"      class="text uk-transition-slide-bottom skin-link"
-                        link="${window.location.origin}${link}" uk-tooltip="Copy skin URL"></span><br>
+                ${skinObject.status === "approved" ? `<span uk-icon="icon:link;ratio:1.5"      class="text uk-transition-slide-bottom skin-link"
+                link="${window.location.origin}${link}" uk-tooltip="Copy skin URL"></span><br>` : ""}
                 <span uk-icon="icon:file-edit;ratio:1.5" class="text uk-transition-slide-bottom skin-edit"
                         skin-id="${skinObject.skinID}" skin-name="${skinObject.skinName}" uk-tooltip="Edit this skin's name"></span><br>
                 <span uk-icon="icon:trash;ratio:1.5"     class="text uk-transition-slide-bottom skin-delete"

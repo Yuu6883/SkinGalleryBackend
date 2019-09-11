@@ -118,7 +118,7 @@ module.exports = new class Prompt {
             }
         }).then(result => {
             if (result.dismiss) return;
-            API.uploadSkin($(this.alert.getInput()).val(), canvas.toDataURL("image/jpeg", 1));
+            API.uploadSkin($(this.alert.getInput()).val(), canvas.toDataURL("image/png", 1));
         });
     }
 

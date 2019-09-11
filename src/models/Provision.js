@@ -69,9 +69,9 @@ class Provision {
     /**
      * @param {string} str
      */
-    confirmJPEG(str) {
+    confirmPNG(str) {
         // Image header and Base64 regex
-        return str && /^data:image\/jpeg;base64,(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(str);
+        return str && /^data:image\/png;base64,(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(str);
     }
 
     /**

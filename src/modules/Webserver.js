@@ -95,8 +95,6 @@ class Webserver {
             next();
         });
         
-        // app.use("/", express.static(WEB_STATIC_SOURCE, { maxAge: 1e8 }));
-        // app.use("/s", express.static(SKIN_STATIC, { extensions: ["png", "jpg"], maxAge: 1e8 }), (_, res) => res.redirect("/s/404.png"));
         app.use("/", this.generateAPIRouter());
 
         this.logger.debug("Webserver opening @", this.config.webLocation);

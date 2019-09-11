@@ -158,7 +158,7 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
                 .setDescription(`${skinDoc.skinName}(recovered because last message was deleted)`)
                 .setFooter(`${this.config.approveThreshold} ${this.config.approveEmoji} to approve | ` + 
                        `${this.config.rejectThreshold} ${this.config.rejectEmoji} to reject`)
-                .attachFile(new Attachment(`${PENDING_SKIN_STATIC}/${skinDoc.skinID}.jpg`, "SPOILER_" + skinDoc.skinName + ".jpg"))
+                .attachFile(new Attachment(`${PENDING_SKIN_STATIC}/${skinDoc.skinID}.png`, "SPOILER_" + skinDoc.skinName + ".png"))
                 .setTimestamp();
 
             if (skinOwner) {
@@ -292,8 +292,8 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
 
     /** @param {string} skinID */
     moveApprovedSkin(skinID) {
-        let sourcePath = `${PENDING_SKIN_STATIC}/${skinID}.jpg`;
-        let distPath = `${SKIN_STATIC}/${skinID}.jpg`;
+        let sourcePath = `${PENDING_SKIN_STATIC}/${skinID}.png`;
+        let distPath = `${SKIN_STATIC}/${skinID}.png`;
 
         if (!fs.existsSync(sourcePath)) {
             this.logger.onError(`Can't find skin at ${sourcePath} while approving`);

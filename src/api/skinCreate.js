@@ -11,7 +11,7 @@ const endpoint = {
         if (!this.provision.confirmSkinName(req.params.skinName))
             return void res.sendStatus(400);
 
-        if (!this.provision.confirmJPEG(req.body))
+        if (!this.provision.confirmPNG(req.body))
             return void res.sendStatus(400);
 
         if ((await this.skins.countByOwnerID(req.vanisUser.discordID)) >= this.config.skinLimit) {
@@ -28,16 +28,16 @@ const endpoint = {
             }
 
             let skinID = await this.provision.generateSkinID();
-            let imageBase64Data = req.body.replace("data:image/jpeg;base64,", "");
+            let imageBase64Data = req.body.replace("data:image/png;base64,", "");
 
             let skinPath = (nsfwStatus === "approved" ? SKIN_STATIC : PENDING_SKIN_STATIC) 
-                        + "/" + skinID + ".jpg";
+                        + "/" + skinID + ".png";
             fs.writeFileSync(skinPath, imageBase64Data, "base64");
 
             let messageID;
 
             if (nsfwStatus === "pending") {
-                messageID = await this.bot.pendSkinReview(req.vanisUser.discordID, result, skinPath, "SPOILER_" + req.params.skinName + ".jpg");
+                messageID = await this.bot.pendSkinReview(req.vanisUser.discordID, result, skinPath, "SPOILER_" + req.params.skinName + ".png");
             }
 
             let skinDoc = await this.skins.create(req.vanisUser.discordID, skinID, req.params.skinName, nsfwStatus, messageID);

@@ -20,7 +20,7 @@ const endpoint = {
             return void res.sendStatus(404);
 
         let skinPath = skinDoc.status === "approved" ? SKIN_STATIC : PENDING_SKIN_STATIC;
-        skinPath += `/${skinDoc.skinID}.jpg`;
+        skinPath += `/${skinDoc.skinID}.png`;
 
         if (!fs.existsSync(skinPath)) {
             this.logger.warn(`Can't find skin at ${skinPath}`);

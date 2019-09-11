@@ -26,7 +26,7 @@ const endpoint = {
 
                 return void res.sendStatus(403);
             } else {
-                return void res.sendFile(PENDING_SKIN_STATIC + "/" + skinID + ".jpg");
+                return void res.sendFile(PENDING_SKIN_STATIC + "/" + skinID + ".png");
             }
             
         } else {

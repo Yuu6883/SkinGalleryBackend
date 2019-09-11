@@ -36,7 +36,7 @@ class NSFWbot {
         this.ctx.drawImage(img, 0, 0, this.size, this.size);
 
         let input = TensorFlow.browser
-            .fromPixels(this.canvas)
+            .fromPixels(this.canvas, 3)
             .toFloat()
             .div(TensorFlow.scalar(255));
 

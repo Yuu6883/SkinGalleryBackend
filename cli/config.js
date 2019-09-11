@@ -9,7 +9,7 @@ module.exports = {
 
     discordAppID: "614712004644438047",
     discordAppSecret: "xjUwM_wkafEYK_hGKwaikww3W9p0zid4",
-    discordAppRedirect: "https://skin.yuu.studio/api/login/callback",
+    discordAppRedirect: "https://skins.vanis.io/api/login/callback",
     discordBotToken: "NjE0NzEyMDA0NjQ0NDM4MDQ3.XWDgUw.BisdBGMA-KJxUpXlRr03pUrgmBs",
 
     nsfwLowThreshold: .2,

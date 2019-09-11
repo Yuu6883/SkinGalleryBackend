@@ -80,6 +80,7 @@ class Webserver {
     async init() {
         const app = express();
         app.disable("x-powered-by");
+        app.set("trust proxy", 1);
         app.use(expressLogger(this.logger));
         
         // Prevent cross-origin requests
@@ -94,9 +95,9 @@ class Webserver {
             next();
         });
         
-        app.use("/", express.static(WEB_STATIC_SOURCE, { maxAge: 1e8 }));
-        app.use("/s", express.static(SKIN_STATIC, { extensions: ["png", "jpg"], maxAge: 1e8 }), (_, res) => res.redirect("/s/404.png"));
-        app.use("/api", this.generateAPIRouter());
+        // app.use("/", express.static(WEB_STATIC_SOURCE, { maxAge: 1e8 }));
+        // app.use("/s", express.static(SKIN_STATIC, { extensions: ["png", "jpg"], maxAge: 1e8 }), (_, res) => res.redirect("/s/404.png"));
+        app.use("/", this.generateAPIRouter());
 
         this.logger.debug("Webserver opening @", this.config.webLocation);
         return new Promise((res, rej) => {

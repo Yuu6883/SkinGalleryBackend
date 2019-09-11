@@ -1,14 +1,17 @@
 const { hasPermission } = require("../constant");
-const expressForms = require("body-parser");
 
 /** @type {APIEndpointHandler} */
 const endpoint = {
     async handler(req, res) {
         
         let skinID = req.params.skinID, name = req.query.name;
+
+        name = name || "Unnamed skin";
+        name = name.slice(0, 16);
+
         // TODO: make moderator able to edit other people's skin name (might not be neccesary)
 
-        this.logger.inform(`Skin ID: ${skinID} Skin Name: ${name}`);
+        // this.logger.inform(`Skin ID: ${skinID} Skin Name: ${name}`);
 
         if (!this.provision.confirmSkinID(skinID) || !this.provision.confirmSkinName(name))
             return void res.sendStatus(400);

@@ -65,7 +65,7 @@ class Webserver {
 
             apiRouter[endpoint.method](endpoint.path, endpoint.handler.bind(this.app));
 
-            this.logger.inform(`Registering route ${endpoint.method.toUpperCase()} /api${endpoint.path}`);
+            this.logger.inform(`Registering route ${endpoint.method.toUpperCase()} ${endpoint.path}`);
         });
 
         // Redirect lurkers
@@ -103,7 +103,7 @@ class Webserver {
         return new Promise((res, rej) => {
             this.webserver = app.listen(this.config.webLocation, err => {
                 if (err) return void rej(err);
-                this.logger.inform("Webserver open");
+                this.logger.inform("Webserver opened @", this.config.webLocation);
                 res();
             });
         });

@@ -12,7 +12,7 @@ const config = {
     discordAppRedirect: "https://skins.vanis.io/api/login/callback",
     discordBotToken: "NjE0NzEyMDA0NjQ0NDM4MDQ3.XWDgUw.BisdBGMA-KJxUpXlRr03pUrgmBs",
 
-    nsfwLowThreshold: .2,
+    nsfwLowThreshold: .1,
     nsfwHighThreshold: .7,
     skinReviewChannelID: "620795314496077824",
     skinLimit: 10,

@@ -1,5 +1,5 @@
 /** @type {AppConfig} */
-module.exports = {
+const config = {
     env: "production",
 
     dbPath: "mongodb://localhost:27017/vanis-skins",
@@ -25,3 +25,7 @@ module.exports = {
     admins: ["214154668044058624", "297567645044310017"],
     prefix: "!"
 };
+
+if (config.env === "development") config.discordAppRedirect = "http://localhost/api/login/callback";
+
+module.exports = config;

@@ -255,7 +255,7 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
                         .setTimestamp();
 
                     if (this.config.env === "production") {
-                        embed.setThumbnail(`https://skin.yuu.studio/s/${skinDoc.skinID}`);
+                        embed.setThumbnail(`https://skins.vanis.io/s/${skinDoc.skinID}`);
                     }
 
                     await this.reviewChannel.send(embed);

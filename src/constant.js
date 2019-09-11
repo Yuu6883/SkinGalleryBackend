@@ -21,7 +21,7 @@ const p = {
 };
 
 const NO_AUTH_LEVEL             = p.VISIT | p.LOGIN;
-const USER_BASE_AUTH_LEVEL      = p.VISIT | p.LOGGED_IN | p.LOGOUT | p.LIST_OWNED_SKINS;
+const USER_BASE_AUTH_LEVEL      = p.VISIT | p.LOGIN | p.LOGGED_IN | p.LOGOUT | p.LIST_OWNED_SKINS;
 const USER_DEV_AUTH_LEVEL       = p.SUDO;
 
 const USER_BANNED_AUTH_LEVEL    = USER_BASE_AUTH_LEVEL;

@@ -195,10 +195,13 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
         }
 
         for (let i in nsfwResult) {
-            nsfwResult[i] = (nsfwResult[i] * 100).toFixed(2) + "%";
+            nsfwResult[i] = isNaN(nsfwResult[i]) ? nsfwResult[i] : (nsfwResult[i] * 100).toFixed(2) + "%";
         }
 
+        let color = nsfwResult.avarage_color.replace(/\D/g, " ").match(/\S+/g).map(c => ~~c);
+
         let embed = new RichEmbed()
+            .setColor(color)
             .setDescription(`**NSFW Prediction of __${skinName}__:**\n\`\`\`\n${table(nsfwResult)}\`\`\`` + 
                             ``)
             .setFooter(`${this.config.approveThreshold} ${this.config.approveEmoji} to approve | ` + 

@@ -925,14 +925,13 @@ module.exports = new class Prompt {
     skinResult(res) {
         switch (res.status) {
             case "approved":
-                return this.alert.fire("Skin Approved", "Be aware that if this skin actually contains NSFW it will still be banned.", "success");
+                return this.alert.fire("Skin Approved", "Be aware that if this skin can still be banned if it contains ruling-breaking components.", "success");
 
             case "pending":
-                return this.alert.fire("Skin Pending", "Your skin will need to be manually reviewed because" + 
-                    " it might contain NSFW content.", "warning");
+                return this.alert.fire("Skin Pending", "Your skin is being manually reviewed because it might contain ruling-breaking components.", "warning");
 
             case "rejected":
-                return this.alert.fire("Skin Rejected", "Your skin most likely contains NSFW content, which is not allowed.");
+                return this.alert.fire("Skin Rejected", "Your skin most likely contains ruling-breaking components., which is not allowed.");
 
             default:
                 console.error(`Unknown status: ${res.status}`);

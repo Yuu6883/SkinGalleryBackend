@@ -195,7 +195,8 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
         }
 
         for (let i in nsfwResult) {
-            nsfwResult[i] = isNaN(nsfwResult[i]) ? nsfwResult[i] : (nsfwResult[i] * 100).toFixed(2) + "%";
+            nsfwResult[i] = isNaN(nsfwResult[i]) ? nsfwResult[i] : 
+                            Number.isInteger(nsfwResult[i]) ? nsfwResult[i] : (nsfwResult[i] * 100).toFixed(2) + "%";
         }
 
         let color = nsfwResult.avarage_color.replace(/\D/g, " ").match(/\S+/g).map(c => ~~c);

@@ -72,7 +72,7 @@ class NSFWbot {
 
         result.avarage_rgb = (mean[0] + mean[1] + mean[2]) / 3;
         result.avarage_color = `rgb(${mean[0]},${mean[1]},${mean[2]})`;
-        result.color_STD = `[${std[0]}, ${std[1]}, ${std[2]}]`;
+        result.color_STD = (std[0] + std[1] + std[2]) / 3;;
 
         return result;
     }
@@ -89,8 +89,8 @@ class NSFWbot {
 
         if (result.hentai < this.app.config.nsfwLowThreshold &&
             result.porn < this.app.config.nsfwLowThreshold &&
-            result.avarage_rgb > 100 &&
-            result.color_STD > 30 || (result.avarage_color > 50 && result.color_STD > 50)) {
+            (result.avarage_rgb > 100 && result.color_STD > 30) || 
+            (result.avarage_color > 50 && result.color_STD > 50)) {
             delete result.avarage_rgb;
             return "approved";
         }

@@ -3,11 +3,6 @@ const { VANIS_TOKEN_COOKIE, VANIS_TOKEN_AGE, hasPermission } = require("../const
 /** @type {APIEndpointHandler} */
 const endpoint = {
     async handler(req, res) {
-
-        if (!hasPermission("LOGIN", req.vanisPermissions)) {
-            this.logger.log(req.vanisPermissions, req.vanisUser);
-            return void res.sendStatus(403);
-        }
             
         const discordAuthorization = await this.discordAPI.exchange(req.query.code, false);
         if (discordAuthorization.error != null) {

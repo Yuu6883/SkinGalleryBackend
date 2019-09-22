@@ -5,7 +5,7 @@ const endpoint = {
     async handler(req, res) {
 
         if (!hasPermission("LOGIN", req.vanisPermissions)) {
-            this.logger.inform(req.vanisUser, req.vanisPermissions);
+            this.logger.inform("no permision", req.vanisUser, req.vanisPermissions);
             return void res.sendStatus(403);
         }
             

@@ -1,4 +1,4 @@
-const { VANIS_TOKEN_COOKIE, VANIS_TOKEN_AGE, hasPermission } = require("../constant");
+const { VANIS_TOKEN_COOKIE, VANIS_TOKEN_AGE } = require("../constant");
 
 /** @type {APIEndpointHandler} */
 const endpoint = {

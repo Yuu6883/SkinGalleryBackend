@@ -94,7 +94,7 @@ class Webserver {
                 return void res.sendStatus(403);
             }
             
-            this.logger.onAccess(`Request Origin: ${origin}`)
+            this.logger.onAccess(`Request Origin: ${origin || "*"}`);
             res.header("Access-Control-Allow-Origin", origin || "*");
             res.header("Access-Control-Allow-Credentials", "true");
             next();

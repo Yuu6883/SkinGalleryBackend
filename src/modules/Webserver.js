@@ -95,8 +95,8 @@ class Webserver {
             }
             
             this.logger.onAccess(`Request Origin: ${origin || "*"}`);
-            res.setHeader("Access-Control-Allow-Origin", origin || "*");
-            res.setHeader("Access-Control-Allow-Credentials", "true");
+            res.set("Access-Control-Allow-Origin", origin || "*");
+            res.set("Access-Control-Allow-Credentials", "true");
             next();
         });
         

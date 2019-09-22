@@ -3,9 +3,11 @@ const { VANIS_TOKEN_COOKIE, VANIS_TOKEN_AGE, hasPermission } = require("../const
 /** @type {APIEndpointHandler} */
 const endpoint = {
     async handler(req, res) {
-        if (!hasPermission("LOGOUT", req.vanisPermissions))
-            return void res.sendStatus(403);
 
+        if (!hasPermission("LOGOUT", req.vanisPermissions)) {
+            return void res.sendStatus(403);
+        }
+            
         const discordUserInfo = await this.provision.ensureDiscordAuthorization(req.vanisUser, true);
         if (discordUserInfo == null)
             // Failure at gateway

@@ -16,7 +16,7 @@ const endpoint = {
             return void res.sendStatus(502);
         }
 
-        this.logger.inform(`Authorizing`, discordAuthorization);
+        this.logger.debug(`Authorizing`, discordAuthorization);
         const vanisToken = await this.users.authorize(discordInfo.id, discordAuthorization.access_token, discordAuthorization.refresh_token);
 
         res.cookie(VANIS_TOKEN_COOKIE, vanisToken, { maxAge: VANIS_TOKEN_AGE });

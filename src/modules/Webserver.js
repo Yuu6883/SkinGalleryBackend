@@ -7,6 +7,7 @@ const { WEB_STATIC_SOURCE, SKIN_STATIC,
 const express = require("express");
 const expressCookies = require("cookie-parser");
 const expressForms = require("body-parser");
+const nocache = require("nocache");
 const expressLogger = require("./ExpressLogger");
 
 class Webserver {
@@ -82,6 +83,7 @@ class Webserver {
         app.disable("x-powered-by");
         app.set("trust proxy", 1);
         app.use(expressLogger(this.logger));
+        app.use(nocache())
         
         // Prevent cross-origin requests
         app.use((req, res, next) => {

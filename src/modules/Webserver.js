@@ -87,8 +87,10 @@ class Webserver {
         app.use((req, res, next) => {
             const origin = req.get("origin");
 
-            if (this.webDomainRegex && !this.webDomainRegex.test(origin))
+            if (this.webDomainRegex && !this.webDomainRegex.test(origin)) {
+                this.logger.warn(`Blocked request from unknown origin: ${origin}`)
                 return void res.sendStatus(403);
+            }
 
             res.header("Access-Control-Allow-Origin", origin || "*");
             res.header("Access-Control-Allow-Credentials", "true");

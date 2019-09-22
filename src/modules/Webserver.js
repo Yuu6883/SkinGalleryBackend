@@ -93,7 +93,8 @@ class Webserver {
                 this.logger.warn(`Blocked request from unknown origin: ${origin}`)
                 return void res.sendStatus(403);
             }
-
+            
+            this.logger.onAccess(`Request Origin: ${origin}`)
             res.header("Access-Control-Allow-Origin", origin || "*");
             res.header("Access-Control-Allow-Credentials", "true");
             next();

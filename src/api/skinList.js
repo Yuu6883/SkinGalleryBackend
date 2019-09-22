@@ -3,9 +3,13 @@ const { hasPermission } = require("../constant");
 /** @type {APIEndpointHandler} */
 const endpoint = {
     async handler(req, res) {
+
+        if (!hasPermission("LOGGED_IN", req.vanisPermissions))
+            return void res.sendStatus(403);
+            
         /** @type {string} */
         let discordID = null;
-        if (req.params.userID === "@me" && hasPermission("LOGGED_IN", req.vanisPermissions))
+        if (req.params.userID === "@me")
             discordID = req.vanisUser.discordID;
         else if (!this.provision.confirmDiscordID(req.params.userID))
             return void res.sendStatus(400);

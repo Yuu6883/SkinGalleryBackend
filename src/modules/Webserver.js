@@ -89,14 +89,14 @@ class Webserver {
         app.use((req, res, next) => {
             const origin = req.get("origin");
 
-            if (this.webDomainRegex && !this.webDomainRegex.test(origin)) {
-                this.logger.warn(`Blocked request from unknown origin: ${origin}`)
-                return void res.sendStatus(403);
-            }
+            // if (this.webDomainRegex && !this.webDomainRegex.test(origin)) {
+            //     this.logger.warn(`Blocked request from unknown origin: ${origin}`)
+            //     return void res.sendStatus(403);
+            // }
             
-            this.logger.onAccess(`Request Origin: ${origin || "*"}`);
-            res.set("Access-Control-Allow-Origin", origin || "*");
-            res.set("Access-Control-Allow-Credentials", "true");
+            // this.logger.onAccess(`Request Origin: ${origin || "*"}`);
+            // res.set("Access-Control-Allow-Origin", origin || "*");
+            // res.set("Access-Control-Allow-Credentials", "true");
             next();
         });
         

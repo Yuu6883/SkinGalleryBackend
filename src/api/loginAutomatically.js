@@ -4,7 +4,7 @@ const { VANIS_TOKEN_COOKIE, VANIS_TOKEN_AGE, hasPermission } = require("../const
 const endpoint = {
     async handler(req, res) {
 
-        if (!hasPermission("LOGOUT", req.vanisPermissions)) {
+        if (!hasPermission("LOGIN", req.vanisPermissions)) {
             return void res.sendStatus(403);
         }
             

@@ -88,9 +88,7 @@ class NSFWbot {
             return "rejected";
 
         if (result.hentai < this.app.config.nsfwLowThreshold &&
-            result.porn < this.app.config.nsfwLowThreshold &&
-            (result.avarage_rgb > 100 && result.color_STD > 30) || 
-            (result.avarage_rgb > 35 && result.color_STD > 60)) {
+            result.porn < this.app.config.nsfwLowThreshold) {
             delete result.avarage_rgb;
             return "approved";
         }

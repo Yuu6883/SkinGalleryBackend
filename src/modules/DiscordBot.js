@@ -338,15 +338,21 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
                 skinDoc.status = "rejected";
                 await skinDoc.save();
 
+                let skinPath =`${PENDING_SKIN_STATIC}/${skinDoc.skinID}.png`;
                 let embed = new RichEmbed()
                         .setTitle("Skin Rejected")
                         .setDescription(`Skin ${skinDoc.skinName} submitted by <@${skinDoc.ownerID}> ` +
                                         `(${skinDoc.skinID}) was rejected by: \n**` + 
                                          rejectReactions.users.filter(u => u !== this.user)
                                                               .map(u => `<@${u.id}>`).join(" ") + "**\n")
+                        .attachFile(new Attachment(skinPath, "SPOILER_" + skinDoc.skinName + ".png"))
                         .setTimestamp();
 
                 let message = await this.rejectedChannel.send(embed);
+
+                if (fs.existsSync(skinPath))
+                    fs.unlinkSync(skinPath);
+                else this.logger.warn(`Can't find rejected skin file to delete`);
 
                 skinDoc.messageID = message.id;
                 await skinDoc.save();
@@ -364,7 +370,7 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
                         let dm = await user.createDM();
                         await dm.send(skinEmbed);
                     } catch(_) {
-                        await this.notifChannel.send(`<@${skinDoc.ownerID}>`, embed).catch(_ => {});
+                        await this.notifChannel.send(`<@${skinDoc.ownerID}>`, skinEmbed).catch(this.logger.onError);
                     }
                 }
 

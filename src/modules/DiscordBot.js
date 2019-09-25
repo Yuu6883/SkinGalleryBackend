@@ -319,8 +319,10 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
 
                         let skinEmbed = new RichEmbed()
                             .setTitle("Your skin was approved!")
+                            .setColor("GREEN")
                             .setDescription(`Skin URL: **\`https://skins.vanis.io/s/${skinDoc.skinID}\`**`)
                             .setImage(`https://skins.vanis.io/s/${skinDoc.skinID}`)
+                            .setFooter("Thanks for using this app")
                             .setTimestamp();
 
                         try {
@@ -341,6 +343,7 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
                 let skinPath =`${PENDING_SKIN_STATIC}/${skinDoc.skinID}.png`;
                 let embed = new RichEmbed()
                         .setTitle("Skin Rejected")
+                        .setColor("RED")
                         .setDescription(`Skin ${skinDoc.skinName} submitted by <@${skinDoc.ownerID}> ` +
                                         `(${skinDoc.skinID}) was rejected by: \n**` + 
                                          rejectReactions.users.filter(u => u !== this.user)
@@ -363,6 +366,7 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
 
                     let skinEmbed = new RichEmbed()
                         .setTitle("Your skin was rejected!")
+                        .setColor("RED")
                         .setDescription(`You may ask moderators why this skin was rejected.`)
                         .setTimestamp();
 

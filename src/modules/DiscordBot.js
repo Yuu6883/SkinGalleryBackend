@@ -350,9 +350,9 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
 
                 let message = await this.rejectedChannel.send(embed);
 
-                if (fs.existsSync(skinPath))
-                    fs.unlinkSync(skinPath);
-                else this.logger.warn(`Can't find rejected skin file to delete`);
+                // if (fs.existsSync(skinPath))
+                //     fs.unlinkSync(skinPath);
+                // else this.logger.warn(`Can't find rejected skin file to delete`);
 
                 skinDoc.messageID = message.id;
                 await skinDoc.save();

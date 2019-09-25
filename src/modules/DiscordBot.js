@@ -384,10 +384,13 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
         }
     }
 
-    /** @param {string} messageID */
-    async deleteReview(messageID) {
+    /** 
+     * @param {string} messageID
+     * @param {SkinStatus} status
+     */
+    async deleteReview(messageID, status) {
         if (!messageID) return false;
-        let message = await this.pendingChannel.fetchMessage(messageID).catch(() => {});
+        let message = await this[`${status}Channel`].fetchMessage(messageID).catch(() => {});
         if (!message) return false;
 
         await Promise.all(message.reactions.deleteAll()).catch(_ => {});

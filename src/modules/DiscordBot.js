@@ -390,7 +390,6 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
      */
     async deleteReview(messageID, status) {
         if (!messageID) return false;
-        console.log(status, `${status}Channel`, this[`${status}Channel`]);
         let message = await this[`${status}Channel`].fetchMessage(messageID).catch(() => {});
         if (!message) return false;
 

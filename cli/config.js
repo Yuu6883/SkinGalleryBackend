@@ -14,7 +14,9 @@ const config = {
 
     nsfwLowThreshold: .1,
     nsfwHighThreshold: .7,
-    skinReviewChannelID: "620795314496077824",
+    skinApprovedChannelID: "626201875129303060",
+    skinPendingChannelID: "620795314496077824",
+    skinRejectedChannelID: "626201904417996800",
     skinLimit: 10,
     approveEmoji: "✅",
     rejectEmoji: "❎",

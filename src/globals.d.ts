@@ -8,22 +8,24 @@ interface AppConfig {
     dbPath: string;
 
     webLocation: string | number;
-    webDomain: string;
+    webDomain:   string;
 
-    discordAppID: string;
-    discordAppSecret: string;
+    discordAppID:       string;
+    discordAppSecret:   string;
     discordAppRedirect: string;
-    discordBotToken: string;
+    discordBotToken:    string;
 
     skinLimit: number;
-    nsfwLowThreshold: number;
+    nsfwLowThreshold:  number;
     nsfwHighThreshold: number;
-    skinReviewChannelID: string;
+    skinApprovedChannelID: string;
+    skinPendingChannelID:  string;
+    skinRejectedChannelID: string;
     approveEmoji: string;
-    rejectEmoji: string;
+    rejectEmoji:  string;
     approveThreshold: number;
-    rejectThreshold: number;
-    reviewInterval: number;
+    rejectThreshold:  number;
+    reviewInterval:   number;
     admins: string[];
     prefix: string;
 }
@@ -81,6 +83,7 @@ interface NSFWPrediction {
     sexy: number;
     avarage_color: string;
     color_STD: string;
+    data: Buffer;
 }
 
 declare type APIRequest = import("express").Request & {

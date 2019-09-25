@@ -31,7 +31,7 @@ class NSFWbot {
     async classify(src) {
         let img = await loadImage(src);
 
-
+        this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.canvas.height);
         this.ctx.arc(this.size / 2, this.size / 2, this.size / 2, 0, Math.PI * 2);
         this.ctx.clip();
         this.ctx.fillStyle = "#a3a3a3";
@@ -73,6 +73,7 @@ class NSFWbot {
         result.avarage_rgb = (mean[0] + mean[1] + mean[2]) / 3;
         result.avarage_color = `rgb(${mean[0]},${mean[1]},${mean[2]})`;
         result.color_STD = (std[0] + std[1] + std[2]) / 3;;
+        result.data = this.canvas.toBuffer("image/png");
 
         return result;
     }

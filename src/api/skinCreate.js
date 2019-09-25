@@ -37,7 +37,15 @@ const endpoint = {
             let messageID;
 
             if (nsfwStatus === "pending") {
-                messageID = await this.bot.pendSkinReview(req.vanisUser.discordID, result, skinPath, "SPOILER_" + req.params.skinName + ".png");
+                messageID = await this.bot.pendSkinReview(req.vanisUser.discordID, result, skinID, req.params.skinName);
+            }
+
+            if (nsfwStatus === "approved") {
+                messageID = await this.bot.approveSkin(req.vanisUser.discordID, result, skinID, req.params.skinName);
+            }
+
+            if (nsfwStatus === "rejected") {
+                messageID = await this.bot.rejectSkin(req.vanisUser.discordID, result, skinID, req.params.skinName);
             }
 
             let skinDoc = await this.skins.create(req.vanisUser.discordID, skinID, req.params.skinName, nsfwStatus, messageID);

@@ -25,10 +25,14 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
         this.logger.inform(`Discord bot (${this.user.username}#${this.user.discriminator}) logged in`);
 
         /** @type {DiscordJS.TextChannel} */
-        this.reviewChannel = this.findChannelByID(this.config.skinReviewChannelID);
+        this.pendingChannel = this.findChannelByID(this.config.skinPendingChannelID);
+        /** @type {DiscordJS.TextChannel} */
+        this.approvedChannel = this.findChannelByID(this.config.skinApprovedChannelID);
+        /** @type {DiscordJS.TextChannel} */
+        this.rejectedChannel = this.findChannelByID(this.config.skinRejectedChannelID);
 
-        if (!this.reviewChannel) 
-            throw Error(`Can't find skin review channel ${this.config.skinReviewChannelID}`);
+        if (!this.pendingChannel || !this.approvedChannel || !this.rejectedChannel) 
+            throw Error(`Can't find skin channels ${this.config.skinPendingChannelID}`);
 
         await this.updateMods();
         this.startReviewCycle();
@@ -142,7 +146,7 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
         let message;
         
         if (skinDoc.messageID) 
-            message = await this.reviewChannel.fetchMessage(skinDoc.messageID).catch(() => {});
+            message = await this.pendingChannel.fetchMessage(skinDoc.messageID).catch(() => {});
 
         let skinOwner = this.findUserByID(skinDoc.ownerID);
 
@@ -168,7 +172,7 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
                 embed.setAuthor(`User ${skinDoc.ownerID}`);
             }
 
-            message = await this.reviewChannel.send(embed);
+            message = await this.pendingChannel.send(embed);
 
             skinDoc.messageID = message.id;
             await skinDoc.save();
@@ -183,16 +187,10 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
     /**
      * @param {string} ownerID 
      * @param {NSFWPrediction} nsfwResult 
-     * @param {string} skinPath 
+     * @param {string} skinID
      * @param {string} skinName 
      */
-    async pendSkinReview(ownerID, nsfwResult, skinPath, skinName) {
-
-        let skinOwner = this.findUserByID(ownerID);
-
-        if (!skinOwner) {
-            // this.logger.warn(`Can't find user ID ${ownerID} while pending skin to reivew`);
-        }
+    async pendSkinReview(ownerID, nsfwResult, skinID, skinName) {
 
         for (let i in nsfwResult) {
             nsfwResult[i] = isNaN(nsfwResult[i]) ? nsfwResult[i] : 
@@ -203,26 +201,70 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
 
         let embed = new RichEmbed()
             .setColor(color)
-            .setDescription(`**NSFW Prediction of __${skinName}__:**\n\`\`\`\n${table(nsfwResult)}\`\`\`` + 
-                            ``)
+            .setDescription(`**NSFW Prediction of \`${skinName}\` submitted by <@${ownerID}> (${skinID}):**` + 
+                            `\n\`\`\`\n${table(nsfwResult)}\`\`\``)
             .setFooter(`${this.config.approveThreshold} ${this.config.approveEmoji} to approve | ` + 
                        `${this.config.rejectThreshold} ${this.config.rejectEmoji} to reject`)
-            .setTimestamp()
-            .attachFile(new Attachment(skinPath, skinName));
-
-        if (skinOwner) {
-            embed.setAuthor(`${skinOwner.username}#${skinOwner.discriminator}` + 
-                            `(${skinOwner.id})`, skinOwner.displayAvatarURL)
-        } else {
-            embed.setAuthor(`User ${ownerID}`);
-        }
+            .attachFile(new Attachment(nsfwResult.data, `SPOILER_${skinName}.png`))
+            .setTimestamp();
 
         /** @type {DiscordJS.Message} */
-        let message = await this.reviewChannel.send(embed);
+        let message = await this.pendingChannel.send(embed);
 
         await message.react(this.config.approveEmoji);
         await message.react(this.config.rejectEmoji);
 
+        return message.id;
+    }
+
+    /**
+     * @param {string} ownerID 
+     * @param {NSFWPrediction} nsfwResult 
+     * @param {string} skinID
+     * @param {string} skinName 
+     */
+    async approveSkin(ownerID, nsfwResult, skinID, skinName) {
+
+        let color = nsfwResult.avarage_color.replace(/\D/g, " ").match(/\S+/g).map(c => ~~c);
+
+        let embed = new RichEmbed()
+            .setAuthor(this.user.username, this.user.displayAvatarURL)
+            .setColor(color)
+            .setTitle("Skin Approved")
+            .setDescription(`Skin **${skinName}**(submitted by <@${ownerID}>)(${skinID})`)
+            .setFooter(`Automatically approved`)
+            .setTimestamp();
+
+        if (this.config.env === "production") {
+            embed.setThumbnail(`https://skins.vanis.io/s/${skinDoc.skinID}`);
+        }
+            
+        /** @type {DiscordJS.Message} */
+        let message = await this.approvedChannel.send(embed);
+        return message.id;
+    }
+
+    /**
+     * @param {string} ownerID 
+     * @param {NSFWPrediction} nsfwResult 
+     * @param {string} skinID
+     * @param {string} skinName 
+     */
+    async rejectSkin(ownerID, nsfwResult, skinID, skinName) {
+
+        let color = nsfwResult.avarage_color.replace(/\D/g, " ").match(/\S+/g).map(c => ~~c);
+
+        let embed = new RichEmbed()
+            .setAuthor(this.user.username, this.user.displayAvatarURL)
+            .setColor(color)
+            .setTitle("Skin Rejected")
+            .setDescription(`Skin **${skinName}** submitted by <@${ownerID}> (${skinID})`)
+            .setFooter(`Automatically rejected`)
+            .attachFile(new Attachment(nsfwResult.data, `SPOILER_${skinName}.png`))
+            .setTimestamp();
+            
+        /** @type {DiscordJS.Message} */
+        let message = await this.rejectedChannel.send(embed);
         return message.id;
     }
 
@@ -254,16 +296,18 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
 
                     let embed = new RichEmbed()
                         .setTitle("Skin Approved")
-                        .setDescription(`Skin ${skinDoc.skinName}(${skinDoc.skinID}) was approved by: \n**` + 
-                                         approvedReactions.users.filter(u => u !== this.user).map(u => `<@${u.id}>`).join(" ") + "**\n")
+                        .setDescription(`Skin ${skinDoc.skinName} submitted by <@${skinDoc.ownerID}>` +
+                                        ` (${skinDoc.skinID}) was approved by: \n**` + 
+                                         approvedReactions.users.filter(u => u !== this.user)
+                                                                .map(u => `<@${u.id}>`).join(" ") + "**\n")
                         .setTimestamp();
 
                     if (this.config.env === "production") {
                         embed.setThumbnail(`https://skins.vanis.io/s/${skinDoc.skinID}`);
                     }
 
-                    await this.reviewChannel.send(embed);
-                } else await this.reviewChannel.send(`Error: can't find skin ${skinDoc.skinName}(${skinDoc.skinID})`);
+                    await this.pendingChannel.send(embed);
+                } else await this.pendingChannel.send(`Error: can't find skin ${skinDoc.skinName}(${skinDoc.skinID})`);
 
             } else if (rejectCount >= this.config.rejectThreshold) {
 
@@ -272,11 +316,13 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
 
                 let embed = new RichEmbed()
                         .setTitle("Skin Rejected")
-                        .setDescription(`Skin ${skinDoc.skinName}(${skinDoc.skinID}) was rejected by: \n**` + 
-                                         rejectReactions.users.filter(u => u !== this.user).map(u => `<@${u.id}>`).join(" ") + "**\n")
+                        .setDescription(`Skin ${skinDoc.skinName} submitted by <@${skinDoc.ownerID}> ` +
+                                        `(${skinDoc.skinID}) was rejected by: \n**` + 
+                                         rejectReactions.users.filter(u => u !== this.user)
+                                                              .map(u => `<@${u.id}>`).join(" ") + "**\n")
                         .setTimestamp();
 
-                await this.reviewChannel.send(embed);
+                await this.rejectedChannel.send(embed);
 
             } else continue;
 
@@ -286,11 +332,11 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
 
     /** @param {string} messageID */
     async deleteReview(messageID) {
-        let message = await this.reviewChannel.fetchMessage(messageID).catch(() => {});
+        let message = await this.pendingChannel.fetchMessage(messageID).catch(() => {});
         
         if (!message) return false;
 
-        message.deletable && (await message.delete().catch(() => {}));
+        message.editable && message.edit("Skin Deleted");
         return true;
     }
 

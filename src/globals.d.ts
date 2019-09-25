@@ -21,6 +21,7 @@ interface AppConfig {
     skinApprovedChannelID: string;
     skinPendingChannelID:  string;
     skinRejectedChannelID: string;
+    notifChannelID:        string;
     approveEmoji: string;
     rejectEmoji:  string;
     approveThreshold: number;

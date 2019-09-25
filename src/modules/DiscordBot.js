@@ -30,8 +30,11 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
         this.approvedChannel = this.findChannelByID(this.config.skinApprovedChannelID);
         /** @type {DiscordJS.TextChannel} */
         this.rejectedChannel = this.findChannelByID(this.config.skinRejectedChannelID);
+        /** @type {DiscordJS.TextChannel} */
+        this.notifChannel = this.findChannelByID(this.config.notifChannelID);
 
-        if (!this.pendingChannel || !this.approvedChannel || !this.rejectedChannel) 
+
+        if (!this.pendingChannel || !this.approvedChannel || !this.rejectedChannel || !this.notifChannel) 
             throw Error(`Can't find skin channels ${this.config.skinPendingChannelID}`);
 
         await this.updateMods();
@@ -306,7 +309,28 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
                         embed.setThumbnail(`https://skins.vanis.io/s/${skinDoc.skinID}`);
                     }
 
-                    await this.pendingChannel.send(embed);
+                    let message = await this.approvedChannel.send(embed);
+                    skinDoc.messageID = message.id;
+                    await skinDoc.save();
+
+                    let user = this.findUserByID(skinDoc.ownerID);
+
+                    if (user) {
+
+                        let skinEmbed = new RichEmbed()
+                            .setTitle("Your skin was approved!")
+                            .setDescription(`Skin URL: **\`https://skins.vanis.io/s/${skinDoc.skinID}\`**`)
+                            .setImage(`https://skins.vanis.io/s/${skinDoc.skinID}`)
+                            .setTimestamp();
+
+                        try {
+                            let dm = await user.createDM();
+                            await dm.send(skinEmbed);
+                        } catch(_) {
+                            await this.notifChannel.send(`<@${skinDoc.ownerID}>`, embed).catch(_ => {});
+                        }
+                    }
+
                 } else await this.pendingChannel.send(`Error: can't find skin ${skinDoc.skinName}(${skinDoc.skinID})`);
 
             } else if (rejectCount >= this.config.rejectThreshold) {
@@ -322,7 +346,27 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
                                                               .map(u => `<@${u.id}>`).join(" ") + "**\n")
                         .setTimestamp();
 
-                await this.rejectedChannel.send(embed);
+                let message = await this.rejectedChannel.send(embed);
+
+                skinDoc.messageID = message.id;
+                await skinDoc.save();
+
+                let user = this.findUserByID(skinDoc.ownerID);
+
+                if (user) {
+
+                    let skinEmbed = new RichEmbed()
+                        .setTitle("Your skin was rejected!")
+                        .setDescription(`You may ask moderators why this skin was rejected.`)
+                        .setTimestamp();
+
+                    try {
+                        let dm = await user.createDM();
+                        await dm.send(skinEmbed);
+                    } catch(_) {
+                        await this.notifChannel.send(`<@${skinDoc.ownerID}>`, embed).catch(_ => {});
+                    }
+                }
 
             } else continue;
 

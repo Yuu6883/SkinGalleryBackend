@@ -236,7 +236,7 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
             .setTimestamp();
 
         if (this.config.env === "production") {
-            embed.setThumbnail(`https://skins.vanis.io/s/${skinDoc.skinID}`);
+            embed.setThumbnail(`https://skins.vanis.io/s/${skinID}`);
         }
             
         /** @type {DiscordJS.Message} */

@@ -397,7 +397,6 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
         if (!message) return false;
 
         await this.deletedChannel.send(`Previous Status: ${status}`, this.copyEmbed(message.embeds[0]));
-        console.log(message.embeds.length);
 
         message.deletable && (await message.delete());
         return true;
@@ -405,6 +404,8 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
 
     /** @param {DiscordJS.MessageEmbed} embed */
     copyEmbed(embed) {
+
+        console.log(embed);
         let copy = new RichEmbed();
 
         embed.author && (copy.setAuthor(embed.author.name, embed.author.iconURL))

@@ -397,6 +397,7 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
         if (!message) return false;
 
         message.content = `Previous Status: ${status}`;
+        delete message.nonce;
         await this.deletedChannel.send(message);
         message.deletable && (await message.delete());
         return true;

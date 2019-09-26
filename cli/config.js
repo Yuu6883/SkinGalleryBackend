@@ -17,6 +17,7 @@ const config = {
     skinApprovedChannelID: "626201875129303060",
     skinPendingChannelID:  "620795314496077824",
     skinRejectedChannelID: "626201904417996800",
+    skinDeletedChannelID:  "626650381719699459",
     notifChannelID: "602980591390162983",
     skinLimit: 10,
     approveEmoji: "✅",

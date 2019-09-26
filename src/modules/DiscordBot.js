@@ -31,10 +31,12 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
         /** @type {DiscordJS.TextChannel} */
         this.rejectedChannel = this.findChannelByID(this.config.skinRejectedChannelID);
         /** @type {DiscordJS.TextChannel} */
+        this.deletedChannel = this.findChannelByID(this.config.skinDeletedChannelID);
+        /** @type {DiscordJS.TextChannel} */
         this.notifChannel = this.findChannelByID(this.config.notifChannelID);
 
-
-        if (!this.pendingChannel || !this.approvedChannel || !this.rejectedChannel || !this.notifChannel) 
+        if (!this.pendingChannel || !this.approvedChannel || 
+            !this.rejectedChannel || !this.deletedChannel || !this.notifChannel) 
             throw Error(`Can't find skin channels ${this.config.skinPendingChannelID}`);
 
         await this.updateMods();
@@ -390,11 +392,13 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
      */
     async deleteReview(messageID, status) {
         if (!messageID) return false;
+        /** @type {DiscordJS.Message} */
         let message = await this[`${status}Channel`].fetchMessage(messageID).catch(() => {});
         if (!message) return false;
 
-        await Promise.all(message.reactions.deleteAll()).catch(_ => {});
-        message.editable && (await message.edit("Skin Deleted"));
+        message.content = `Previous Status: ${status}`;
+        await this.deletedChannel.send(message);
+        message.deletable && (await message.delete());
         return true;
     }
 

@@ -13,7 +13,7 @@ const config = {
     discordBotToken: "NjE0NzEyMDA0NjQ0NDM4MDQ3.XWDgUw.BisdBGMA-KJxUpXlRr03pUrgmBs",
 
     nsfwLowThreshold: .1,
-    nsfwHighThreshold: .9,
+    nsfwHighThreshold: 1,
     skinApprovedChannelID: "626201875129303060",
     skinPendingChannelID:  "620795314496077824",
     skinRejectedChannelID: "626201904417996800",

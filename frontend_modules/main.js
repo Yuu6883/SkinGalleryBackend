@@ -101,7 +101,7 @@ $(window).on("load", () => {
 
 const updateSkinPanel = skins => {
     let skinsHTML = skins.map(linkedSkinPanel).join("");
-    let emptySkinsHTML = emptySkinPanel.repeat(10 - skins.length);            
+    let emptySkinsHTML = emptySkinPanel.repeat(20 - skins.length);            
 
     let panel = $("#skin-panel").children().first();
     panel.children().remove();

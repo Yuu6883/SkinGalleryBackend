@@ -396,7 +396,7 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
         let message = await this[`${status}Channel`].fetchMessage(messageID).catch(() => {});
         if (!message) return false;
 
-        await this.deletedChannel.send(`Previous Status: ${status}`, this.copyEmbed(message.embeds[0]));
+        await this.deletedChannel.send(this.copyEmbed(message.embeds[0]));
 
         message.deletable && (await message.delete());
         return true;
@@ -413,7 +413,7 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
         embed.description && (copy.setDescription(embed.description));
         embed.thumbnail && (copy.setThumbnail(embed.thumbnail.proxyURL));
         copy.setTimestamp();
-        embed.footer && (copy.setFooter(embed.footer));
+        embed.footer && (copy.setFooter(embed.footer.text));
         embed.image  && (copy.setFooter(embed.image.proxyURL));
 
         return copy;

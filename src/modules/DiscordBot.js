@@ -405,14 +405,14 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
     /** @param {DiscordJS.MessageEmbed} embed */
     copyEmbed(embed) {
 
-        console.log(embed);
         let copy = new RichEmbed();
 
         embed.author && (copy.setAuthor(embed.author.name, embed.author.iconURL))
         embed.color  && (copy.setColor(embed.color));
         embed.title  && (copy.setTitle(embed.title));
+        embed.description && (copy.setDescription(embed.description));
         embed.thumbnail && (copy.setThumbnail(embed.thumbnail.proxyURL));
-        copy.setThumbnail();
+        copy.setTimestamp();
         embed.footer && (copy.setFooter(embed.footer));
         embed.image  && (copy.setFooter(embed.image.proxyURL));
 

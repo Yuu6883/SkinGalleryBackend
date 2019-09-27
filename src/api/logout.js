@@ -3,6 +3,11 @@ const { VANIS_TOKEN_COOKIE } = require("../constant");
 /** @type {APIEndpointHandler} */
 const endpoint = {
     async handler(req, res) {
+
+        if (!req.vanisUser) {
+            return void res.sendStatus(500);
+        }
+
         const deauthorizationResponse = await this.discordAPI.revoke(req.vanisUser.discordToken);
         if (deauthorizationResponse.error != null) {
             // Discord errored out - not our problem

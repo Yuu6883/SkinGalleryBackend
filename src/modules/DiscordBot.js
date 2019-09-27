@@ -47,6 +47,7 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
         // });
 
         this.on("message", message => this.onMessage(message));
+        this.on("error",   error   => this.logger.onError(error));
     }
 
     /** @param {DiscordJS.Message} message */

@@ -11,7 +11,6 @@ const SkinSchema = new mongoose.Schema({
 
 SkinSchema.index({ skinID: 1 }, { unique: true });
 SkinSchema.index({ ownerID: 1 });
-SkinSchema.index({ skinName: "text" });
 
 /** @type {mongoose.Model<SkinDocument, {}>} */
 const SkinModel = mongoose.model("skins", SkinSchema);

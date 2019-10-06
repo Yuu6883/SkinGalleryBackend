@@ -54,7 +54,7 @@ class NSFWbot {
 
         let mean = stdRGB.mean.cast("int32").arraySync();
 
-        let std = stdRGB.variance.sqrt().cast("int32").arraySync();
+        // let std = stdRGB.variance.sqrt().cast("int32").arraySync();
 
         let testResult = await TensorFlow.tidy(() => 
             this.model.predict(TensorFlow.expandDims(TensorFlow.browser.fromPixels(this.canvas, 3)
@@ -70,9 +70,9 @@ class NSFWbot {
             return prev;
         }, {});
 
-        result.avarage_rgb = (mean[0] + mean[1] + mean[2]) / 3;
+        // result.avarage_rgb = (mean[0] + mean[1] + mean[2]) / 3;
         result.avarage_color = `rgb(${mean[0]},${mean[1]},${mean[2]})`;
-        result.color_STD = (std[0] + std[1] + std[2]) / 3;;
+        // result.color_STD = (std[0] + std[1] + std[2]) / 3;
         result.data = this.canvas.toBuffer("image/png");
 
         return result;

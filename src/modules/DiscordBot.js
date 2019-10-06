@@ -198,17 +198,19 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
      */
     async pendSkinReview(ownerID, nsfwResult, skinID, skinName) {
 
+        let color = nsfwResult.avarage_color.replace(/\D/g, " ").match(/\S+/g).map(c => ~~c);
+        delete nsfwResult.avarage_color;
+
         for (let i in nsfwResult) {
             nsfwResult[i] = isNaN(nsfwResult[i]) ? nsfwResult[i] : 
-                            Number.isInteger(nsfwResult[i]) ? nsfwResult[i] : (nsfwResult[i] * 100).toFixed(2) + "%";
+                            (Number.isInteger(nsfwResult[i]) && nsfwResult[i] <= 1) ? 
+                            nsfwResult[i] : (nsfwResult[i] * 100).toFixed(2) + " %";
         }
-
-        let color = nsfwResult.avarage_color.replace(/\D/g, " ").match(/\S+/g).map(c => ~~c);
 
         let embed = new RichEmbed()
             .setColor(color)
             .setDescription(`**NSFW Prediction of \`${skinName}\` submitted by <@${ownerID}> (${skinID}):**` + 
-                            `\n\`\`\`\n${table(nsfwResult)}\`\`\``)
+                            `\n\`\`\`prolog\n${table(nsfwResult)}\`\`\``)
             .setFooter(`${this.config.approveThreshold} ${this.config.approveEmoji} to approve | ` + 
                        `${this.config.rejectThreshold} ${this.config.rejectEmoji} to reject`)
             .attachFile(new Attachment(nsfwResult.data, `SPOILER_${skinName}.png`))

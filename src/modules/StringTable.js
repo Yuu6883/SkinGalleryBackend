@@ -21,7 +21,5 @@ module.exports = obj => {
 
     obj.data = buffer;
 
-    return top(longestKey, longestValue) + "\n" +
-           keys.map((k, i) => "┃" + k + ": " + values[i] + "┃\n").join(middle(longestKey, longestValue) + "\n") +
-           bottom(longestKey, longestValue);
+    return keys.map((k, i) => k + ": " + values[i]).join("\n");
 }

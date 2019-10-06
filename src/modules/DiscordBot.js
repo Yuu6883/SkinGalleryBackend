@@ -201,10 +201,6 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
         let color = nsfwResult.avarage_color.replace(/\D/g, " ").match(/\S+/g).map(c => ~~c);
         delete nsfwResult.avarage_color;
 
-        for (let i in nsfwResult) {
-            nsfwResult[i] = isNaN(nsfwResult[i]) ? nsfwResult[i] : (nsfwResult[i] * 100).toFixed(2);
-        }
-
         let embed = new RichEmbed()
             .setColor(color)
             .setDescription(`**NSFW Prediction of \`${skinName}\` submitted by <@${ownerID}> (${skinID}):**` + 

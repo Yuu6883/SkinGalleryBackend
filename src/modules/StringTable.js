@@ -9,8 +9,9 @@ module.exports = obj => {
     delete obj.data;
 
     let keys = Object.keys(obj);
-    let values = Object.values(obj);
+    let values = Object.values(obj).map(number => String(number).length < 4 ? `${number}  %` : `${number} $`);
 
+    keys.sort((k1, k2) => obj[k2] - obj[k1]);
     keys = keys.map(k => k[0].toUpperCase() + k.slice(1).toLowerCase().replace(/_/g, " "));
 
     let longestKey = Math.max(...keys.map(k => k.length));

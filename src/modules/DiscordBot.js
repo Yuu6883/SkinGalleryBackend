@@ -202,9 +202,7 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
         delete nsfwResult.avarage_color;
 
         for (let i in nsfwResult) {
-            nsfwResult[i] = isNaN(nsfwResult[i]) ? nsfwResult[i] : 
-                            (Number.isInteger(nsfwResult[i]) && nsfwResult[i] <= 1) ? 
-                            nsfwResult[i] : (nsfwResult[i] * 100).toFixed(2) + " %";
+            nsfwResult[i] = isNaN(nsfwResult[i]) ? nsfwResult[i] : (nsfwResult[i] * 100).toFixed(2);
         }
 
         let embed = new RichEmbed()

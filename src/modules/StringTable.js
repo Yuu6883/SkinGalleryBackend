@@ -10,7 +10,7 @@ module.exports = obj => {
 
     let keys = Object.keys(obj);
     
-    keys = keys.sort((k1, k2) => parseFloat(obj[k2]) - parseFloat(obj[k1]));
+    keys = keys.sort((k1, k2) => ~~(10000 * obj[k2] - 10000 * obj[k1]));
     keys = keys.map(k => k[0].toUpperCase() + k.slice(1).toLowerCase().replace(/_/g, " "));
 
     let values = Object.values(obj)

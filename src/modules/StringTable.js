@@ -10,14 +10,14 @@ module.exports = obj => {
 
     let keys = Object.keys(obj);
     
-    keys = keys.sort((k1, k2) => obj[k2] - obj[k1]);
+    keys = keys.sort((k1, k2) => parseFloat(obj[k2]) - parseFloat(obj[k1]));
     keys = keys.map(k => k[0].toUpperCase() + k.slice(1).toLowerCase().replace(/_/g, " "));
 
     let values = Object.values(obj)
         .map(number => (number * 100).toFixed(2))
         .map(number => String(number).length < 5 ? `${number}  %` : `${number} %`);
 
-    let longestKey = Math.max(...keys.map(k => k.length));
+    let longestKey   = Math.max(...keys.map(k => k.length));
     let longestValue = Math.max(...values.map(v => v.length));
 
     keys = keys.map(k => k + " ".repeat(longestKey - k.length));

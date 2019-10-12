@@ -168,8 +168,12 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
                 .setDescription(`${skinDoc.skinName}(recovered because last message was deleted)`)
                 .setFooter(`${this.config.approveThreshold} ${this.config.approveEmoji} to approve | ` + 
                        `${this.config.rejectThreshold} ${this.config.rejectEmoji} to reject`)
-                .attachFile(new Attachment(`${PENDING_SKIN_STATIC}/${skinDoc.skinID}.png`, "SPOILER_" + skinDoc.skinName + ".png"))
                 .setTimestamp();
+
+            let skinPath = `${PENDING_SKIN_STATIC}/${skinDoc.skinID}.png`;
+
+            if (fs.existsSync(skinPath))
+                embed.attachFile(new Attachment, "SPOILER_" + skinDoc.skinName + ".png");
 
             if (skinOwner) {
                 embed.setAuthor(`${skinOwner.username}#${skinOwner.discriminator}` + 
@@ -354,8 +358,10 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
                                         `(${skinDoc.skinID}) was rejected by: \n**` + 
                                          rejectReactions.users.filter(u => u !== this.user)
                                                               .map(u => `<@${u.id}>`).join(" ") + "**\n")
-                        .attachFile(new Attachment(skinPath, "SPOILER_" + skinDoc.skinName + ".png"))
                         .setTimestamp();
+
+                if (fs.existsSync(skinPath))
+                    embed.attachFile(new Attachment(skinPath, "SPOILER_" + skinDoc.skinName + ".png"));
 
                 let message = await this.rejectedChannel.send(embed);
 

@@ -151,6 +151,7 @@ function fprocessSync() {
 process.once("uncaughtException", function(e) {
     synchronous = true;
     write(new Date(), "FATAL", e.stack);
+    console.error(e);
     fprocessSync();
     process.removeAllListeners("exit");
     process.exit(1);

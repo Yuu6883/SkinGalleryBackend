@@ -275,6 +275,13 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
         let pendingSkins = await this.app.skins.getPending();
         this.logger.debug(`Checking ${pendingSkins.length} pending reviews...`);
 
+        let length = pendingSkins.length;
+        if (length) {
+            await this.user.setActivity(`with ${length} pending skins`, { url: "https://skins.vanis.io", type: "PLAYING" });
+        } else {
+            await this.user.setActivity(`for next skin submission`, { url: "https://skins.vanis.io", type: "WATCHING" });
+        }
+
         // Don't laugh
         for (let i in pendingSkins) {
             let skinDoc = pendingSkins[i];

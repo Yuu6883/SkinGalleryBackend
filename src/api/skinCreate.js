@@ -50,11 +50,21 @@ const endpoint = {
 
             let skinDoc = await this.skins.create(req.vanisUser.discordID, skinID, req.params.skinName, nsfwStatus, messageID);
 
-            res.json({
-                id: skinDoc.skinID,
-                skinName: skinDoc.skinName,
-                status: skinDoc.status
-            });
+            if (!skinDoc) {
+                // Autism strikes
+                this.logger.warn(`${req.vanisUser.discordID} tried to submit more than limit.`);
+                res.sendStatus(500);
+
+                if (fs.existsSync(skinPath))
+                    fs.unlinkSync(skinPath);
+
+            } else {
+                res.json({
+                    id: skinDoc.skinID,
+                    skinName: skinDoc.skinName,
+                    status: skinDoc.status
+                });
+            }
 
         } catch (e) {
             this.logger.warn(`Error occured while running NSFW detection`);

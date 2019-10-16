@@ -211,8 +211,10 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
                             `\n\`\`\`prolog\n${table(nsfwResult)}\`\`\``)
             .setFooter(`${this.config.approveThreshold} ${this.config.approveEmoji} to approve | ` + 
                        `${this.config.rejectThreshold} ${this.config.rejectEmoji} to reject`)
-            .attachFile(new Attachment(nsfwResult.data, `SPOILER_${skinName}.png`))
             .setTimestamp();
+
+        if (nsfwResult.data)
+            embed.attachFile(new Attachment(nsfwResult.data, `SPOILER_${skinName}.png`));
 
         /** @type {DiscordJS.Message} */
         let message = await this.pendingChannel.send(embed);
@@ -266,8 +268,10 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
             .setTitle("Skin Rejected")
             .setDescription(`Skin **${skinName}** submitted by <@${ownerID}> (${skinID})`)
             .setFooter(`Automatically rejected`)
-            .attachFile(new Attachment(nsfwResult.data, `SPOILER_${skinName}.png`))
             .setTimestamp();
+        
+        if (nsfwResult.data)
+            embed.attachFile(new Attachment(nsfwResult.data, `SPOILER_${skinName}.png`));
             
         /** @type {DiscordJS.Message} */
         let message = await this.rejectedChannel.send(embed);

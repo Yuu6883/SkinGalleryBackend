@@ -16,7 +16,8 @@ const endpoint = {
         if (skinDoc === null)
             return void res.sendStatus(404);
 
-        if (skinDoc.ownerID !== req.vanisUser.discordID)
+        if (!hasPermission("DELETE_OTHER_SKIN", req.vanisPermissions) &&
+            skinDoc.ownerID !== req.vanisUser.discordID)
             return void res.sendStatus(404);
 
         let skinPath = skinDoc.status === "approved" ? SKIN_STATIC : PENDING_SKIN_STATIC;

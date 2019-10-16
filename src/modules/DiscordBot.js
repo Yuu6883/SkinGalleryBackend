@@ -173,7 +173,7 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
             let skinPath = `${PENDING_SKIN_STATIC}/${skinDoc.skinID}.png`;
 
             if (fs.existsSync(skinPath))
-                embed.attachFile(new Attachment, "SPOILER_" + skinDoc.skinName + ".png");
+                embed.attachFile(new Attachment(skinPath, "SPOILER_" + skinDoc.skinName + ".png"));
 
             if (skinOwner) {
                 embed.setAuthor(`${skinOwner.username}#${skinOwner.discriminator}` + 

@@ -35,7 +35,7 @@ class NSFWbot {
         this.ctx.arc(this.size / 2, this.size / 2, this.size / 2, 0, Math.PI * 2);
         this.ctx.clip();
         this.ctx.fillStyle = "#a3a3a3";
-        this.ctx.fillRect(0, 0, this.size / 2, this.size / 2);
+        this.ctx.fillRect(0, 0, this.size, this.size);
         this.ctx.drawImage(img, 0, 0, this.size, this.size);
 
         let input = TensorFlow.browser

@@ -1,4 +1,5 @@
 const DiscordJS = require("discord.js");
+const { execSync } = require("child_process");
 const fs = require("fs");
 const { Attachment, RichEmbed } = DiscordJS;
 
@@ -109,6 +110,11 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
                 let isMod = await this.isMod(user.id);
                 await message.channel.send(name + " is " + (isMod ? "**mod**" : "pleb"));
             }
+        }
+
+        if (message.content.startsWith(`${this.prefix}count`)) {
+            let result = execSync(`ls ${__dirname}/../../skins | wc -l`).toString();
+            message.channel.send(`Total skin count: **${result}**`);
         }
     }
 

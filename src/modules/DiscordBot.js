@@ -116,6 +116,11 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
             let result = execSync(`ls ${__dirname}/../../skins | wc -l`).toString();
             message.channel.send(`Total skin count: **${result}**`);
         }
+
+        if (message.content.startsWith(`${this.prefix}size`)) {
+            let result = execSync(`du -h ${__dirname}/../../skins`).toString().split(" ")[0];
+            message.channel.send(`Skin folder size: **${result}**`);
+        }
     }
 
     startReviewCycle() {

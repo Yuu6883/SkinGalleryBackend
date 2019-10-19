@@ -81,7 +81,7 @@ class Provision {
      */
     async ensureDiscordAuthorization(user, attemptRefresh = true) {
         const discordInfo = await this.app.discordAPI.fetchUserInfo(user.discordToken);
-        if (discordInfo.error == null)
+        if (!discordInfo.error)
             return discordInfo;
         // Couldn't fetch - try refreshing
         if (!attemptRefresh) {
@@ -90,7 +90,7 @@ class Provision {
             return null;
         }
         const refreshResponse = await this.app.discordAPI.exchange(user.discordRefresh, true);
-        if (refreshResponse.error == null) {
+        if (!refreshResponse.error) {
             // Refreshing failed
             this.logger.onError(`Failed to refresh token: ${discordInfo.error} (${discordInfo.error_description})`);
             return null;

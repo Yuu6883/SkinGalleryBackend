@@ -700,7 +700,9 @@ $(window).on("load", () => {
 
     copyEl = document.getElementById("copy");
 
-    new Starfield($("#starfield")[0]).start();
+    new Starfield($("#starfield")[0], {
+        color: '#ff3df5'
+    }).start();
 
     // API.on("needToLogin", () => Prompt.login().then(() => API.redirectLogin()));
     $("#logout").click(() => API.logout());

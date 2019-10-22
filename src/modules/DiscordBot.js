@@ -121,6 +121,36 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
             let result = execSync(`du -h ${__dirname}/../../skins`).toString().split("\t")[0];
             message.channel.send(`Skin folder size: **${result}**`);
         }
+
+        if (message.content.startsWith(`${this.prefix}delete `)) {
+            
+            if (!(await this.isMod(message.author.id)))
+                return message.reply(`You don't have permission to delete skin`);
+
+            let skinID = message.content.trim().split(/ /g).slice(1).join(" ");
+            if (!/^\w{6}$/.test(skinID)) {
+                return message.reply(`Invalid skin ID: ${skinID}`);
+            }
+
+            let skinDoc = await this.app.skins.findBySkinID(skinID);
+
+            if (skinDoc === null)
+                return message.reply(`Can't find skin ID ${skinID}`);
+
+            let skinPath = skinDoc.status === "approved" ? SKIN_STATIC : PENDING_SKIN_STATIC;
+            skinPath += `/${skinDoc.skinID}.png`;
+
+            if (!fs.existsSync(skinPath)) {
+                this.logger.warn(`Can't find skin at ${skinPath}`);
+            } else fs.unlinkSync(skinPath);
+
+            if (!(await this.deleteReview(skinDoc.messageID, skinDoc.status)))
+                this.logger.warn("Bot failed to delete review");
+            
+            let success = await this.app.skins.deleteByID(skinID);
+
+            message.channel.send(success ? `Skin ${skinID} deleted` : `Failed to delete skin ${skinID}`);
+        }
     }
 
     startReviewCycle() {

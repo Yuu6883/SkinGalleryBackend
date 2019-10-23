@@ -1,6 +1,6 @@
 /** @type {AppConfig} */
 const config = {
-    env: "development",
+    env: "production",
 
     dbPath: "mongodb://localhost:27017/vanis-skins",
 

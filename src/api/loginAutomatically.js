@@ -25,7 +25,7 @@ const endpoint = {
             discriminator: discordUserInfo.discriminator,
             avatar: discordUserInfo.avatar,
             moderator: req.vanisUser.moderator,
-            bannedUntil: req.vanisUser.bannedUntil
+            bannedUntil: req.vanisUser.bannedUntil && req.vanisUser.bannedUntil.getTime()
         });
     },
     method: "post",

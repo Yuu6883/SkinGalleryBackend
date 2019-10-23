@@ -52,9 +52,12 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
     }
 
     /** @param {DiscordJS.Message} message */
-    onMessage(message) {
-        if (this.isAdmin(message.author.id) && message.content.startsWith(this.prefix)) 
+    async onMessage(message) {
+        if (this.isAdmin(message.author.id) && message.content.startsWith(this.prefix)) {
             this.runCommand(message);
+            this.runModCommand(message);
+        } else if (await this.isMod(message.author.id))
+            this.runModCommand(message);
     }
 
     /** @param {DiscordJS.Message} message */
@@ -121,27 +124,28 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
             let result = execSync(`du -h ${__dirname}/../../skins`).toString().split("\t")[0];
             message.channel.send(`Skin folder size: **${result}**`);
         }
+    }
+
+    /** @param {DiscordJS.Message} message */
+    async runModCommand(message) {
 
         if (message.content.startsWith(`${this.prefix}delete `)) {
-            
-            if (!(await this.isMod(message.author.id)))
-                return message.reply(`You don't have permission to delete skin`);
 
             let skinID = message.content.trim().split(/ /g).slice(1).join(" ");
             if (!/^\w{6}$/.test(skinID)) {
-                return message.reply(`Invalid skin ID: ${skinID}`);
+                return message.reply(`Invalid skin ID: \`${skinID}\``);
             }
 
             let skinDoc = await this.app.skins.findBySkinID(skinID);
 
             if (skinDoc === null)
-                return message.reply(`Can't find skin ID ${skinID}`);
+                return message.reply(`Can't find skin ID \`${skinID}\``);
 
             let skinPath = skinDoc.status === "approved" ? SKIN_STATIC : PENDING_SKIN_STATIC;
             skinPath += `/${skinDoc.skinID}.png`;
 
             if (!fs.existsSync(skinPath)) {
-                this.logger.warn(`Can't find skin at ${skinPath}`);
+                this.logger.warn(`Can't find skin at \`${skinPath}\``);
             } else fs.unlinkSync(skinPath);
 
             if (!(await this.deleteReview(skinDoc.messageID, skinDoc.status)))
@@ -149,8 +153,53 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
             
             let success = await this.app.skins.deleteByID(skinID);
 
-            message.channel.send(success ? `Skin ${skinID} deleted` : `Failed to delete skin ${skinID}`);
+            message.channel.send(success ? `Skin \`${skinID}\` deleted` : `Failed to delete skin \`${skinID}\``);
         }
+
+        if (message.content.startsWith(`${this.prefix}ban `)) {
+            let userID = message.content.replace(/\D/g, "").trim();
+
+            if (userID) {
+                let userDoc = await this.app.users.find(userID);
+
+                if (!userDoc)
+                    return message.reply(`Can't find user ${userID}`);
+
+                if (await this.isMod(userID))
+                    await message.reply(`Stop abusing <@${userID}>`);
+
+                userDoc.bannedUntil = new Date(3000, 1, 1);
+                await userDoc.save();
+
+                message.reply(`User banned: \`${userID}\``);
+                
+            } else {
+                return message.reply(`Use ${this.prefix}ban \`/\\D+/\` to ban someone from Vanis Skin`);
+            }
+        }
+
+        if (message.content.startsWith(`${this.prefix}unban `)) {
+            let userID = message.content.replace(/\D/g, "").trim();
+
+            if (userID) {
+                let userDoc = await this.app.users.find(userID);
+
+                if (!userDoc)
+                    return message.reply(`Can't find user \`${userID}\``);
+
+                if (await (this.isMod(userID)))
+                    await message.reply(`Yeet <@${userID}>`);
+
+                userDoc.bannedUntil = new Date(0);
+                await userDoc.save();
+
+                message.reply(`User unbanned: \`${userID}\``);
+                
+            } else {
+                return message.reply(`Use ${this.prefix}unban \`/\\D+/\` to unban someone from Vanis Skin`);
+            }
+        }
+
     }
 
     startReviewCycle() {

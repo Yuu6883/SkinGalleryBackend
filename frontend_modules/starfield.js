@@ -13,6 +13,7 @@ class Starfield {
      * @param {Number} [options.enterTime] enter phase time in seconds
      * @param {String} [options.color]
      * @param {Number} [options.alpha]
+     * @param {Boolean} [options.halloween] Interesting
      */
     constructor (canvas, options) {
 
@@ -30,10 +31,15 @@ class Starfield {
             speedRange: 3.3,
             enterTime: 0.55,
             color: "#00b8ff",
-            alpha: .9
+            alpha: .9,
+            halloween: false,
         };
 
         Object.assign(this.config, options);
+
+        if (this.config.halloween) {
+            this.config.color = '#ffb13d';
+        }
 
         this.resize();
         this.init();
@@ -45,13 +51,20 @@ class Starfield {
 
     start() {
         this.stars = Array.from({ length: this.config.starNumber })
-                          .map(() => new Star(this, this.randomVector));
+                          .map(() => this.createStar());
 
         this.startTime = 0;
         this.lastUpdate = 0;
 
         this.stopped = false;
         this.render();
+    }
+
+    createStar() {
+        if (this.config.halloween && Math.random() < 0.01) {
+            return new Pumpkin(this, this.randomVector);
+        }
+        return new Star(this, this.randomVector);
     }
 
     clear() {
@@ -100,9 +113,13 @@ class Starfield {
         ctx.beginPath();
         ctx.fillStyle = this.config.color;
         ctx.globalAlpha = this.config.alpha;
-        this.stars.forEach(star => star.draw(dt));
+        this.stars.forEach((star, index) => {
+            star.update(dt);
+            if (star.isOutside)
+                star = this.stars[index] = this.createStar();
+            star.draw();
+        });
         ctx.fill();
-
     } 
 
     resize() {
@@ -152,12 +169,7 @@ class Star {
     }
 
     /** @param {Number} dt delta time */
-    draw(dt) {
-
-        this.update(dt);
-
-        if (this.isOutside) this.spawn(this.field.randomVector);
-
+    draw() {
         this.field.ctx.moveTo(this.x, this.y);
         this.field.ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
     }
@@ -168,6 +180,43 @@ class Star {
         let yBound = this.field.hheight + this.radius;
 
         return this.x < - xBound || this.x > xBound || this.y < - yBound || this.y > yBound;
+    }
+}
+
+class Pumpkin extends Star {
+
+    /** 
+     * @param {Starfield} field
+     * @param {Vector} initVector
+     */
+    constructor(field, initVector) {
+        super(field, initVector);
+
+        this.img = document.getElementById("pumpkin");
+        this.rotation = this.angle;
+        this.clockWise = Math.random() < 0.5;
+        this.radius *= 500;
+        this.alpha = 0;
+        this.targeAlpha = 0.5 + Math.random() / 2;
+    }
+
+    update(dt) {
+        super.update(dt);
+        this.rotation += (this.clockWise ? 1 : -1) * dt / 100;
+        this.alpha = Math.min(this.alpha + dt / 300, this.targeAlpha);
+    }
+
+    draw() {
+        let ctx = this.field.ctx;
+
+        ctx.save();
+
+        ctx.globalAlpha = this.alpha;
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotation);
+        ctx.drawImage(this.img, -this.radius / 2, -this.radius / 2, this.radius, this.radius);
+
+        ctx.restore();
     }
 }
 

@@ -12,12 +12,14 @@ const readImage = file => new Promise(resolve => {
     img.src = URL.createObjectURL(file);
 });
 
+/** @param {Date} date */
+const MMDDYYYY = date => `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()}`;
+
 module.exports = new class Prompt {
     
     constructor() {
         
         this.alert = Swal.mixin({
-            background: '#172535',
             heightAuto: false,
             focusConfirm: false,
             focusCancel: true,
@@ -85,6 +87,10 @@ module.exports = new class Prompt {
         });
     }
 
+    showBanned(date) {
+        return this.alert.fire("Ops...", `You are banned until ${MMDDYYYY(date)}`, "warning");
+    }
+
     /** @param {{name:String,img:HTMLImageElement}} skin */
     editSkin(skin) {
         let canvas = document.createElement("canvas");
@@ -109,10 +115,11 @@ module.exports = new class Prompt {
             inputAttributes: {
                 maxLength: 16
             },
+            inputValidator: value => !(value && value.length <= 16),
             inputAutoTrim: true,
             confirmButtonText: "Submit",
             showCancelButton: true,
-            inputValue: skin.name.split(".").slice(0, -1).join("."),
+            inputValue: skin.name.split(".").slice(0, -1).join(".").slice(0, 16),
             onOpen: () => {
                 $(this.alert.getContent()).prepend(canvas);
             }

@@ -35,7 +35,11 @@ module.exports = new class API extends EventEmitter {
             dataType: "json",
             success: res => {
                 this.userInfo = res;
-                this.emit("loginSuccess");
+                if (res.bannedUntil > Date.now()) {
+                    this.emit("banned", new Date(res.bannedUntil));
+                } else {
+                    this.emit("loginSuccess");
+                }
             },
             error: () => {
                 this.emit("loginFail");

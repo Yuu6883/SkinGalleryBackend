@@ -56,9 +56,22 @@ $(window).on("load", () => {
 
     copyEl = document.getElementById("copy");
 
-    new Starfield($("#starfield")[0], {
-        color: '#ff3df5'
-    }).start();
+    let halloween = false;
+    let today = new Date();
+    let month = today.getMonth() + 1; // Autism
+    let date  = today.getDate();
+
+    if (localStorage.theme == "halloween" && 
+        (month == 10 && date >= 15) ||
+        (month == 11 && data == 1)) {
+            
+        halloween = true;
+        // Halloween theme
+        $(":root").prop("style").setProperty("--background-color", " rgba(30,13,0,.75) ");
+        $(":root").prop("style").setProperty("--card--color",      "  #351733 ");
+    }
+
+    new Starfield($("#starfield")[0], { halloween }).start();
 
     // API.on("needToLogin", () => Prompt.login().then(() => API.redirectLogin()));
     $("#logout").click(() => API.logout());
@@ -79,6 +92,13 @@ $(window).on("load", () => {
         $("#user-panel").hide();
         $("#skin-panel").hide();
     });
+
+    API.on("banned", date => Prompt.showBanned(date).then(() => {
+        $("#login-panel").hide();
+        $("#user-panel").show();
+        $("#user-pfp").attr("src", "assets/img/lmao.png");
+        $("#username").html("<strong>ACHIEVEMENT UNLOCKED</strong><br> You have been banned");
+    }));
 
     API.on("myskin", skins => updateSkinPanel(skins));
 

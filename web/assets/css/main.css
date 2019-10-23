@@ -1,3 +1,8 @@
+:root {
+    --background-color: rgba(0,13,30,.75);
+    --card--color: #172535;
+}
+
 body, html {
     width: 100%;
     height: 100%;
@@ -11,7 +16,7 @@ body, html {
 }
 
 #overlay {
-    background: radial-gradient(rgba(0,13,30,.75) 300px,rgba(0,0,0,.75));
+    background: radial-gradient(var(--background-color),300px,rgba(0,0,0,.75));
     position: fixed;
     top: 0;
     bottom: 0;
@@ -41,10 +46,10 @@ body, html {
     opacity: 0.1;
 }
 
-.card {
+.card, .swal2-modal {
     box-shadow: 0 0 4px 2px #000;
     border-radius: 4px;
-    background-color: #172535;
+    background-color: var(--card--color);
 }
 
 .padding-s {

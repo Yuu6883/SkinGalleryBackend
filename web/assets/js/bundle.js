@@ -561,7 +561,11 @@ module.exports = new class API extends EventEmitter {
             dataType: "json",
             success: res => {
                 this.userInfo = res;
-                this.emit("loginSuccess");
+                if (res.bannedUntil > Date.now()) {
+                    this.emit("banned", new Date(res.bannedUntil));
+                } else {
+                    this.emit("loginSuccess");
+                }
             },
             error: () => {
                 this.emit("loginFail");
@@ -700,9 +704,22 @@ $(window).on("load", () => {
 
     copyEl = document.getElementById("copy");
 
-    new Starfield($("#starfield")[0], {
-        color: '#ff3df5'
-    }).start();
+    let halloween = false;
+    let today = new Date();
+    let month = today.getMonth() + 1; // Autism
+    let date  = today.getDate();
+
+    if (localStorage.theme == "halloween" && 
+        (month == 10 && date >= 15) ||
+        (month == 11 && data == 1)) {
+            
+        halloween = true;
+        // Halloween theme
+        $(":root").prop("style").setProperty("--background-color", " rgba(30,13,0,.75) ");
+        $(":root").prop("style").setProperty("--card--color",      "  #351733 ");
+    }
+
+    new Starfield($("#starfield")[0], { halloween }).start();
 
     // API.on("needToLogin", () => Prompt.login().then(() => API.redirectLogin()));
     $("#logout").click(() => API.logout());
@@ -723,6 +740,13 @@ $(window).on("load", () => {
         $("#user-panel").hide();
         $("#skin-panel").hide();
     });
+
+    API.on("banned", date => Prompt.showBanned(date).then(() => {
+        $("#login-panel").hide();
+        $("#user-panel").show();
+        $("#user-pfp").attr("src", "assets/img/lmao.png");
+        $("#username").html("<strong>ACHIEVEMENT UNLOCKED</strong><br> You have been banned");
+    }));
 
     API.on("myskin", skins => updateSkinPanel(skins));
 
@@ -813,12 +837,14 @@ const readImage = file => new Promise(resolve => {
     img.src = URL.createObjectURL(file);
 });
 
+/** @param {Date} date */
+const MMDDYYYY = date => `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()}`;
+
 module.exports = new class Prompt {
     
     constructor() {
         
         this.alert = Swal.mixin({
-            background: '#172535',
             heightAuto: false,
             focusConfirm: false,
             focusCancel: true,
@@ -886,6 +912,10 @@ module.exports = new class Prompt {
         });
     }
 
+    showBanned(date) {
+        return this.alert.fire("Ops...", `You are banned until ${MMDDYYYY(date)}`, "warning");
+    }
+
     /** @param {{name:String,img:HTMLImageElement}} skin */
     editSkin(skin) {
         let canvas = document.createElement("canvas");
@@ -910,10 +940,11 @@ module.exports = new class Prompt {
             inputAttributes: {
                 maxLength: 16
             },
+            inputValidator: value => !(value && value.length <= 16),
             inputAutoTrim: true,
             confirmButtonText: "Submit",
             showCancelButton: true,
-            inputValue: skin.name.split(".").slice(0, -1).join("."),
+            inputValue: skin.name.split(".").slice(0, -1).join(".").slice(0, 16),
             onOpen: () => {
                 $(this.alert.getContent()).prepend(canvas);
             }
@@ -1018,6 +1049,7 @@ class Starfield {
      * @param {Number} [options.enterTime] enter phase time in seconds
      * @param {String} [options.color]
      * @param {Number} [options.alpha]
+     * @param {Boolean} [options.halloween] Interesting
      */
     constructor (canvas, options) {
 
@@ -1035,10 +1067,15 @@ class Starfield {
             speedRange: 3.3,
             enterTime: 0.55,
             color: "#00b8ff",
-            alpha: .9
+            alpha: .9,
+            halloween: false,
         };
 
         Object.assign(this.config, options);
+
+        if (this.config.halloween) {
+            this.config.color = '#ffb13d';
+        }
 
         this.resize();
         this.init();
@@ -1050,13 +1087,20 @@ class Starfield {
 
     start() {
         this.stars = Array.from({ length: this.config.starNumber })
-                          .map(() => new Star(this, this.randomVector));
+                          .map(() => this.createStar());
 
         this.startTime = 0;
         this.lastUpdate = 0;
 
         this.stopped = false;
         this.render();
+    }
+
+    createStar() {
+        if (this.config.halloween && Math.random() < 0.01) {
+            return new Pumpkin(this, this.randomVector);
+        }
+        return new Star(this, this.randomVector);
     }
 
     clear() {
@@ -1105,9 +1149,13 @@ class Starfield {
         ctx.beginPath();
         ctx.fillStyle = this.config.color;
         ctx.globalAlpha = this.config.alpha;
-        this.stars.forEach(star => star.draw(dt));
+        this.stars.forEach((star, index) => {
+            star.update(dt);
+            if (star.isOutside)
+                star = this.stars[index] = this.createStar();
+            star.draw();
+        });
         ctx.fill();
-
     } 
 
     resize() {
@@ -1157,12 +1205,7 @@ class Star {
     }
 
     /** @param {Number} dt delta time */
-    draw(dt) {
-
-        this.update(dt);
-
-        if (this.isOutside) this.spawn(this.field.randomVector);
-
+    draw() {
         this.field.ctx.moveTo(this.x, this.y);
         this.field.ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
     }
@@ -1173,6 +1216,43 @@ class Star {
         let yBound = this.field.hheight + this.radius;
 
         return this.x < - xBound || this.x > xBound || this.y < - yBound || this.y > yBound;
+    }
+}
+
+class Pumpkin extends Star {
+
+    /** 
+     * @param {Starfield} field
+     * @param {Vector} initVector
+     */
+    constructor(field, initVector) {
+        super(field, initVector);
+
+        this.img = document.getElementById("pumpkin");
+        this.rotation = this.angle;
+        this.clockWise = Math.random() < 0.5;
+        this.radius *= 500;
+        this.alpha = 0;
+        this.targeAlpha = 0.5 + Math.random() / 2;
+    }
+
+    update(dt) {
+        super.update(dt);
+        this.rotation += (this.clockWise ? 1 : -1) * dt / 100;
+        this.alpha = Math.min(this.alpha + dt / 300, this.targeAlpha);
+    }
+
+    draw() {
+        let ctx = this.field.ctx;
+
+        ctx.save();
+
+        ctx.globalAlpha = this.alpha;
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotation);
+        ctx.drawImage(this.img, -this.radius / 2, -this.radius / 2, this.radius, this.radius);
+
+        ctx.restore();
     }
 }
 

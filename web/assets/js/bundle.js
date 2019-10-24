@@ -656,7 +656,7 @@ const Prompt = require("./prompt");
 const Starfield = require("./starfield");
 
 const emptySkinPanel = 
-`<div class="uk-width-1-5@l uk-width-1-2@m uk-card uk-margin-top">
+`<div class="uk-width-1-5@l uk-width-1-4@m uk-width-1-2 uk-card uk-margin-top">
     <div class="padding-s uk-inline-clip uk-transition-toggle uk-text-center card">
         <img src="assets/img/logo-grey.png" class="skin-preview skin-empty">
         <div class="uk-position-center">
@@ -678,7 +678,7 @@ const linkedSkinPanel = skinObject => {
     let link = skinObject.status === "approved" ? `/s/${skinObject.skinID}` : `/api/p/skin/${skinObject.skinID}`;
     let labelClass = { "approved": "success", "pending": "warning", "rejected": "danger" }[skinObject.status];
     return "" +
-    `<div class="uk-width-1-5@l uk-width-1-2@m uk-card uk-margin-top">
+    `<div class="uk-width-1-5@l uk-width-1-4@m uk-width-1-2 uk-card uk-margin-top">
         <div class="padding-s uk-inline-clip pointer uk-text-center uk-transition-toggle card">
             <div>
                 <a href="${link}" data-type="image" data-caption="<h1 class='text uk-margin-large-bottom'>${escapeHtml(skinObject.skinName)}</h1>">
@@ -709,7 +709,7 @@ $(window).on("load", () => {
     let month = today.getMonth() + 1; // Autism
     let date  = today.getDate();
 
-    if (localStorage.theme == "halloween" && 
+    if (localStorage.theme == "halloween" || 
         (month == 10 && date >= 15) ||
         (month == 11 && data == 1)) {
             
@@ -717,13 +717,17 @@ $(window).on("load", () => {
         // Halloween theme
         $(":root").prop("style").setProperty("--background-color", " rgba(30,13,0,.75) ");
         $(":root").prop("style").setProperty("--card--color",      "  #351733 ");
+
+        $("#extra-info").html(`<img width="30" height="30" src="assets/img/pumpkin.png">` + 
+                                `<span>Happy Halloween!</span>` + 
+                              `<img width="30" height="30" src="assets/img/pumpkin.png">`);
     }
 
     new Starfield($("#starfield")[0], { halloween }).start();
 
-    // API.on("needToLogin", () => Prompt.login().then(() => API.redirectLogin()));
-    $("#logout").click(() => API.logout());
     $("#login").click(() => API.redirectLogin());
+    $("#logout").click(() => API.logout());
+    $("#upload").click(() => Prompt.inputImage());
 
     API.on("loginSuccess", () => {
         $("#login-panel").hide();
@@ -733,6 +737,7 @@ $(window).on("load", () => {
         $("#skin-panel").show();
 
         API.listSkin();
+        $(".center").css("min-height", "100%");
     });
 
     API.on("logoutSuccess", () => {
@@ -769,11 +774,13 @@ $(window).on("load", () => {
     $(document).ajaxComplete(() => Prompt.hideLoader());
 });
 
-const updateSkinPanel = skins => {
+const updateSkinPanel = async skins => {
     let skinsHTML = skins.map(linkedSkinPanel).join("");
     let emptySkinsHTML = emptySkinPanel.repeat(20 - skins.length);            
 
-    let panel = $("#skin-panel").children().first();
+    let panel = $("#my-skins");
+    await new Promise(resolve => panel.fadeOut(300, resolve));
+
     panel.children().remove();
     panel.append($(skinsHTML + emptySkinsHTML));
 
@@ -797,6 +804,8 @@ const updateSkinPanel = skins => {
         else
             Prompt.copyFail($(copyEl).val());
     });
+
+    await new Promise(resolve => panel.fadeIn(300, resolve));
 }
 
 const copyText = element => {

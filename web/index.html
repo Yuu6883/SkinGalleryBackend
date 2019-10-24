@@ -36,33 +36,60 @@
         </div> -->
         <div class="center uk-width-3-5@l uk-width-4-5@m uk-width-4-5@s">
             <div class="uk-text-center">
-                <h1 class="uk-heading uk-margin-top text">Vanis Skin Library</h1>
+                <h1 class="uk-heading uk-margin-top text">Vanis Skin Library
+                    <span class="theme-color info" uk-icon="icon:info;ratio:1.5"></span>
+                    <div class="uk-card uk-card-body card" uk-dropdown>
+                        <h5 id="extra-info" class="text uk-text-center uk-margin-remove"></h5>
+                        <h5 class="text uk-margin-remove">Copyright &copy; 2019 Yuu & Luka</h5>
+                    </div>
+                </h1>
             </div>
             <div class="uk-card uk-card-body uk-text-center uk-margin-top uk-animation-fade card" id="login-panel">
                 <h4 class="uk-heading text">Connect with Discord to use and manage skins.</h4>
                 <div class="uk-text-center uk-margin-top-small">
-                    <button class="btn uk-text-center uk-width-small">
+                    <button class="btn uk-text-center uk-width-small" id="login">
                         <img src="assets/img/discord-logo.svg" width="30px">
-                        <span class="text" id="login">Continue</span>
+                        <span class="text">Continue</span>
                     </button>
                 </div>
             </div>
             <div class="uk-card uk-padding-small uk-margin-top uk-animation-fade card" id="user-panel">
-                <div class="uk-grid-small uk-flex uk-flex-middle" uk-grid>
+                <div class="uk-grid-small uk-flex uk-flex-middle uk-margin-remove" uk-grid>
                     <div class="uk-width-auto">
                         <img class="uk-border-circle" width="40" height="40" id="user-pfp">
                     </div>
-                    <div class="uk-width-expand">
+                    <div class="uk-width-auto">
                         <h3 class="uk-card-title uk-margin-remove-bottom text" id="username"></h3>
                         <p class="uk-text-meta uk-margin-remove-top text" id="user-status"></p>
                     </div>
-                    <div class="uk-width-small">
-                        <button class="btn danger uk-float-right uk-width-small" id="logout">Log out</button>
+                    <div class="uk-width-expand button-group">
+                        <button class="btn danger          uk-float-right" id="logout">Log out</button>
+                        <button class="btn uk-margin-right uk-float-right" id="upload">Upload Skin</button>
                     </div>
                 </div>
             </div>
             <div class="uk-card uk-margin-top uk-animation-fade" id="skin-panel">
-                <div class="uk-grid-small uk-flex-middle" uk-grid uk-lightbox></div>
+                <ul class="uk-flex-center uk-margin-remove-bottom" uk-tab uk-switcher="animation: uk-animation-fade">
+                    <li class="uk-active text"><a href="#">My Skins</a></li>
+                    <li class="text"><a href="#">Favorites</a></li>
+                    <li class="text"><a href="#">Public Skins</a></li>
+                </ul>
+                <ul class="uk-switcher">
+                    <li><div id="my-skins"  class="uk-grid-small uk-flex-middle" uk-grid uk-lightbox></div></li>
+                    <li><div id="my-fav"    class="uk-grid-small uk-flex-middle" uk-grid uk-lightbox>
+                        <div class="uk-margin-top uk-card uk-card-body uk-text-center uk-width-1-1 card">
+                            <h3 class="text">Coming soon...</h3>
+                            <p  class="text">You will be able to favorite skins which will be visible only to you on this panel.</p>
+                        </div>
+                    </div></li>
+                    <li><div id="pub-skins" class="uk-grid-small uk-flex-middle" uk-grid uk-lightbox>
+                        <div class="uk-margin-top uk-card uk-card-body uk-text-center uk-width-1-1 card">
+                            <h3 class="text">Coming soon...</h3>
+                            <p  class="text">You will be able to make your skin public/private when you upload.<br>
+                                Public ones will be visible to everyone on this panel.</p>
+                        </div>
+                    </div></li>
+                </ul>
             </div>
         </div>
         <h1 id="copy"></h1>

@@ -2,12 +2,13 @@ const mongoose = require("mongoose");
 
 /** @type {mongoose.Schema<UserEntry>} */
 const UserSchema = new mongoose.Schema({
-    discordID:      { type: String, required: true },
+    discordID:      { type: String, required: true  },
     discordToken:   { type: String, required: false },
     discordRefresh: { type: String, required: false },
     vanisToken:     { type: String, required: false },
-    bannedUntil:    { type: Date, required: false },
-    moderator:      { type: Boolean, default: false }
+    bannedUntil:    { type: Date,   required: false },
+    moderator:      { type: Boolean, default: false },
+    public:         { type: Boolean, default: true  }
 });
 UserSchema.index({ discordID: 1 }, { unique: true });
 UserSchema.index({ discordToken: 1 }, { unique: true, sparse: true });

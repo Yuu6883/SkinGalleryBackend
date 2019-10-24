@@ -1,6 +1,6 @@
 /** @type {AppConfig} */
 const config = {
-    env: "development",
+    env: process.platform == "win32" ? "development" : "production",
 
     dbPath: "mongodb://localhost:27017/vanis-skins",
 

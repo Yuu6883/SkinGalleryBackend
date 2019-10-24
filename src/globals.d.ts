@@ -15,6 +15,9 @@ interface AppConfig {
     discordAppRedirect: string;
     discordBotToken:    string;
 
+    publicUpdateInterval: string;
+    publicPageLimit: string;
+
     skinLimit: number;
     nsfwLowThreshold:  number;
     nsfwHighThreshold: number;
@@ -43,11 +46,15 @@ interface UserEntry {
 declare type UserDocument = import("mongoose").Document & UserEntry;
 
 interface SkinEntry {
-    skinID: string;
-    ownerID: string;
-    skinName: string;
+    skinID:    string;
+    ownerID:   string;
+    skinName:  string;
     messageID: string;
-    status: SkinStatus;
+    status:    SkinStatus;
+    public:    boolean;
+    tags:      string[];
+    createdAt: Date;
+    updatedAt: Date;
 }
 declare type SkinStatus = "pending" | "rejected" | "approved";
 declare type SkinDocument = import("mongoose").Document & SkinEntry;

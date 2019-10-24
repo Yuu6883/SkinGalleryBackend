@@ -10,6 +10,7 @@ const p = {
     UPLOAD_SKIN:        0x000100,
     MODIFY_SKIN:        0x000200,
     DELETE_SKIN:        0x000400,
+    VIEW_PUBLIC_SKIN:   0x000800,
 
     APPROVE_SKIN:       0x001000,
     REJECT_SKIN:        0x002000,
@@ -26,7 +27,9 @@ const USER_BASE_AUTH_LEVEL      = p.VISIT | p.LOGIN | p.LOGGED_IN | p.LOGOUT | p
 const USER_DEV_AUTH_LEVEL       = p.SUDO;
 
 const USER_BANNED_AUTH_LEVEL    = USER_BASE_AUTH_LEVEL;
-const USER_BASIC_AUTH_LEVEL     = USER_BASE_AUTH_LEVEL  | p.UPLOAD_SKIN  | p.MODIFY_SKIN | p.DELETE_SKIN;
+const USER_BASIC_AUTH_LEVEL     = USER_BASE_AUTH_LEVEL  | p.UPLOAD_SKIN  | 
+                                    p.MODIFY_SKIN | p.DELETE_SKIN | VIEW_PUBLIC_SKIN;
+                                    
 const USER_MOD_AUTH_LEVEL       = USER_BASIC_AUTH_LEVEL | p.LIST_OTHER_SKINS | p.DELETE_OTHER_SKIN |
                                     p.APPROVE_SKIN | p.REJECT_SKIN | p.BAN_USER | p.UNBAN_USER;
 

@@ -48,7 +48,8 @@ const endpoint = {
                 messageID = await this.bot.rejectSkin(req.vanisUser.discordID, result, skinID, req.params.skinName);
             }
 
-            let skinDoc = await this.skins.create(req.vanisUser.discordID, skinID, req.params.skinName, nsfwStatus, messageID);
+            let skinDoc = await this.skins.create(req.vanisUser.discordID, skinID, 
+                                    req.params.skinName, nsfwStatus, !!req.query.public,messageID);
 
             if (!skinDoc) {
                 // Autism strikes

@@ -2,11 +2,16 @@ const mongoose = require("mongoose");
 
 /** @type {mongoose.Schema<SkinEntry>} */
 const SkinSchema = new mongoose.Schema({
-    skinID:         { type: String, required: true },
-    ownerID:        { type: String, required: true },
-    skinName:       { type: String, required: true },
-    messageID:      { type: String, required: false },
-    status:         { type: String, default: "pending", enum: [ "pending", "rejected", "approved" ] }
+    skinID:         { type: String,  required: true  },
+    ownerID:        { type: String,  required: true  },
+    skinName:       { type: String,  required: true  },
+    messageID:      { type: String,  required: false },
+    status:         { type: String,  default: "pending", enum: [ "pending", "rejected", "approved" ] },
+    public:         { type: Boolean, default: false },
+    favorites:      { type: Number,  default: 0 },
+    tags:           { type: [String], default: ["other"] }
+}, {
+    timestamps: true
 });
 
 SkinSchema.index({ skinID: 1 }, { unique: true });
@@ -21,6 +26,40 @@ class SkinCollection {
      */
     constructor(app) {
         this.app = app;
+        /** @type {SkinDocument[]} */
+        this.publicSkins = [];
+    }
+
+    startUpdatePublic() {
+        const u = async () => {
+            await this.updatePublic();
+            this.publicTimeout = setTimeout(u, this.app.config.publicUpdateInterval);
+        };
+        u();
+    }
+
+    stopUpdatePublic() {
+        this.publicTimeout && clearTimeout(this.publicTimeout);
+    }
+
+    async updatePublic() {
+        this.publicSkins = await SkinModel
+            .find({ status: "approved" })
+            .sort("-createdAt");
+    }
+
+    get publicSkinCount() { return this.publicSkins.length }
+
+    getPublicSkins(page = 0) {
+        let lim = this.app.config.publicPageLimit;
+        return this.publicSkins
+            .slice(page * lim, (page + 1) * lim)
+            .map(skinDoc => ({
+                id:   skinDoc.skinID,
+                name: skinDoc.skinName,
+                tags: skinDoc.tags,
+                timestamp: skinDoc.createdAt.getTime()
+            }));
     }
 
     /**
@@ -66,7 +105,7 @@ class SkinCollection {
      * @param {string} messageID
      * @returns {SkinDocument}
      */
-    async create(ownerID, skinID, skinName, status = "pending", messageID) {
+    async create(ownerID, skinID, skinName, status = "pending", public = true, messageID) {
         
         if (await this.countByOwnerID(ownerID) >= this.app.config.skinLimit) {
             return null;
@@ -77,6 +116,7 @@ class SkinCollection {
             ownerID,
             skinName,
             status,
+            public,
             messageID
         });
     }

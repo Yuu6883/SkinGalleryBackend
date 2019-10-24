@@ -8,7 +8,7 @@ const UserSchema = new mongoose.Schema({
     vanisToken:     { type: String, required: false },
     bannedUntil:    { type: Date,   required: false },
     moderator:      { type: Boolean, default: false },
-    public:         { type: Boolean, default: true  }
+    favorites:      { type: [String], default: []   }
 });
 UserSchema.index({ discordID: 1 }, { unique: true });
 UserSchema.index({ discordToken: 1 }, { unique: true, sparse: true });

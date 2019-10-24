@@ -12,6 +12,9 @@ const config = {
     discordAppRedirect: "https://skins.vanis.io/api/login/callback",
     discordBotToken:    "NjE0NzEyMDA0NjQ0NDM4MDQ3.XWDgUw.BisdBGMA-KJxUpXlRr03pUrgmBs",
 
+    publicUpdateInterval: 5 * 60 * 1000, // 5 minutes
+    publicPageLimit: 20,
+
     nsfwLowThreshold: .1,
     nsfwHighThreshold: 1,
     skinApprovedChannelID: "626201875129303060",

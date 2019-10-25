@@ -165,8 +165,11 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
                 if (!userDoc)
                     return message.reply(`Can't find user ${userID}`);
 
-                if (await this.isMod(userID))
+                if (await this.isMod(userID)) {
                     await message.reply(`Stop abusing <@${userID}>`);
+                } else {
+                    await this.purge(userID, message);
+                }
 
                 userDoc.bannedUntil = new Date(3000, 1, 1);
                 await userDoc.save();
@@ -199,7 +202,32 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
                 return message.reply(`Use ${this.prefix}unban \`/\\D+/\` to unban someone from Vanis Skin`);
             }
         }
+    }
 
+    /**
+     * @param {string} userID 
+     * @param {DiscordJS.Message} message 
+     */
+    async purge(userID, message) {
+        let skins = await this.app.skins.findByOwnerID(userID);
+
+        if (skins.length) {
+            await message.reply(`Purging skin(s): \`${skins.map(s => s.skinID).join("\`, \`")}\``);
+            for (let s of skins) {
+
+                await this.app.skins.deleteByID(s.skinID);
+
+                let skinPath = (s.status == "approved" ? SKIN_STATIC : PENDING_SKIN_STATIC) + s.skinID + ".png";
+                if (fs.existsSync(skinPath))
+                    fs.unlinkSync(skinPath);
+
+                await this.deleteReview(s.messageID);
+            };
+
+            await this.app.skins.restartUpdatePublic();
+        } else {
+            await message.reply(`Nothing to purge`);
+        }
     }
 
     startReviewCycle() {

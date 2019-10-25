@@ -42,6 +42,34 @@ class UserCollection {
         return await UserModel.create({ discordID });
     }
 
+    /**
+     * @param {UserDocument} userDoc 
+     * @param {string} skinID 
+     */
+    async addFav(userDoc, skinID) {
+        let skinDoc = await this.app.skins.findBySkinID(skinID);
+        if (!skinDoc) return false;
+        if (userDoc.favorites.includes(skinID)) return false;
+        skinDoc.favorites++;
+        userDoc.favorites.push(skinID);
+        await Promise.all([skinDoc.save(), userDoc.save()]);
+        return true;
+    }
+
+    /**
+     * @param {UserDocument} userDoc 
+     * @param {string} skinID 
+     */
+    async removeFav(userDoc, skinID) {
+        let skinDoc = await this.app.skins.findBySkinID(skinID);
+        if (!skinDoc) return false;
+        if (!userDoc.favorites.includes(skinID)) return false;
+        skinDoc.favorites--;
+        userDoc.favorites.splice(userDoc.favorites.indexOf(skinID), 1);
+        await Promise.all([skinDoc.save(), userDoc.save()]);
+        return true;
+    }
+
     async getMods() {
         return await UserModel.find({ moderator: true });
     }

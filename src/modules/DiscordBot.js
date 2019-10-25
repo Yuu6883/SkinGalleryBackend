@@ -130,77 +130,18 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
     async runModCommand(message) {
 
         if (message.content.startsWith(`${this.prefix}delete `)) {
-
             let skinID = message.content.trim().split(/ /g).slice(1).join(" ");
-            if (!/^\w{6}$/.test(skinID)) {
-                return message.reply(`Invalid skin ID: \`${skinID}\``);
-            }
-
-            let skinDoc = await this.app.skins.findBySkinID(skinID);
-
-            if (skinDoc === null)
-                return message.reply(`Can't find skin ID \`${skinID}\``);
-
-            let skinPath = skinDoc.status === "approved" ? SKIN_STATIC : PENDING_SKIN_STATIC;
-            skinPath += `/${skinDoc.skinID}.png`;
-
-            if (!fs.existsSync(skinPath)) {
-                this.logger.warn(`Can't find skin at \`${skinPath}\``);
-            } else fs.unlinkSync(skinPath);
-
-            if (!(await this.deleteReview(skinDoc.messageID, skinDoc.status)))
-                this.logger.warn("Bot failed to delete review");
-            
-            let success = await this.app.skins.deleteByID(skinID);
-
-            message.channel.send(success ? `Skin \`${skinID}\` deleted` : `Failed to delete skin \`${skinID}\``);
+            this.delete(skinID);
         }
 
         if (message.content.startsWith(`${this.prefix}ban `)) {
             let userID = message.content.replace(/\D/g, "").trim();
-
-            if (userID) {
-                let userDoc = await this.app.users.find(userID);
-
-                if (!userDoc)
-                    return message.reply(`Can't find user ${userID}`);
-
-                if (await this.isMod(userID)) {
-                    await message.reply(`Stop abusing <@${userID}>`);
-                } else {
-                    await this.purge(userID, message);
-                }
-
-                userDoc.bannedUntil = new Date(3000, 1, 1);
-                await userDoc.save();
-
-                message.reply(`User banned: \`${userID}\``);
-                
-            } else {
-                return message.reply(`Use ${this.prefix}ban \`/\\D+/\` to ban someone from Vanis Skin`);
-            }
+            this.ban(userID, message);
         }
 
         if (message.content.startsWith(`${this.prefix}unban `)) {
             let userID = message.content.replace(/\D/g, "").trim();
-
-            if (userID) {
-                let userDoc = await this.app.users.find(userID);
-
-                if (!userDoc)
-                    return message.reply(`Can't find user \`${userID}\``);
-
-                if (await (this.isMod(userID)))
-                    await message.reply(`Yeet <@${userID}>`);
-
-                userDoc.bannedUntil = new Date(0);
-                await userDoc.save();
-
-                message.reply(`User unbanned: \`${userID}\``);
-                
-            } else {
-                return message.reply(`Use ${this.prefix}unban \`/\\D+/\` to unban someone from Vanis Skin`);
-            }
+            this.unban(userID, message);
         }
     }
 
@@ -210,23 +151,89 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
      */
     async purge(userID, message) {
         let skins = await this.app.skins.findByOwnerID(userID);
-
         if (skins.length) {
             await message.reply(`Purging skin(s): \`${skins.map(s => s.skinID).join("\`, \`")}\``);
             for (let s of skins) {
-
-                await this.app.skins.deleteByID(s.skinID);
-
-                let skinPath = (s.status == "approved" ? SKIN_STATIC : PENDING_SKIN_STATIC) + s.skinID + ".png";
-                if (fs.existsSync(skinPath))
-                    fs.unlinkSync(skinPath);
-
-                await this.deleteReview(s.messageID);
-            };
-
+                await this.delete(s.skinID, message);
+            }
             await this.app.skins.restartUpdatePublic();
         } else {
             await message.reply(`Nothing to purge`);
+        }
+    }
+
+    /**
+     * @param {string} skinID 
+     * @param {DiscordJS.Message} message 
+     */
+    async delete(skinID, message) {
+        if (!/^\w{6}$/.test(skinID)) {
+            return message.reply(`Invalid skin ID: \`${skinID}\``);
+        }
+
+        let skinDoc = await this.app.skins.findBySkinID(skinID);
+
+        if (skinDoc === null)
+            return message.reply(`Can't find skin ID \`${skinID}\``);
+
+        let skinPath = skinDoc.status === "approved" ? SKIN_STATIC : PENDING_SKIN_STATIC;
+        skinPath += `/${skinDoc.skinID}.png`;
+
+        if (!fs.existsSync(skinPath)) {
+            this.logger.warn(`Can't find skin at \`${skinPath}\``);
+        } else fs.unlinkSync(skinPath);
+
+        if (!(await this.deleteReview(skinDoc.messageID, skinDoc.status)))
+            this.logger.warn("Bot failed to delete review");
+        
+        let success = await this.app.skins.deleteByID(skinID);
+
+        message.channel.send(success ? `Skin \`${skinID}\` deleted` : `Failed to delete skin \`${skinID}\``);
+    
+    }
+
+    /**
+     * @param {string} userID 
+     * @param {DiscordJS.Message} message 
+     */
+    async ban(userID, message) {
+        if (userID) {
+            let banned = await this.app.users.ban(userID);
+
+            if (!banned)
+                return message.reply(`Can't find user ${userID}`);
+
+            if (await this.isMod(userID)) {
+                await message.reply(`Stop abusing <@${userID}>`);
+            } else {
+                await this.purge(userID, message);
+            }
+
+            message.reply(`User banned: \`${userID}\``);
+            
+        } else {
+            return message.reply(`Use ${this.prefix}ban \`/\\D+/\` to ban someone from Vanis Skin`);
+        }
+    }
+
+    /**
+     * @param {string} userID 
+     * @param {DiscordJS.Message} message 
+     */
+    async unban(userID, message) {
+        if (userID) {
+            let unbanned = await this.app.users.unban(userID);
+
+            if (!unbanned)
+                return message.reply(`Can't find user \`${userID}\``);
+
+            if (await (this.isMod(userID)))
+                await message.reply(`Yeet <@${userID}>`);
+
+            message.reply(`User unbanned: \`${userID}\``);
+            
+        } else {
+            return message.reply(`Use ${this.prefix}unban \`/\\D+/\` to unban someone from Vanis Skin`);
         }
     }
 

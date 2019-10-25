@@ -85,15 +85,20 @@ class SkinCollection {
                 filtered = filtered.sort((a, b) => factor * (a.favorites - b.favorites));
                 break;
         }
-            
-        return filtered
-            .slice(page * lim, (page + 1) * lim)
-            .map(skinDoc => ({
-                id:   skinDoc.skinID,
-                name: skinDoc.skinName,
-                tags: skinDoc.tags,
-                timestamp: skinDoc.createdAt
-            }));
+        
+        let total = filtered.length;
+
+        return {
+            skins: filtered
+                .slice(page * lim, (page + 1) * lim)
+                .map(skinDoc => ({
+                    id:   skinDoc.skinID,
+                    name: skinDoc.skinName,
+                    tags: skinDoc.tags,
+                    timestamp: skinDoc.createdAt
+                })),
+            total
+        };
     }
 
     /**

@@ -90,6 +90,28 @@ class UserCollection {
     }
 
     /**
+     * @param {string} discordID 
+     */
+    async ban(discordID, banTime = 3 * 24 * 60 * 60 * 1000) {
+        let userDoc = await this.find(discordID);
+        if (!userDoc) return;
+        userDoc.bannedUntil = new Date(Date.now() + banTime);
+        await userDoc.save();
+        return true;
+    }
+
+    /**
+     * @param {string} discordID 
+     */
+    async unban(discordID) {
+        let userDoc = await this.find(discordID);
+        if (!userDoc) return;
+        userDoc.bannedUntil = new Date(0, 0, 0);
+        await userDoc.save();
+        return true;
+    }
+
+    /**
      * @param {string} vanisToken
      */
     async countAuthedVanis(vanisToken) {

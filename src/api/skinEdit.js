@@ -22,7 +22,11 @@ const endpoint = {
         if (!(await this.skins.checkOwnership(req.vanisUser.discordID, skinID)))
             return void res.sendStatus(404);
 
-        res.json({ success: await this.skins.editName(skinID, name) });
+        let success = await this.skins.edit({skinID, name, isPublic: req.query.public == "true" });
+
+        await this.skins.restartUpdatePublic(success);
+        
+        res.json({ success });
     },
     method: "put",
     path: "/skins/:skinID",

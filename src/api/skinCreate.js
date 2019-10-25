@@ -60,6 +60,9 @@ const endpoint = {
                     fs.unlinkSync(skinPath);
 
             } else {
+
+                await this.skins.restartUpdatePublic();
+
                 res.json({
                     id: skinDoc.skinID,
                     skinName: skinDoc.skinName,

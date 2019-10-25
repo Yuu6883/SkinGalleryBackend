@@ -67,9 +67,9 @@ module.exports = new class API extends EventEmitter {
         });
     }
 
-    uploadSkin(name, data) {
+    uploadSkin(name, data, isPublic) {
         $.post({
-            url: "/api/skins/" + encodeURIComponent(name),
+            url: `/api/skins/${encodeURIComponent(name)}${isPublic ? "?public=true" : ""}`,
             data,
             /** @param {{status:SkinStatus}} res */
             success: res => {
@@ -94,13 +94,13 @@ module.exports = new class API extends EventEmitter {
         });
     }
 
-    editSkinName(skinID, newName) {
+    editSkin({ skinID, newName, isPublic }) {
         $.ajax({
             method: "PUT",
-            url: `/api/skins/${skinID}?name=${encodeURIComponent(newName)}`,
+            url: `/api/skins/${skinID}?name=${encodeURIComponent(newName)}&public=${!!isPublic}`,
             dataType: "json",
             success: res => {
-                if (res.success) this.emit("skinEditSuccess", newName);
+                if (res.success) this.emit("skinEditSuccess", { newName, isPublic });
             },
             error: console.error
         });

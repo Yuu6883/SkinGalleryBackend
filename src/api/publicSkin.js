@@ -8,7 +8,7 @@ const endpoint = {
 
         res.json(this.skins.getPublicSkins(~~req.query.page));
     },
-    method: "GET",
+    method: "get",
     path:   "/public"
 }
 

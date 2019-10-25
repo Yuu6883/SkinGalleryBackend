@@ -9,9 +9,8 @@ const SkinSchema = new mongoose.Schema({
     status:         { type: String,  default: "pending", enum: [ "pending", "rejected", "approved" ] },
     public:         { type: Boolean, default: false },
     favorites:      { type: Number,  default: 0 },
-    tags:           { type: [String], default: ["other"] }
-}, {
-    timestamps: true
+    tags:           { type: [String], default: ["other"] },
+    createdAt:      { type: Number,    default: Date.now }
 });
 
 SkinSchema.index({ skinID: 1 }, { unique: true });
@@ -26,6 +25,7 @@ class SkinCollection {
      */
     constructor(app) {
         this.app = app;
+        this.publicRefreshTimestamp = 0;
         /** @type {SkinDocument[]} */
         this.publicSkins = [];
     }
@@ -35,30 +35,64 @@ class SkinCollection {
             await this.updatePublic();
             this.publicTimeout = setTimeout(u, this.app.config.publicUpdateInterval);
         };
-        u();
+        return u();
     }
 
     stopUpdatePublic() {
         this.publicTimeout && clearTimeout(this.publicTimeout);
     }
 
+    restartUpdatePublic(force) {
+        // Limit operation at most once every 10 seconds
+        if (force || Date.now() - this.publicRefreshTimestamp >= 10 * 1000) {
+            this.publicRefreshTimestamp = Date.now();
+            this.stopUpdatePublic();
+            return this.startUpdatePublic();
+        }
+    }
+
     async updatePublic() {
         this.publicSkins = await SkinModel
-            .find({ status: "approved" })
+            .find({ status: "approved", public: true })
             .sort("-createdAt");
     }
 
     get publicSkinCount() { return this.publicSkins.length }
 
-    getPublicSkins(page = 0) {
+    /**
+     * 
+     * @param {{ page: number, tag: string, sort: string }} param0 
+     */
+    getPublicSkins({page = 0, tag, sort = "" }) {
         let lim = this.app.config.publicPageLimit;
-        return this.publicSkins
+
+        let filtered = this.publicSkins
+            // Make sure the tag exists then filter it
+            .filter(obj => (tag && this.app.config.tags.includes(tag)) ? 
+                            obj.tags.includes(tag) : true);
+
+        let factor = sort[0] == "-" ? 1 : -1;
+        switch (sort) {
+            case "time":
+            case "-time":
+                filtered = filtered.sort((a, b) => factor * (a.createdAt - b.createdAt));
+                break;
+            case "name":
+            case "-name":
+                filtered = filtered.sort((a, b) => factor * (a.skinName.localeCompare(b)));
+                break;
+            case "fav":
+                filtered = filtered.sort((a, b) => factor * (a.favorites - b.favorites));
+                break;
+        }
+            
+        return filtered
             .slice(page * lim, (page + 1) * lim)
             .map(skinDoc => ({
                 id:   skinDoc.skinID,
                 name: skinDoc.skinName,
                 tags: skinDoc.tags,
-                timestamp: skinDoc.createdAt.getTime()
+                timestamp: skinDoc.createdAt
             }));
     }
 
@@ -73,7 +107,7 @@ class SkinCollection {
      * @param {string} ownerID
      */
     async findByOwnerID(ownerID) {
-        const projection = { skinID: true, status: true, skinName: true, _id: false };
+        const projection = { skinID: true, status: true, skinName: true, public: true, createdAt: true, _id: false };
         return await SkinModel.find({ ownerID }, projection);
     }
 
@@ -105,7 +139,7 @@ class SkinCollection {
      * @param {string} messageID
      * @returns {SkinDocument}
      */
-    async create(ownerID, skinID, skinName, status = "pending", public = true, messageID) {
+    async create(ownerID, skinID, skinName, status = "pending", publicSkin = true, messageID) {
         
         if (await this.countByOwnerID(ownerID) >= this.app.config.skinLimit) {
             return null;
@@ -116,7 +150,7 @@ class SkinCollection {
             ownerID,
             skinName,
             status,
-            public,
+            public: publicSkin,
             messageID
         });
     }
@@ -134,13 +168,13 @@ class SkinCollection {
     }
 
     /**
-     * @param {string} skinID
-     * @param {string} name
+     * @param {{ skinID: string, name: string, isPublic: boolean }} param0
      */
-    async editName(skinID, name) {
+    async edit({ skinID, name, isPublic }) {
         const doc = await this.findBySkinID(skinID);
         if (doc == null) return false;
         doc.skinName = name;
+        doc.public = !!isPublic;
         await doc.save();
         return true;
     }

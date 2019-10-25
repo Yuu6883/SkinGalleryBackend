@@ -24,7 +24,7 @@ const escapeHtml = unsafe => unsafe
          .replace(/"/g, "&quot;")
          .replace(/'/g, "&#039;");
 
-/** @param {{skinID:string,skinName:string,status:SkinStatus}} skinObject */
+/** @param {{skinID:string,skinName:string,status:SkinStatus,public:boolean}} skinObject */
 const linkedSkinPanel = skinObject => {
 
     let link = skinObject.status === "approved" ? `/s/${skinObject.skinID}` : `/api/p/skin/${skinObject.skinID}`;
@@ -39,11 +39,20 @@ const linkedSkinPanel = skinObject => {
             </div>
             <div class="top-right uk-label uk-label-${labelClass} uk-transition-slide-top">${skinObject.status}</div>
             <h3 class="text uk-position-bottom-center uk-margin-small-bottom">${escapeHtml(skinObject.skinName)}</h3>
+            <div class="top-left">
+                <span uk-icon="icon:${skinObject.public ? "users" : "lock"};ratio:1.5" 
+                      class="text uk-transition-slide-top info skin-edit ${skinObject.public ? "" : "danger-text"}"
+                      skin-id="${skinObject.skinID}" skin-name="${skinObject.skinName}" ${skinObject.public ? "skin-public='true'" : ""} 
+                      uk-tooltip="This skin is ${skinObject.public ? "public" : "private"}"></span>
+            </div>
             <div class="bottom-right">
                 ${skinObject.status === "approved" ? `<span uk-icon="icon:link;ratio:1.5"      class="text uk-transition-slide-bottom skin-link"
                 link="${window.location.origin}${link}" uk-tooltip="Copy skin URL"></span><br>` : ""}
+
                 <span uk-icon="icon:file-edit;ratio:1.5" class="text uk-transition-slide-bottom skin-edit"
-                        skin-id="${skinObject.skinID}" skin-name="${skinObject.skinName}" uk-tooltip="Edit this skin's name"></span><br>
+                        skin-id="${skinObject.skinID}" skin-name="${skinObject.skinName}" ${skinObject.public ? "skin-public='true'" : ""} 
+                        uk-tooltip="Edit this skin"></span><br>
+
                 <span uk-icon="icon:trash;ratio:1.5"     class="text uk-transition-slide-bottom skin-delete"
                         skin-id="${skinObject.skinID}" skin-name="${skinObject.skinName}" uk-tooltip="Delete this skin"></span>
             </div>
@@ -112,12 +121,14 @@ $(window).on("load", () => {
         Prompt.skinResult(res).then(() => API.listSkin());
     });
 
-    API.on("skinEditSuccess", newName => {
-        Prompt.skinEditResult(escapeHtml(newName)).then(() => API.listSkin());
+    API.on("skinEditSuccess", ({ newName, isPublic }) => {
+        Prompt.skinEditResult({ name: escapeHtml(newName), isPublic })
+              .then(() => API.listSkin());
     });
 
     API.on("skinDeleteSuccess", name => {
-        Prompt.skinDeleteResult(escapeHtml(name)).then(() => API.listSkin());
+        Prompt.skinDeleteResult(escapeHtml(name))
+              .then(() => API.listSkin());
     });
 
     API.init();
@@ -139,7 +150,10 @@ const updateSkinPanel = async skins => {
     $(".skin-upload").click(() => Prompt.inputImage());
 
     $(".skin-edit").click(function() {
-        Prompt.editSkinName($(this).attr("skin-id"), $(this).attr("skin-name"));
+        Prompt.editSkin({ 
+            skinID: $(this).attr("skin-id"),
+            oldName: $(this).attr("skin-name"),
+            wasPublic: !!$(this).attr("skin-public") });
     });
 
     $(".skin-delete").click(function() {

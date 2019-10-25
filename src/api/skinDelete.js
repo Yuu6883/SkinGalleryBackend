@@ -30,7 +30,11 @@ const endpoint = {
         if (!(await this.bot.deleteReview(skinDoc.messageID, skinDoc.status)))
             this.logger.warn("Bot failed to delete review");
 
-        res.json({ success: await this.skins.deleteByID(req.params.skinID) });
+        let success = await this.skins.deleteByID(req.params.skinID);
+        
+        await this.skins.restartUpdatePublic();
+        
+        res.json({ success });
         
     },
     method: "delete",

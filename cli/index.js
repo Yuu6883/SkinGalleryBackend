@@ -34,10 +34,12 @@ app.init().then(() => {
         }
         repl.prompt(false);
     });
-    repl.once("SIGINT", () => {
+    repl.once("SIGINT", async () => {
         repl.close();
         app.logger.inform("SIGINT on REPL");
-        app.stop();
+        await app.stop();
+
+        process.exit(0);
     });
     repl.prompt(false);
 });

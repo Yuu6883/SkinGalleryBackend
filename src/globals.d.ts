@@ -31,6 +31,7 @@ interface AppConfig {
     approveThreshold: number;
     rejectThreshold:  number;
     reviewInterval:   number;
+    tags:   string[];
     admins: string[];
     prefix: string;
 }
@@ -52,9 +53,9 @@ interface SkinEntry {
     messageID: string;
     status:    SkinStatus;
     public:    boolean;
+    favorites: number;
     tags:      string[];
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: Number;
 }
 declare type SkinStatus = "pending" | "rejected" | "approved";
 declare type SkinDocument = import("mongoose").Document & SkinEntry;

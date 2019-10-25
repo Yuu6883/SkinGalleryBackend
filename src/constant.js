@@ -28,7 +28,7 @@ const USER_DEV_AUTH_LEVEL       = p.SUDO;
 
 const USER_BANNED_AUTH_LEVEL    = USER_BASE_AUTH_LEVEL;
 const USER_BASIC_AUTH_LEVEL     = USER_BASE_AUTH_LEVEL  | p.UPLOAD_SKIN  | 
-                                    p.MODIFY_SKIN | p.DELETE_SKIN | VIEW_PUBLIC_SKIN;
+                                    p.MODIFY_SKIN | p.DELETE_SKIN | p.VIEW_PUBLIC_SKIN;
                                     
 const USER_MOD_AUTH_LEVEL       = USER_BASIC_AUTH_LEVEL | p.LIST_OTHER_SKINS | p.DELETE_OTHER_SKIN |
                                     p.APPROVE_SKIN | p.REJECT_SKIN | p.BAN_USER | p.UNBAN_USER;

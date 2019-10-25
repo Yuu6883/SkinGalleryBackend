@@ -70,7 +70,7 @@ module.exports = new class Prompt {
             onOpen: () => {
                 let self = this;
                 $("#skin-input").change(function() {
-                    readImage(this.files.item(0)).then(skin => self.editSkin(skin));
+                    readImage(this.files.item(0)).then(skin => self.confirmSkin(skin));
                 });
             }
         }).then(result => {
@@ -80,7 +80,7 @@ module.exports = new class Prompt {
             if (url) {
                 let img = new Image;
                 img.crossOrigin = "anonymous";
-                img.onload = () => this.editSkin({ name: url.split("/").slice(-1)[0], img });
+                img.onload = () => this.confirmSkin({ name: url.split("/").slice(-1)[0], img });
                 img.onabort = img.onerror = () => this.alert.fire("Invalid Skin URL", `Failed to load image from ${url}`, "error");
                 img.src = url;
             }
@@ -92,7 +92,7 @@ module.exports = new class Prompt {
     }
 
     /** @param {{name:String,img:HTMLImageElement}} skin */
-    editSkin(skin) {
+    confirmSkin(skin) {
         let canvas = document.createElement("canvas");
         canvas.width = canvas.height = 512;
         $(canvas).addClass("skin-preview");
@@ -107,6 +107,7 @@ module.exports = new class Prompt {
             extraMessage = `Warning: Your image dimension is ${skin.img.width}x${skin.img.height}.` + 
                            ` 512x512 skin recommended. Other size will be force scaled.`
 
+        let isPublic = true;
         this.alert.fire({
             title: "Preview",
             text: extraMessage,
@@ -122,10 +123,15 @@ module.exports = new class Prompt {
             inputValue: skin.name.split(".").slice(0, -1).join(".").slice(0, 16),
             onOpen: () => {
                 $(this.alert.getContent()).prepend(canvas);
+                $(this.alert.getContent()).append(
+                    $(`<label><input class="uk-checkbox" type="checkbox" checked>` + 
+                    ` <strong>Public</strong> (visible to everyone)</label>`)
+                        .click(function() { isPublic = $(this).is(":checked") })
+                );
             }
         }).then(result => {
             if (result.dismiss) return;
-            API.uploadSkin($(this.alert.getInput()).val(), canvas.toDataURL("image/png", 1));
+            API.uploadSkin($(this.alert.getInput()).val(), canvas.toDataURL("image/png", 1), isPublic);
         });
     }
 
@@ -147,17 +153,21 @@ module.exports = new class Prompt {
         }
     }
 
-    skinEditResult(newName) {
-        return this.alert.fire("Success", `Skin name changed to ${newName}`, "success");
+    skinEditResult({ name, isPublic }) {
+        return this.alert.fire("Success", `Skin <strong>${name}</strong> is ${isPublic ? "public" : "private"}`, "success");
     }
 
     skinDeleteResult(skinName) {
         return this.alert.fire("Success", `Skin ${skinName} deleted`, "success");
     }
 
-    editSkinName(skinID, oldName) {
+    /**
+     * @param {{ skinID: string, oldName: string, wasPublic: boolean }} param0
+     */
+    editSkin({skinID, oldName, wasPublic }) {
+        let isPublic = wasPublic;
         this.alert.fire({
-            title: "Edit Skin Name",
+            title: "Edit Skin",
             input: "text",
             inputAttributes: {
                 maxLength: 16
@@ -165,11 +175,21 @@ module.exports = new class Prompt {
             inputAutoTrim: true,
             confirmButtonText: "Save",
             showCancelButton: true,
-            inputValue: oldName
+            inputValue: oldName,
+            onOpen: () => {
+                $(this.alert.getContent()).append(
+                    $(`<label><strong>Public</strong> (visible to everyone)</label>`)
+                        .prepend( 
+                            $(`<input class="uk-checkbox" type="checkbox">`)
+                                .attr("checked", wasPublic)
+                                .click(function() { isPublic = $(this).is(":checked") })),                       
+                );
+            }
         }).then(result => {
             if (result.dismiss) return;
-            if (result.value == oldName) return;
-            API.editSkinName(skinID, result.value);
+            if (result.value == oldName && isPublic == wasPublic) {
+                this.alert.fire("No changes to be made", "", "warning");
+            } else API.editSkin({ skinID, newName: result.value, isPublic });
         });
     }
     

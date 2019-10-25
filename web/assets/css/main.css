@@ -38,10 +38,6 @@ body, html {
     overflow-y: scroll;
 }
 
-#my-skin {
-
-}
-
 .skin-preview {
     width: 100%;
     height: 100%;
@@ -77,9 +73,17 @@ body, html {
 }
 
 .info {
-    stroke-width: 5px;
+    stroke-width: 2px;
     cursor: pointer;
     color: #99610d!important;
+}
+
+.uk-checkbox:checked {
+   background-color: #b1700f!important; 
+}
+
+.uk-checkbox:focus, .uk-radio:focus {
+   border-color: #b1700f!important; 
 }
 
 .info:hover {
@@ -112,12 +116,12 @@ body, html {
     background-color: rgb(73, 73, 73);
 }
 
-.skin-upload, .skin-edit {
+.skin-upload, .skin-edit, .toggle-public {
     color: #b1700f!important;
     margin-bottom: 10px;
 }
 
-.skin-upload:hover, .skin-edit:hover {
+.skin-upload:hover, .skin-edit:hover, .toggle-public:hover {
     color: #99610d!important;
 }
 
@@ -201,4 +205,13 @@ body, html {
 
 .button-group {
     min-width: 150px;
+}
+
+
+.danger-text {
+    color: rgba(190, 0, 0, 0.8)!important;
+}
+
+.danger-text:hover {
+    color: rgb(190, 0, 0)!important;
 }

@@ -8,9 +8,9 @@ const endpoint = {
             !hasPermission("FAV_SKIN", req.vanisPermissions))
             return void res.sendStatus(403);
 
-        if (req.params.userID == '@me')
+        if (req.params.userID == '@me') {
             return void res.json(req.vanisUser.favorites);
-        else {
+        } else {
             if (!hasPermission("LIST_OTHER_FAV", req.vanisPermissions))
                 return void res.sendStatus(404);
 

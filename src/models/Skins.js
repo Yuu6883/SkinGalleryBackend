@@ -90,11 +90,12 @@ class SkinCollection {
 
         return {
             skins: filtered
-                .slice(page * lim, (page + 1) * lim)
+                .slice(~~page * lim, (~~page + 1) * lim)
                 .map(skinDoc => ({
                     id:   skinDoc.skinID,
                     name: skinDoc.skinName,
                     tags: skinDoc.tags,
+                    favorites: skinDoc.favorites,
                     timestamp: skinDoc.createdAt
                 })),
             total
@@ -110,9 +111,11 @@ class SkinCollection {
 
     /**
      * @param {string} ownerID
+     * @returns {ClientSkin[]}
      */
     async findByOwnerID(ownerID) {
-        const projection = { skinID: true, status: true, skinName: true, public: true, createdAt: true, _id: false };
+        const projection = { skinID: true, status: true, skinName: true, tags: true, 
+            public: true, createdAt: true, favorites: true, _id: false };
         return await SkinModel.find({ ownerID }, projection);
     }
 

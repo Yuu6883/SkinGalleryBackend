@@ -135,6 +135,37 @@ module.exports = new class Prompt {
         });
     }
 
+    /** @param {ClientSkin} skin */
+    warnDuplicate(skin) {
+        if (skin.status == "approved") {
+            this.alert.fire({
+                title: "Duplicate Skin",
+                imageUrl: `${window.origin}/s/${skin.skinID}`,
+                text:  "Please try not to submit a duplicate skin. " +
+                       `This skin is already approved: ` + 
+                       `<a>${window.origin}/s/${skin.skinID}</a>`,
+                type: "warning",
+            });
+        } else if (skin.status == "pending") {
+            this.alert.fire({
+                title: "Duplicate Skin",
+                imageUrl: `${window.origin}/s/${skin.skinID}`,
+                text:  "Please try not to submit a duplicate skin. " +
+                       `This skin is pending right now. Moderators would normally review and ` + 
+                       `most likely approve your skin in a few minutes. Your patience is appreciated.`,
+                type: "warning",
+            });
+        } else if (skin.status == "rejected") {
+            this.alert.fire({
+                title: "Duplicate Skin",
+                text:  "Please try not to submit a duplicate skin, " + 
+                       "especially when the previous one is already rejected. " +
+                       "Your action might cause your account to be banned from this website.",
+                type: "warning",
+            });
+        }
+    }
+
     /** @param {{status:SkinStatus}} res */
     skinResult(res) {
         switch (res.status) {

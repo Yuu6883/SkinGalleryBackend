@@ -11,6 +11,7 @@ const config = {
     discordAppSecret:   "xjUwM_wkafEYK_hGKwaikww3W9p0zid4",
     discordAppRedirect: "https://skins.vanis.io/api/login/callback",
     discordBotToken:    "NjE0NzEyMDA0NjQ0NDM4MDQ3.XWDgUw.BisdBGMA-KJxUpXlRr03pUrgmBs",
+    userinfoCacheTime: 30 * 60 * 1000, // 30 minutes
 
     publicUpdateInterval: 5 * 60 * 1000, // 5 minutes
     publicPageLimit: 20,

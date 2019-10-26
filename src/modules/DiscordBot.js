@@ -1,12 +1,12 @@
+const fs = require("fs");
 const DiscordJS = require("discord.js");
 const { execSync } = require("child_process");
-const fs = require("fs");
-const { Attachment, RichEmbed } = DiscordJS;
+const { Attachment, RichEmbed, Client } = DiscordJS;
 
 const table = require("./StringTable");
 const { SKIN_STATIC, PENDING_SKIN_STATIC } = require("../constant");
 
-class VanisSkinsDiscordBot extends DiscordJS.Client {
+class VanisSkinsDiscordBot extends Client {
     /**
      * @param {App} app
      * @param {DiscordJS.ClientOptions} options
@@ -167,16 +167,16 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
      * @param {DiscordJS.Message} message 
      */
     async delete(skinID, message) {
-        if (!/^\w{6}$/.test(skinID)) {
-            return message.reply(`Invalid skin ID: \`${skinID}\``);
-        }
+        if (!/^\w{6}$/.test(skinID))
+            return await message.reply(`Invalid skin ID: \`${skinID}\``);
 
         let skinDoc = await this.app.skins.findBySkinID(skinID);
 
         if (skinDoc === null)
             return message.reply(`Can't find skin ID \`${skinID}\``);
 
-        let skinPath = skinDoc.status === "approved" ? SKIN_STATIC : PENDING_SKIN_STATIC;
+        let skinPath = skinDoc.status === "approved" ? 
+                            SKIN_STATIC : PENDING_SKIN_STATIC;
         skinPath += `/${skinDoc.skinID}.png`;
 
         if (!fs.existsSync(skinPath)) {
@@ -188,8 +188,8 @@ class VanisSkinsDiscordBot extends DiscordJS.Client {
         
         let success = await this.app.skins.deleteByID(skinID);
 
-        message.channel.send(success ? `Skin \`${skinID}\` deleted` : `Failed to delete skin \`${skinID}\``);
-    
+        await message.channel.send(success ? `Skin \`${skinID}\` deleted` :
+            `Failed to delete skin \`${skinID}\``);
     }
 
     /**

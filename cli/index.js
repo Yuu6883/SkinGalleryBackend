@@ -1,4 +1,4 @@
-process.once("unhandledRejection", err => { throw err; });
+process.once("unhandledRejection", err => app.logger.onError(err));
 
 const readline = require("readline");
 

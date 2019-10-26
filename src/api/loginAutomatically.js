@@ -6,15 +6,20 @@ const endpoint = {
 
         if (!hasPermission("LOGIN", req.vanisPermissions)) {
             this.logger.inform("no permision", req.vanisUser, req.vanisPermissions);
-            return void res.sendStatus(403);
+            return void res.clearCookie(VANIS_TOKEN_COOKIE).sendStatus(403);
         }
 
-        if (!req.vanisUser) {
-            return void res.sendStatus(403);
-        }
-            
-        const discordUserInfo = await this.provision.ensureDiscordAuthorization(req.vanisUser, true);
-        if (discordUserInfo == null)
+        if (!req.vanisUser)
+            return void res.clearCookie(VANIS_TOKEN_COOKIE).sendStatus(403);
+
+        /** @type {DiscordUser} */
+        let discordUserInfo;
+
+        if (Date.now() - req.vanisUser.cacheTimestamp < this.config.userinfoCacheTime)
+           discordUserInfo = await this.provision.ensureDiscordAuthorization(
+               req.vanisUser, true);
+
+        if (!discordUserInfo || !Object.keys(discordUserInfo).length)
             // Failure at gateway
             return void res.sendStatus(502);
 
@@ -25,7 +30,8 @@ const endpoint = {
             discriminator: discordUserInfo.discriminator,
             avatar: discordUserInfo.avatar,
             moderator: req.vanisUser.moderator,
-            bannedUntil: req.vanisUser.bannedUntil && req.vanisUser.bannedUntil.getTime()
+            bannedUntil: req.vanisUser.bannedUntil && 
+                         req.vanisUser.bannedUntil.getTime()
         });
     },
     method: "post",

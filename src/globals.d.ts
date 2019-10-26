@@ -14,6 +14,7 @@ interface AppConfig {
     discordAppSecret:   string;
     discordAppRedirect: string;
     discordBotToken:    string;
+    userinfoCacheTime:  number;
 
     publicUpdateInterval: string;
     publicPageLimit: string;
@@ -41,6 +42,8 @@ interface UserEntry {
     discordToken:   string;
     discordRefresh: string;
     vanisToken:     string;
+    cacheTimestamp: number;
+    cacheInfo:      Map<string,string>;
     moderator:      boolean;
     bannedUntil:    Date;
     favorites:      string[];
@@ -58,6 +61,19 @@ interface SkinEntry {
     tags:      string[];
     createdAt: Number;
 }
+
+interface ClientSkin {
+    skinID:    string;
+    status:    SkinStatus;
+    skinName:  boolean;
+    public:    boolean;
+    createdAt: number;
+    favorites: number;
+    tags:      string[];
+}
+
+declare type ClientSkinWithHash = ClientSkin & { hash: string };
+
 declare type SkinStatus = "pending" | "rejected" | "approved";
 declare type SkinDocument = import("mongoose").Document & SkinEntry;
 

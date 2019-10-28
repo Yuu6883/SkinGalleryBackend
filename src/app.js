@@ -41,6 +41,7 @@ class VanisSkinsApp {
         });
         this.logger.inform("Connected to database");
         await this.bot.init();
+        await this.nsfwBot.init();
         await this.webserver.init();
 
         this.skins.startUpdatePublic();

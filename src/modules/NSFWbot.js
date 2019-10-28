@@ -42,31 +42,29 @@ class NSFWbot {
         this.ctx.fillRect(0, 0, this.size, this.size);
         this.ctx.drawImage(img, 0, 0, this.size, this.size);
 
-        let input = TensorFlow.browser
-            .fromPixels(this.canvas, 4)
-            .toFloat()
-
-        // let sumRGB = input.sum([0, 1]).div(TensorFlow.scalar((this.size / 2) ** 2 * Math.PI / 255));
-
-        let inputArray = input.reshape([this.size ** 2, 4])
-            .arraySync()
-            .filter(rgba => (rgba[0] || rgba[1] || rgba[2]) && (rgba[3] === 255));
-
-        input.dispose();
-
-        let stdRGB = TensorFlow.moments(inputArray, 0);
-
-        let mean = stdRGB.mean.cast("int32").arraySync();
+        /** @type {number[]} */
+        let mean;
 
         // let std = stdRGB.variance.sqrt().cast("int32").arraySync();
 
-        let testResult = await TensorFlow.tidy(() => 
-            this.model.predict(TensorFlow.expandDims(TensorFlow.browser.fromPixels(this.canvas, 3)
-                                                 .toFloat()
-                                                 .div(TensorFlow.scalar(255)
-                                                 ), 0)));
+        let resultArray = await TensorFlow.tidy(() => {            
+            let input = TensorFlow.browser
+                .fromPixels(this.canvas, 4)
+                .toFloat()
 
-        let resultArray = testResult.arraySync()[0];
+            let inputArray = input.reshape([this.size ** 2, 4])
+                .arraySync()
+                .filter(rgba => (rgba[0] || rgba[1] || rgba[2]) && (rgba[3] === 255));
+            let stdRGB = TensorFlow.moments(inputArray, 0);
+            mean = stdRGB.mean.cast("int32").arraySync();
+            
+            return this.model.predict(
+                TensorFlow.expandDims(
+                    TensorFlow.browser.fromPixels(this.canvas, 3)
+                                      .toFloat()
+                                      .div(TensorFlow.scalar(255)), 0))
+                             .arraySync()[0];
+        });
 
         /** @type {NSFWPrediction} */
         let result = resultArray.reduce((prev, curr, index) =>{

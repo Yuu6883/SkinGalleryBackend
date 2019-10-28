@@ -328,6 +328,7 @@ class VanisSkinsDiscordBot extends Client {
     async pendSkinReview(ownerID, nsfwResult, skinID, skinName) {
 
         let color = nsfwResult.avarage_color.replace(/\D/g, " ").match(/\S+/g).map(c => ~~c);
+        nsfwResult.color = nsfwResult.avarage_color;
         delete nsfwResult.avarage_color;
 
         let embed = new RichEmbed()

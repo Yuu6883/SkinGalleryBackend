@@ -422,10 +422,10 @@ class VanisSkinsDiscordBot extends Client {
             let statusMessage = await this.getReviewMessage(skinDoc);
 
             let approvedReactions = statusMessage.reactions.get(this.config.approveEmoji);
-            let rejectReactions = statusMessage.reactions.get(this.config.rejectEmoji);
+            let rejectReactions   = statusMessage.reactions.get(this.config.rejectEmoji);
 
             let approveCount = await this.filterModReaction(approvedReactions);
-            let rejectCount = await this.filterModReaction(rejectReactions);
+            let rejectCount  = await this.filterModReaction(rejectReactions);
 
             if (approveCount >= this.config.approveThreshold) {
 
@@ -584,8 +584,7 @@ class VanisSkinsDiscordBot extends Client {
             if (!(await this.isMod(user.id))) {
                 // this.logger.inform(`${name} not a mod, removing emoji`);
                 await reaction.remove(user);
-            }
-            else count++;
+            } else count++;
         }
 
         return count;

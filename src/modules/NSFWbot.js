@@ -11,11 +11,15 @@ class NSFWbot {
         this.size = 299;
         this.canvas = new Canvas(299, 299);
         this.ctx = this.canvas.getContext("2d");
-        this.init();
     }
 
     async init() {
         let logger = this.app.logger;
+
+        if (this.model) {
+            logger.warn("Failed to init again: NSFW model already loaded");
+            return;
+        }
 
         let now = Date.now();
         logger.inform("Loading NSFW model");

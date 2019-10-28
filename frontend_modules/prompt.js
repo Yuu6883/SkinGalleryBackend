@@ -98,7 +98,8 @@ module.exports = new class Prompt {
         $(canvas).addClass("skin-preview");
 
         let ctx = canvas.getContext("2d");
-        ctx.arc(256, 256, 256, 256, 0, 2 * Math.PI);
+        let r = 512 / 2 + 1;
+        ctx.arc(r, r, r, r, 0, 2 * Math.PI);
         ctx.clip();
         ctx.drawImage(skin.img, 0, 0, 512, 512);
 

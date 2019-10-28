@@ -53,10 +53,10 @@ module.exports = new class API extends EventEmitter {
     }
 
     init() {
-        this.on("loginSuccess", () => localStorage.autoLogin = "ha")
-            .on("loginFail", () => delete localStorage.autoLogin)
+        this.on("loginSuccess",  () => localStorage.autoLogin = "ha")
+            .on("loginFail",     () => delete localStorage.autoLogin)
             .on("logoutSuccess", () => delete localStorage.autoLogin)
-            .on("logoutFail", () => delete localStorage.autoLogin);
+            .on("logoutFail",    () => delete localStorage.autoLogin);
 
         if (localStorage.autoLogin) this.login();
         else this.emit("needToLogin");
@@ -173,7 +173,6 @@ module.exports = new class API extends EventEmitter {
             dataType: "json",
             success: res => {
                 if (res.success) {
-                    this.removeFilehash(skinID);
                     this.emit("skinDeleteSuccess", name);
                 }
             },

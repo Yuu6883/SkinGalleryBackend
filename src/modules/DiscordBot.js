@@ -114,6 +114,11 @@ class VanisSkinsDiscordBot extends Client {
                 await message.channel.send(name + " is " + (isMod ? "**mod**" : "pleb"));
             }
         }
+        
+        if (message.content.startsWith(`${this.prefix}purge `)) {
+            let userID = message.content.replace(/\D/g, "").trim();
+            this.purge(userID, message);
+        }
 
         if (message.content.startsWith(`${this.prefix}count`)) {
             let result = execSync(`ls ${__dirname}/../../skins | wc -l`).toString();

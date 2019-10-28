@@ -21,11 +21,11 @@ const jsonToMap = obj => new Map(Object.entries(obj));
 
 // Pre and post transformation hook
 UserSchema.pre("save", function() {
-    this.cacheInfo = jsonToMap(this.cacheInfo);
+    this.cacheInfo = jsonToMap(this.cacheInfo || {});
 });
 
 UserSchema.post("init", doc => {
-    doc.cacheInfo = mapToJson(doc.cacheInfo);
+    doc.cacheInfo = mapToJson(doc.cacheInfo || new Map());
 });
 
 /** @type {mongoose.Model<UserDocument, {}>} */

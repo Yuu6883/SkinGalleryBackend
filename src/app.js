@@ -36,7 +36,8 @@ class VanisSkinsApp {
         this.logger.inform("App init");
         await mongoose.connect(this.config.dbPath, {
             useNewUrlParser: true,
-            useCreateIndex: true
+            useCreateIndex: true,
+            useFindAndModify: true
         });
         this.logger.inform("Connected to database");
         await this.bot.init();

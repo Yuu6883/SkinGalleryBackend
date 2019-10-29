@@ -13,6 +13,7 @@ skins/*
 
 pending_skins/*
 !pending_skins/404.png
+!pending_skins/400.png
 
 # legacy jpg
 *.jpg

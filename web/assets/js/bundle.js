@@ -22953,6 +22953,7 @@ module.exports = new class Prompt {
             this.alert.fire({
                 title: "Duplicate Skin",
                 imageUrl: `${window.origin}/s/${skin.skinID}`,
+                imageClass: "skin-preview",
                 html:  "Please try not to submit a duplicate skin. " +
                        `This skin is already approved: ` + 
                        `<a>${window.origin}/s/${skin.skinID}</a>`,
@@ -22960,7 +22961,8 @@ module.exports = new class Prompt {
         } else if (skin.status == "pending") {
             this.alert.fire({
                 title: "Duplicate Skin",
-                imageUrl: `${window.origin}/s/${skin.skinID}`,
+                imageUrl: `${window.origin}/api/p/skin/${skin.skinID}`,
+                imageClass: "skin-preview",
                 text:  "Please try not to submit a duplicate skin. " +
                        `This skin is pending right now. Moderators would normally review and ` + 
                        `most likely approve your skin in a few minutes. Your patience is appreciated.`,

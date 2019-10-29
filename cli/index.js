@@ -11,6 +11,11 @@ require("./log-handler")(app);
 
 app.init().then(() => {
 
+    process.once("SIGINT", async () => {
+        await app.stop();
+        process.exit(0);
+    });
+
     // nope
     if (app.config.env === "production") return;
 
@@ -41,5 +46,6 @@ app.init().then(() => {
 
         process.exit(0);
     });
+
     repl.prompt(false);
 });

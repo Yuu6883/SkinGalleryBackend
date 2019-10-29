@@ -17,6 +17,12 @@ class VanisSkinsDiscordBot extends Client {
         this.app = app;
         this.enabled = false;
         this.prefix = app.config.prefix || "!";
+
+        this.on("ready",   () => {
+            /** @type {DiscordJS.TextChannel} */
+            this.debugChannel = this.findChannelByID(this.config.debugChannelID);
+            this.debugChannel.send("Bot ready")
+        });
     }
 
     get config() { return this.app.config; }
@@ -37,8 +43,8 @@ class VanisSkinsDiscordBot extends Client {
         /** @type {DiscordJS.TextChannel} */
         this.notifChannel = this.findChannelByID(this.config.notifChannelID);
 
-        if (!this.pendingChannel || !this.approvedChannel || 
-            !this.rejectedChannel || !this.deletedChannel || !this.notifChannel) 
+        if (!this.pendingChannel || !this.approvedChannel || !this.rejectedChannel ||
+            !this.deletedChannel || !this.notifChannel    || !this.debugChannel) 
             throw Error(`Can't find skin channels ${this.config.skinPendingChannelID}`);
 
         await this.updateMods();
@@ -130,6 +136,19 @@ class VanisSkinsDiscordBot extends Client {
             let result = execSync(`du -h ${__dirname}/../../skins`).toString().split("\t")[0];
             message.channel.send(`Skin folder size: **${result}**`);
         }
+
+        if (message.content.startsWith(`${this.prefix}eval `)) {
+            this.runEval(message);
+        }
+
+        if (message.content == `${this.prefix}approve`) {
+            this.approveAll(message);
+        }
+
+        if (message.content == `${this.prefix}exit`) {
+            this.logger.inform("Exiting via discord command");
+            process.emit("SIGINT");
+        }
     }
 
     /** @param {DiscordJS.Message} message */
@@ -148,10 +167,6 @@ class VanisSkinsDiscordBot extends Client {
         if (message.content.startsWith(`${this.prefix}unban `)) {
             let userID = message.content.replace(/\D/g, "").trim();
             this.unban(userID, message);
-        }
-
-        if (message.content.startsWith(`${this.prefix}eval `)) {
-            this.runEval(message);
         }
     }
 
@@ -308,6 +323,36 @@ class VanisSkinsDiscordBot extends Client {
         this.reviewCycle = null;
 
         return true;
+    }
+
+    /**
+     * @param {string} skinID 
+     * @param {DiscordJS.Message} message 
+     */
+    async approveAll(message) {
+
+        if (!this.stopReviewCycle()) {
+            await message.reply("Failed to stop review cycle");
+            return;
+        }
+
+        let pending = await this.app.skins.getPending();
+
+        pending = pending.filter(s => Date.now() - s.createdAt > 10000);
+
+        for (let skinDoc of pending) {
+            await this.approvePending(skinDoc);
+        }
+
+        if (!this.startReviewCycle()) {
+            await message.reply("Failed to restart review cycle");
+            process.emit("SIGINT");
+        } else {
+            if (pending.length)
+                await message.reply(`Batch approved ${pending.length} skins`);
+            else
+                await message.reply(`Can't find skins to batch approve`);
+        }
     }
 
     /** @param {string} id */
@@ -480,99 +525,123 @@ class VanisSkinsDiscordBot extends Client {
 
             if (approveCount >= this.config.approveThreshold) {
 
-                skinDoc.status = "approved";
-                await skinDoc.save();
-
-                let success = this.moveApprovedSkin(skinDoc.skinID);
-
-                if (success) {
-
-                    let embed = new RichEmbed()
-                        .setTitle("Skin Approved")
-                        .setDescription(`Skin ${skinDoc.skinName} submitted by <@${skinDoc.ownerID}>` +
-                                        ` (${skinDoc.skinID}) was approved by: \n**` + 
-                                         approvedReactions.users.filter(u => u !== this.user)
-                                                                .map(u => `<@${u.id}>`).join(" ") + "**\n")
-                        .setTimestamp();
-
-                    if (this.config.env === "production") {
-                        embed.setThumbnail(`https://skins.vanis.io/s/${skinDoc.skinID}`);
-                    }
-
-                    let message = await this.approvedChannel.send(embed);
-                    skinDoc.messageID = message.id;
-                    await skinDoc.save();
-
-                    let user = this.findUserByID(skinDoc.ownerID);
-
-                    if (user) {
-
-                        let skinEmbed = new RichEmbed()
-                            .setTitle("Your skin was approved!")
-                            .setColor("GREEN")
-                            .setDescription(`Skin URL: **\`https://skins.vanis.io/s/${skinDoc.skinID}\`**`)
-                            .setImage(`https://skins.vanis.io/s/${skinDoc.skinID}`)
-                            .setFooter("Thanks for using this app")
-                            .setTimestamp();
-
-                        try {
-                            let dm = await user.createDM();
-                            await dm.send(skinEmbed);
-                        } catch(_) {
-                            await this.notifChannel.send(`<@${skinDoc.ownerID}>`, embed).catch(_ => {});
-                        }
-                    }
-
-                } else await this.pendingChannel.send(`Error: can't find skin ${skinDoc.skinName}(${skinDoc.skinID})`);
+                await this.approvePending(skinDoc, approvedReactions);
 
             } else if (rejectCount >= this.config.rejectThreshold) {
 
-                skinDoc.status = "rejected";
-                await skinDoc.save();
-
-                let skinPath =`${PENDING_SKIN_STATIC}/${skinDoc.skinID}.png`;
-                let embed = new RichEmbed()
-                        .setTitle("Skin Rejected")
-                        .setColor("RED")
-                        .setDescription(`Skin ${skinDoc.skinName} submitted by <@${skinDoc.ownerID}> ` +
-                                        `(${skinDoc.skinID}) was rejected by: \n**` + 
-                                         rejectReactions.users.filter(u => u !== this.user)
-                                                              .map(u => `<@${u.id}>`).join(" ") + "**\n")
-                        .setTimestamp();
-
-                if (fs.existsSync(skinPath))
-                    embed.attachFile(new Attachment(skinPath, "SPOILER_" + skinDoc.skinName + ".png"));
-
-                let message = await this.rejectedChannel.send(embed);
-
-                // if (fs.existsSync(skinPath))
-                //     fs.unlinkSync(skinPath);
-                // else this.logger.warn(`Can't find rejected skin file to delete`);
-
-                skinDoc.messageID = message.id;
-                await skinDoc.save();
-
-                let user = this.findUserByID(skinDoc.ownerID);
-
-                if (user) {
-
-                    let skinEmbed = new RichEmbed()
-                        .setTitle("Your skin was rejected!")
-                        .setColor("RED")
-                        .setDescription(`You may ask moderators why this skin was rejected.`)
-                        .setTimestamp();
-
-                    try {
-                        let dm = await user.createDM();
-                        await dm.send(skinEmbed);
-                    } catch(_) {
-                        await this.notifChannel.send(`<@${skinDoc.ownerID}>`, skinEmbed).catch(this.logger.onError);
-                    }
-                }
+                await this.rejectPending(skinDoc, rejectReactions);
 
             } else continue;
 
             statusMessage.deletable && (await statusMessage.delete().catch(() => {}));
+        }
+    }
+
+    /**
+     * @param {SkinDocument} skinDoc 
+     * @param {DiscordJS.MessageReaction} approvedReactions
+     */
+    async approvePending(skinDoc, approvedReactions) {
+        skinDoc.status = "approved";
+        await skinDoc.save();
+
+        let success = this.moveApprovedSkin(skinDoc.skinID);
+
+        if (success) {
+
+            let extra = approvedReactions ? `(${skinDoc.skinID}) was approved by: \n**` + 
+                                            approvedReactions.users.filter(u => u !== this.user)
+                                                                .map(u => `<@${u.id}>`).join(" ") + "**\n" :
+                                            `(${skinDoc.skinID}) was batch approved`;
+
+            let embed = new RichEmbed()
+                .setTitle("Skin Approved")
+                .setDescription(`Skin ${skinDoc.skinName} submitted by <@${skinDoc.ownerID}> ${extra}`)
+                .setTimestamp();
+
+            if (this.config.env === "production") {
+                embed.setThumbnail(`https://skins.vanis.io/s/${skinDoc.skinID}`);
+            }
+
+            let message = await this.approvedChannel.send(embed);
+            skinDoc.messageID = message.id;
+            await skinDoc.save();
+
+            let user = this.findUserByID(skinDoc.ownerID);
+
+            if (user) {
+
+                let skinEmbed = new RichEmbed()
+                    .setTitle("Your skin was approved!")
+                    .setColor("GREEN")
+                    .setDescription(`Skin URL: **\`https://skins.vanis.io/s/${skinDoc.skinID}\`**`)
+                    .setImage(`https://skins.vanis.io/s/${skinDoc.skinID}`)
+                    .setFooter("Thanks for using this app")
+                    .setTimestamp();
+
+                try {
+                    let dm = await user.createDM();
+                    await dm.send(skinEmbed);
+                } catch(_) {
+                    await this.notifChannel.send(`<@${skinDoc.ownerID}>`, embed).catch(_ => {});
+                }
+            }
+
+        } else await this.pendingChannel.send(`Error: can't find skin ${skinDoc.skinName}(${skinDoc.skinID})`);
+    }
+
+    /**
+     * @param {SkinDocument} skinDoc 
+     * @param {DiscordJS.MessageReaction} rejectReactions
+     */
+    async rejectPending(skinDoc, rejectReactions) {
+        skinDoc.status = "rejected";
+        await skinDoc.save();
+
+        let skinPath =`${PENDING_SKIN_STATIC}/${skinDoc.skinID}.png`;
+        let extra = rejectReactions ? `(${skinDoc.skinID}) was rejected by: \n**` + 
+                                        rejectReactions.users.filter(u => u !== this.user)
+                                                    .map(u => `<@${u.id}>`).join(" ") + "**\n" :
+                                      "";
+
+        if (!extra) {
+            this.logger.warn(`Skin must be rejected with reactions`);
+        }
+
+        let embed = new RichEmbed()
+                .setTitle("Skin Rejected")
+                .setColor("RED")
+                .setDescription(`Skin ${skinDoc.skinName} submitted by <@${skinDoc.ownerID}> ${extra}`)
+                .setTimestamp();
+
+        if (fs.existsSync(skinPath))
+            embed.attachFile(new Attachment(skinPath, "SPOILER_" + skinDoc.skinName + ".png"));
+
+        let message = await this.rejectedChannel.send(embed);
+
+        // if (fs.existsSync(skinPath))
+        //     fs.unlinkSync(skinPath);
+        // else this.logger.warn(`Can't find rejected skin file to delete`);
+
+        skinDoc.messageID = message.id;
+        await skinDoc.save();
+
+        let user = this.findUserByID(skinDoc.ownerID);
+
+        if (user) {
+
+            let skinEmbed = new RichEmbed()
+                .setTitle("Your skin was rejected!")
+                .setColor("RED")
+                .setDescription(`You may ask moderators why this skin was rejected.`)
+                .setTimestamp();
+
+            try {
+                let dm = await user.createDM();
+                await dm.send(skinEmbed);
+            } catch(_) {
+                await this.notifChannel.send(`<@${skinDoc.ownerID}>`, skinEmbed).catch(this.logger.onError);
+            }
         }
     }
 
@@ -681,6 +750,8 @@ class VanisSkinsDiscordBot extends Client {
     }
 
     async stop() {
+        
+        await this.debugChannel.send("Bot Stopping");
         await this.destroy();
         this.logger.inform("Discord bot logged out");
     }

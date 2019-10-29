@@ -15,10 +15,19 @@ const endpoint = {
         /** @type {DiscordUser} */
         let discordUserInfo;
 
-        if (Date.now() - req.vanisUser.cacheTimestamp < this.config.userinfoCacheTime) {
+        if (Date.now() - req.vanisUser.cacheTimestamp >
+            this.config.userinfoCacheTime || 
+            !Object.keys(req.vanisUser.cacheInfo).length) {
+
             discordUserInfo = await this.provision.ensureDiscordAuthorization(
                 req.vanisUser, true);
+
+            if (discordUserInfo == null)
+                return void res.sendStatus(500);
+
             req.vanisUser.cacheTimestamp = Date.now();
+            req.vanisUser.cacheInfo = discordUserInfo;
+
             await req.vanisUser.save();
         } else discordUserInfo = req.vanisUser.cacheInfo;
 

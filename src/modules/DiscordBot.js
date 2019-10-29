@@ -433,16 +433,19 @@ class VanisSkinsDiscordBot extends Client {
 
         let embed = new RichEmbed()
             .setColor(color)
-            .setDescription(`**NSFW Prediction of \`${skinName}\` submitted by <@${ownerID}> (${skinID}):**` + 
-                            `\n\`\`\`prolog\n${table(nsfwResult)}\`\`\``)
+            .setTitle(`Skin ${skinID}`)
+            .setDescription(`Submitted by **<@${ownerID}>**`) 
+                            // `\n\`\`\`prolog\n${table(nsfwResult)}\`\`\``)
             .setFooter(`${this.config.approveThreshold} ${this.config.approveEmoji} to approve | ` + 
-                       `${this.config.rejectThreshold} ${this.config.rejectEmoji} to reject`)
+                       `${this.config.rejectThreshold } ${this.config.rejectEmoji } to reject`)
             .setTimestamp();
 
         if (nsfwResult.data && this.config.env == "development")
             embed.attachFile(new Attachment(nsfwResult.data, `SPOILER_${skinName}.png`));
-        else if (this.config.env == "production")
-            embed.setThumbnail(`https://skins.vanis.io/api/p/skin/${skinID}`);
+        else if (this.config.env == "production") {
+            let url = `https://skins.vanis.io/api/p/skin/${skinID}`;
+            embed.setThumbnail(url).setURL(url);
+        }
 
         /** @type {DiscordJS.Message} */
         let message = await this.pendingChannel.send(embed);

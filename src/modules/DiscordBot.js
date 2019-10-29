@@ -396,7 +396,7 @@ class VanisSkinsDiscordBot extends Client {
                            `${this.config.rejectThreshold } ${this.config.rejectEmoji } to reject`)
                 .setTimestamp();
 
-            let url = `https://skins.vanis.io/api/p/skin/${skinID}`;
+            let url = `https://skins.vanis.io/api/p/skin/${skinDoc.skinID}`;
             
             embed.setURL(url).setThumbnail(url);
 

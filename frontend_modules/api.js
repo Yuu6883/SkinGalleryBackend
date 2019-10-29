@@ -15,6 +15,9 @@ module.exports = new class API extends EventEmitter {
         /** @type {ClientSkinWithHash[]} */
         this.mySkins = [];
     }
+    
+    /** @param {string} id */
+    validateID(id) { return /^\w{6}$/.test(id) }
 
     /** @param {string} skinID */
     async getSkinHash(skinID) {
@@ -24,7 +27,7 @@ module.exports = new class API extends EventEmitter {
         /** @type {Promise<HTMLImageElement} */
         let loadImagePromise = new Promise(resolve => {
             img.onload = () => resolve(img);
-            img.onerror = img.onabort = resolve();
+            img.onerror = img.onabort = _ => resolve();
         });
 
         img.src = `${window.origin}/s/${skinID}`;
@@ -139,12 +142,13 @@ module.exports = new class API extends EventEmitter {
                     for (let s of res) {
                         if (this.mySkins.find(skin => skin.skinID == s.skinID))
                             return;
-                        console.log(`Calculating image hash for ${s.skinID}`);
+                        // console.log(`Calculating image hash for ${s.skinID}`);
 
                         s.hash = await this.getSkinHash(s.skinID);
+                        // console.log(`Hash: ${s.hash}`);
 
-                        if (!s.hash) 
-                            console.error(`Failed to calculate image hash for ${s.skinID}`);
+                        // if (!s.hash) 
+                        //     console.error(`Failed to calculate image hash for ${s.skinID}`);
                         temp.push(s);
                     }
                     this.mySkins = temp;

@@ -115,6 +115,7 @@ $(window).on("load", () => {
     }));
 
     API.on("myskin", skins => updateSkinPanel(skins));
+    API.on("duplicate", s => Prompt.warnDuplicate(s))
 
     API.on("skinUploaded", res => {
         if (res.error) return console.error(res.error);
@@ -135,6 +136,13 @@ $(window).on("load", () => {
 
     $(document).ajaxStart(() => Prompt.showLoader());
     $(document).ajaxComplete(() => Prompt.hideLoader());
+    $(document).ajaxError((_, xhr) => {
+        Prompt.alert.fire({
+            title: `Error[${xhr.status}]: ${xhr.statusText}`,
+            text: "Please report this issue on discord.",
+            type: "error"
+        });
+    });
 });
 
 const updateSkinPanel = async skins => {

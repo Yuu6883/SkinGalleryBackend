@@ -142,10 +142,9 @@ module.exports = new class Prompt {
             this.alert.fire({
                 title: "Duplicate Skin",
                 imageUrl: `${window.origin}/s/${skin.skinID}`,
-                text:  "Please try not to submit a duplicate skin. " +
+                html:  "Please try not to submit a duplicate skin. " +
                        `This skin is already approved: ` + 
                        `<a>${window.origin}/s/${skin.skinID}</a>`,
-                type: "warning",
             });
         } else if (skin.status == "pending") {
             this.alert.fire({
@@ -154,7 +153,6 @@ module.exports = new class Prompt {
                 text:  "Please try not to submit a duplicate skin. " +
                        `This skin is pending right now. Moderators would normally review and ` + 
                        `most likely approve your skin in a few minutes. Your patience is appreciated.`,
-                type: "warning",
             });
         } else if (skin.status == "rejected") {
             this.alert.fire({

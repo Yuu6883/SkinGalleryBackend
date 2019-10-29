@@ -17,6 +17,8 @@ class Cloudflare {
 
     /** @param {String} url */
     async purgeCache(url) {
+        if (this.app.config.env !== "production") return;
+        
         if (!url.startsWith(DOMAIN)) {
             this.logger.warn(`Trying to purge none-related url: ${url}`);
             return;

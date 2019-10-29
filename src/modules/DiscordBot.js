@@ -559,10 +559,10 @@ class VanisSkinsDiscordBot extends Client {
 
         if (success) {
 
-            let extra = approvedReactions ? `(${skinDoc.skinID}) was approved by: \n**` + 
+            let extra = approvedReactions ? `This skin was approved by: \n**` + 
                                             approvedReactions.users.filter(u => u !== this.user)
                                                                 .map(u => `<@${u.id}>`).join(" ") + "**\n" :
-                                            `(${skinDoc.skinID}) was batch approved`;
+                                            `Batch approved`;
 
             let embed = new RichEmbed()
                 .setTitle(`Skin ${skinDoc.skinID} Approved`)
@@ -610,7 +610,7 @@ class VanisSkinsDiscordBot extends Client {
         await skinDoc.save();
 
         let skinPath =`${PENDING_SKIN_STATIC}/${skinDoc.skinID}.png`;
-        let extra = rejectReactions ? `(${skinDoc.skinID}) was rejected by: \n**` + 
+        let extra = rejectReactions ? `This skin was rejected by: \n**` + 
                                         rejectReactions.users.filter(u => u !== this.user)
                                                     .map(u => `<@${u.id}>`).join(" ") + "**\n" :
                                       "";

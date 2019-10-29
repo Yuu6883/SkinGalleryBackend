@@ -46,7 +46,7 @@ class Cloudflare {
         let json = await res.json().catch(() => {});
 
         if (!json.success) {
-            this.logger.onError(`Failed to purge CF cache: ${json.errors}`);
+            this.logger.onError("Failed to purge CF cache", json.errors);
         } else {
             this.purgeList = this.purgeList.slice(CF_PURGE_LIMIT);
             this.logger.debug(`Purged URL's: ${purging.map(p => p.replace(DOMAIN, "")).join(", ")}`);

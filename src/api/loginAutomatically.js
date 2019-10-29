@@ -26,7 +26,7 @@ const endpoint = {
                 req.vanisUser, true);
 
             if (discordUserInfo == null)
-                return void res.sendStatus(500);
+                return void res.clearCookie(VANIS_TOKEN_COOKIE).sendStatus(500);
 
             req.vanisUser.cacheTimestamp = Date.now();
             req.vanisUser.cacheInfo = jsonToMap(discordUserInfo);
@@ -36,7 +36,7 @@ const endpoint = {
 
         if (!discordUserInfo || !Object.keys(discordUserInfo).length)
             // Failure at gateway
-            return void res.sendStatus(500);
+            return void res.clearCookie(VANIS_TOKEN_COOKIE).sendStatus(500);
 
         res.cookie(VANIS_TOKEN_COOKIE, req.vanisUser.vanisToken, { maxAge: VANIS_TOKEN_AGE });
         

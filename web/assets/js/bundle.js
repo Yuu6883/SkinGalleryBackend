@@ -22445,6 +22445,7 @@ module.exports = new class API extends EventEmitter {
         });
 
         img.src = `${window.origin}/s/${skinID}`;
+        img.crossOrigin = "anonymous";
 
         let imageLoaded = await loadImagePromise;
         if (!imageLoaded) return;

@@ -16,18 +16,6 @@ UserSchema.index({ discordID: 1 }, { unique: true });
 UserSchema.index({ discordToken: 1 }, { unique: true, sparse: true });
 UserSchema.index({ vanisToken: 1 }, { unique: true, sparse: true });
 
-const mapToJson = map => [...map.entries()].reduce((prev, curr) => (prev[curr[0]] = curr[1], prev), {});
-const jsonToMap = obj => new Map(Object.entries(obj));
-
-// Pre and post transformation hook
-UserSchema.pre("save", function() {
-    this.cacheInfo = jsonToMap(this.cacheInfo || {});
-});
-
-UserSchema.post("init", doc => {
-    doc.cacheInfo = mapToJson(doc.cacheInfo || new Map());
-});
-
 /** @type {mongoose.Model<UserDocument, {}>} */
 const UserModel = mongoose.model("users", UserSchema);
 

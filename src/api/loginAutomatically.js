@@ -1,5 +1,8 @@
 const { VANIS_TOKEN_COOKIE, VANIS_TOKEN_AGE, hasPermission } = require("../constant");
 
+const mapToJson = map => [...map.entries()].reduce((prev, curr) => (prev[curr[0]] = curr[1], prev), {});
+const jsonToMap = obj => new Map(Object.entries(obj));
+
 /** @type {APIEndpointHandler} */
 const endpoint = {
     async handler(req, res) {
@@ -13,11 +16,11 @@ const endpoint = {
             return void res.clearCookie(VANIS_TOKEN_COOKIE).sendStatus(403);
 
         /** @type {DiscordUser} */
-        let discordUserInfo;
-
+        let discordUserInfo = mapToJson(req.vanisUser.cacheInfo || new Map());
+        
         if (Date.now() - req.vanisUser.cacheTimestamp >
             this.config.userinfoCacheTime || 
-            !Object.keys(req.vanisUser.cacheInfo).length) {
+            !Object.keys(discordUserInfo).length) {
 
             this.logger.debug(`Ensuring discord auth of ${req.vanisUser.discordID}`);
             discordUserInfo = await this.provision.ensureDiscordAuthorization(
@@ -27,11 +30,11 @@ const endpoint = {
                 return void res.sendStatus(500);
 
             req.vanisUser.cacheTimestamp = Date.now();
-            req.vanisUser.cacheInfo = discordUserInfo;
+            req.vanisUser.cacheInfo = jsonToMap(discordUserInfo);
             this.logger.debug("Saving info", discordUserInfo);
 
             await req.vanisUser.save();
-        } else discordUserInfo = req.vanisUser.cacheInfo;
+        }
 
         if (!discordUserInfo || !Object.keys(discordUserInfo).length)
             // Failure at gateway

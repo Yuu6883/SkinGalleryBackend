@@ -345,7 +345,7 @@ class VanisSkinsDiscordBot extends Client {
             this.getReviewMessage(skinDoc).then(msg => {
                 msg && msg.deletable && msg.delete().catch(_ => {});
             });
-            
+
             await this.approvePending(skinDoc);
         }
 
@@ -439,8 +439,10 @@ class VanisSkinsDiscordBot extends Client {
                        `${this.config.rejectThreshold} ${this.config.rejectEmoji} to reject`)
             .setTimestamp();
 
-        if (nsfwResult.data)
+        if (nsfwResult.data && this.config.env == "development")
             embed.attachFile(new Attachment(nsfwResult.data, `SPOILER_${skinName}.png`));
+        else if (this.config.env == "production")
+            embed.setThumbnail(`https://skins.vanis.io/api/p/skin/${skinID}`);
 
         /** @type {DiscordJS.Message} */
         let message = await this.pendingChannel.send(embed);
@@ -756,7 +758,7 @@ class VanisSkinsDiscordBot extends Client {
 
     async stop() {
         
-        await this.debugChannel.send("Bot Stopping");
+        await this.debugChannel.send("Bot stopping");
         await this.destroy();
         this.logger.inform("Discord bot logged out");
     }

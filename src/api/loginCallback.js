@@ -7,13 +7,13 @@ const endpoint = {
         const discordAuthorization = await this.discordAPI.exchange(req.query.code, false);
         if (discordAuthorization.error != null) {
             this.logger.warn(`Initial Discord authorization failed: ${discordAuthorization.error} (${discordAuthorization.error_description})`);
-            return void res.sendStatus(409);
+            return void res.redirect("/");
         }
 
         const discordInfo = await this.discordAPI.fetchUserInfo(discordAuthorization.access_token);
         if (discordAuthorization.error != null) {
             this.logger.onError(`Initial Discord info fetch failed: ${discordInfo.error} (${discordInfo.error_description})`);
-            return void res.sendStatus(500);
+            return void res.redirect("/");
         }
 
         this.logger.debug(`Authorizing`, discordAuthorization);

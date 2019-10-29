@@ -17,6 +17,8 @@ const endpoint = {
             !hasPermission("LIST_OWNED_SKINS", req.vanisPermissions))
             return void res.sendStatus(403);
 
+        this.logger.debug(req.rawHeaders);
+
         let pendingSkins = fs.readdirSync(PENDING_SKIN_STATIC).map(n => n.split(".")[0]);
 
         if (pendingSkins.includes(skinID)) {

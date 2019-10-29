@@ -18,6 +18,9 @@ pending_skins/*
 # legacy jpg
 *.jpg
 
+# Update bash script
+*.bat
+
 # NPM
 node_modules
 package-lock.json

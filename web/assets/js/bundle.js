@@ -22434,7 +22434,7 @@ module.exports = new class API extends EventEmitter {
     validateID(id) { return /^\w{6}$/.test(id) }
 
     /** @param {string} skinID */
-    async getSkinHash(skinID) {
+    async getSkinHash(skinID, pending) {
         if (!this.validateID(skinID)) return;
 
         let img = document.createElement("img");
@@ -22444,7 +22444,7 @@ module.exports = new class API extends EventEmitter {
             img.onerror = img.onabort = _ => resolve();
         });
 
-        img.src = `${window.origin}/s/${skinID}`;
+        img.src = `${window.origin}/${pending ? "api/p/skin" : "s"}/${skinID}`;
         img.crossOrigin = "anonymous";
 
         let imageLoaded = await loadImagePromise;
@@ -22559,7 +22559,7 @@ module.exports = new class API extends EventEmitter {
                             return;
                         // console.log(`Calculating image hash for ${s.skinID}`);
 
-                        s.hash = await this.getSkinHash(s.skinID);
+                        s.hash = await this.getSkinHash(s.skinID, s.status != "approved");
                         // console.log(`Hash: ${s.hash}`);
 
                         // if (!s.hash) 

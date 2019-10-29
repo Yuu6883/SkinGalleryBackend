@@ -341,6 +341,11 @@ class VanisSkinsDiscordBot extends Client {
         pending = pending.filter(s => Date.now() - s.createdAt > 10000);
 
         for (let skinDoc of pending) {
+
+            this.getReviewMessage(skinDoc).then(msg => {
+                msg && msg.deletable && msg.delete().catch(_ => {});
+            });
+            
             await this.approvePending(skinDoc);
         }
 

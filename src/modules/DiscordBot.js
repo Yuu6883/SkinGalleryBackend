@@ -391,7 +391,7 @@ class VanisSkinsDiscordBot extends Client {
 
             let embed = new RichEmbed()
                 .setTitle(`Skin ${skinID} (recovered)`)
-                .setDescription(`"\`${skinName.replace("`", "\\`")}\`"Submitted by **<@${skinDoc.ownerID}>**`) 
+                .setDescription(`\`${skinName.replace("`", "\\`")}\` submitted by <@${skinDoc.ownerID}>`) 
                 .setFooter(`${this.config.approveThreshold} ${this.config.approveEmoji} to approve | ` + 
                            `${this.config.rejectThreshold } ${this.config.rejectEmoji } to reject`)
                 .setTimestamp();
@@ -434,7 +434,7 @@ class VanisSkinsDiscordBot extends Client {
         let embed = new RichEmbed()
             .setColor(color)
             .setTitle(`Skin ${skinID}`)
-            .setDescription(`"\`${skinName.replace("`", "\\`")}\`"Submitted by **<@${ownerID}>**`) 
+            .setDescription(`\`${skinName.replace(/`/g, "\\`")}\` submitted by <@${ownerID}>`) 
                             // `\n\`\`\`prolog\n${table(nsfwResult)}\`\`\``)
             .setFooter(`${this.config.approveThreshold} ${this.config.approveEmoji} to approve | ` + 
                        `${this.config.rejectThreshold } ${this.config.rejectEmoji } to reject`)
@@ -469,8 +469,8 @@ class VanisSkinsDiscordBot extends Client {
         let embed = new RichEmbed()
             .setAuthor(this.user.username, this.user.displayAvatarURL)
             .setColor(color)
-            .setTitle("Skin Approved")
-            .setDescription(`Skin **${skinName}**(submitted by <@${ownerID}>)(${skinID})`)
+            .setTitle(`Skin ${skinID} Approved`)
+            .setDescription(`\`${skinName.replace(/`/g, "\\`")}\` submitted by <@${ownerID}>`)
             .setFooter(`Automatically approved`)
             .setTimestamp();
 
@@ -496,8 +496,8 @@ class VanisSkinsDiscordBot extends Client {
         let embed = new RichEmbed()
             .setAuthor(this.user.username, this.user.displayAvatarURL)
             .setColor(color)
-            .setTitle("Skin Rejected")
-            .setDescription(`Skin **${skinName}** submitted by <@${ownerID}> (${skinID})`)
+            .setTitle(`Skin ${skinID} Rejected`)
+            .setDescription(`\`${skinName.replace(/`/g, "\\`")}\` submitted by <@${ownerID}>`)
             .setFooter(`Automatically rejected`)
             .setTimestamp();
         
@@ -565,12 +565,13 @@ class VanisSkinsDiscordBot extends Client {
                                             `(${skinDoc.skinID}) was batch approved`;
 
             let embed = new RichEmbed()
-                .setTitle("Skin Approved")
-                .setDescription(`Skin ${skinDoc.skinName} submitted by <@${skinDoc.ownerID}> ${extra}`)
+                .setTitle(`Skin ${skinDoc.skinID} Approved`)
+                .setDescription(`\`${skinDoc.skinName.replace(/`/g,"\\`")}\` submitted by <@${skinDoc.ownerID}> ${extra}`)
                 .setTimestamp();
 
             if (this.config.env === "production") {
-                embed.setThumbnail(`https://skins.vanis.io/s/${skinDoc.skinID}`);
+                let url = `https://skins.vanis.io/s/${skinDoc.skinID}`;
+                embed.setThumbnail(url).setURL(url);
             }
 
             let message = await this.approvedChannel.send(embed);
@@ -619,9 +620,9 @@ class VanisSkinsDiscordBot extends Client {
         }
 
         let embed = new RichEmbed()
-                .setTitle("Skin Rejected")
+                .setTitle(`Skin ${skinDoc.skinID} Rejected`)
                 .setColor("RED")
-                .setDescription(`Skin ${skinDoc.skinName} submitted by <@${skinDoc.ownerID}> ${extra}`)
+                .setDescription(`\`${skinDoc.skinName.replace(/`/g, "\\`")}\` submitted by <@${skinDoc.ownerID}> ${extra}`)
                 .setTimestamp();
 
         if (fs.existsSync(skinPath))

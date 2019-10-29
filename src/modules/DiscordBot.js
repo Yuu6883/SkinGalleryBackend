@@ -137,7 +137,7 @@ class VanisSkinsDiscordBot extends Client {
 
         if (message.content.startsWith(`${this.prefix}delete `)) {
             let skinID = message.content.trim().split(/ /g).slice(1).join(" ");
-            this.delete(skinID);
+            this.delete(skinID, message);
         }
 
         if (message.content.startsWith(`${this.prefix}ban `)) {
@@ -194,8 +194,9 @@ class VanisSkinsDiscordBot extends Client {
         
         let success = await this.app.skins.deleteByID(skinID);
 
+        if (skinDoc.status == "approved")
+            await this.app.cloudflare.purgeCache(`https://skins.vanis.io/s/${skinDoc.skinID}`);
         
-
         await message.channel.send(success ? `Skin \`${skinID}\` deleted` :
             `Failed to delete skin \`${skinID}\``);
     }

@@ -43,7 +43,7 @@ interface UserEntry {
     discordRefresh: string;
     vanisToken:     string;
     cacheTimestamp: number;
-    cacheInfo:      Map<string,string>;
+    cacheInfo:      DiscordUser;
     moderator:      boolean;
     bannedUntil:    Date;
     favorites:      string[];

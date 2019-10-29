@@ -61,9 +61,9 @@ class UserCollection {
      * @param {string} skinID 
      */
     async addFav(userDoc, skinID) {
+        if (userDoc.favorites.includes(skinID)) return false;
         let skinDoc = await this.app.skins.findBySkinID(skinID);
         if (!skinDoc) return false;
-        if (userDoc.favorites.includes(skinID)) return false;
         skinDoc.favorites++;
         userDoc.favorites.push(skinID);
         await Promise.all([skinDoc.save(), userDoc.save()]);

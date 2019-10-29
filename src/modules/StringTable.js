@@ -14,8 +14,8 @@ module.exports = obj => {
     keys = keys.map(k => k[0].toUpperCase() + k.slice(1).toLowerCase().replace(/_/g, " "));
 
     let values = Object.values(obj)
-        .map(number => (number * 100).toFixed(2))
-        .map(number => String(number).length < 5 ? `${number}  %` : `${number} %`);
+        .map(n => isNaN(n) ? String(n) : (n = (n * 100).toFixed(2), 
+            String(n).length < 5 ? `${n}  %` : `${n} %`));
 
     let longestKey   = Math.max(...keys.map(k => k.length));
     let longestValue = Math.max(...values.map(v => v.length));

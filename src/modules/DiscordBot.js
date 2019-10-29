@@ -1,4 +1,5 @@
 const fs = require("fs");
+const fetch = require("node-fetch");
 const DiscordJS = require("discord.js");
 const { execSync } = require("child_process");
 const { Attachment, RichEmbed, Client } = DiscordJS;
@@ -192,6 +193,8 @@ class VanisSkinsDiscordBot extends Client {
             this.logger.warn("Bot failed to delete review");
         
         let success = await this.app.skins.deleteByID(skinID);
+
+        
 
         await message.channel.send(success ? `Skin \`${skinID}\` deleted` :
             `Failed to delete skin \`${skinID}\``);

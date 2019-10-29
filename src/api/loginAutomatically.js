@@ -15,13 +15,16 @@ const endpoint = {
         /** @type {DiscordUser} */
         let discordUserInfo;
 
-        if (Date.now() - req.vanisUser.cacheTimestamp < this.config.userinfoCacheTime)
-           discordUserInfo = await this.provision.ensureDiscordAuthorization(
-               req.vanisUser, true);
+        if (Date.now() - req.vanisUser.cacheTimestamp < this.config.userinfoCacheTime) {
+            discordUserInfo = await this.provision.ensureDiscordAuthorization(
+                req.vanisUser, true);
+            req.vanisUser.cacheTimestamp = Date.now();
+            await req.vanisUser.save();
+        } else discordUserInfo = req.vanisUser.cacheInfo;
 
         if (!discordUserInfo || !Object.keys(discordUserInfo).length)
             // Failure at gateway
-            return void res.sendStatus(502);
+            return void res.sendStatus(500);
 
         res.cookie(VANIS_TOKEN_COOKIE, req.vanisUser.vanisToken, { maxAge: VANIS_TOKEN_AGE });
         res.json({

@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const SkinCache = require("./SkinCache");
+const TIME_0 = 1546243200000;
 
 /** @type {mongoose.Schema<SkinEntry>} */
 const SkinSchema = new mongoose.Schema({
@@ -10,7 +12,23 @@ const SkinSchema = new mongoose.Schema({
     public:         { type: Boolean, default: false },
     favorites:      { type: Number,  default: 0 },
     tags:           { type: [String], default: ["other"] },
-    createdAt:      { type: Number,    default: Date.now }
+    createdAt:      { type: Number }
+});
+
+SkinSchema.pre("save", function() {
+    this.createdAt = this.createdAt || Date.now();
+    // UINT32_MAX
+    if (this.createdAt > 2 ** 32 - 1) {
+        this.createdAt = Math.round((this.createdAt - TIME_0) / 1000);
+    }
+});
+
+SkinSchema.post("init", doc => {
+    doc.createdAt = doc.createdAt || Date.now();
+    // UINT32_MAX
+    if (doc.createdAt > 2 ** 32 - 1) {
+        doc.createdAt = Math.round((doc.createdAt - TIME_0) / 1000);
+    }
 });
 
 SkinSchema.index({ skinID: 1 }, { unique: true });
@@ -28,6 +46,9 @@ class SkinCollection {
         this.publicRefreshTimestamp = 0;
         /** @type {SkinDocument[]} */
         this.publicSkins = [];
+        this.TIME_0 = TIME_0;
+
+        this.publicCache = new SkinCache(app);
     }
 
     startUpdatePublic() {
@@ -53,8 +74,7 @@ class SkinCollection {
 
     async updatePublic() {
         this.publicSkins = await SkinModel
-            .find({ status: "approved", public: true })
-            .sort("-createdAt");
+            .find({ status: "approved", public: true });
     }
 
     get publicSkinCount() { return this.publicSkins.length }

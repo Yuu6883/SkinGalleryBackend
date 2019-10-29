@@ -11,7 +11,7 @@ skins/*
 !skins/404.png
 !skins/vanis[1-9].png
 
-pending_skins/
+pending_skins/*
 !pending_skins/404.png
 
 # legacy jpg

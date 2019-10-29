@@ -9,6 +9,12 @@ body, html {
     margin: 0px;
     overflow: hidden;
     background-color: rgb(16, 16, 16);
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+     -khtml-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
 }
 
 .text {

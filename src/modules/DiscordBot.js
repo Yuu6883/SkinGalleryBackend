@@ -390,15 +390,15 @@ class VanisSkinsDiscordBot extends Client {
         if (!message) {
 
             let embed = new RichEmbed()
-                .setDescription(`${skinDoc.skinName}(recovered because last message was deleted)`)
+                .setTitle(`Skin ${skinID} (recovered)`)
+                .setDescription(`"\`${skinName.replace("`", "\\`")}\`"Submitted by **<@${skinDoc.ownerID}>**`) 
                 .setFooter(`${this.config.approveThreshold} ${this.config.approveEmoji} to approve | ` + 
-                       `${this.config.rejectThreshold} ${this.config.rejectEmoji} to reject`)
+                           `${this.config.rejectThreshold } ${this.config.rejectEmoji } to reject`)
                 .setTimestamp();
 
-            let skinPath = `${PENDING_SKIN_STATIC}/${skinDoc.skinID}.png`;
-
-            if (fs.existsSync(skinPath))
-                embed.attachFile(new Attachment(skinPath, "SPOILER_" + skinDoc.skinName + ".png"));
+            let url = `https://skins.vanis.io/api/p/skin/${skinID}`;
+            
+            embed.setURL(url).setThumbnail(url);
 
             if (skinOwner) {
                 embed.setAuthor(`${skinOwner.username}#${skinOwner.discriminator}` + 
@@ -434,7 +434,7 @@ class VanisSkinsDiscordBot extends Client {
         let embed = new RichEmbed()
             .setColor(color)
             .setTitle(`Skin ${skinID}`)
-            .setDescription(`Submitted by **<@${ownerID}>**`) 
+            .setDescription(`"\`${skinName.replace("`", "\\`")}\`"Submitted by **<@${ownerID}>**`) 
                             // `\n\`\`\`prolog\n${table(nsfwResult)}\`\`\``)
             .setFooter(`${this.config.approveThreshold} ${this.config.approveEmoji} to approve | ` + 
                        `${this.config.rejectThreshold } ${this.config.rejectEmoji } to reject`)

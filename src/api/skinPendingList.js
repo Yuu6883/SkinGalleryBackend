@@ -13,9 +13,9 @@ const endpoint = {
         if (!this.provision.confirmSkinID(skinID))
             return void res.redirect("/api/p/skin/404");
 
-        if (!hasPermission("LOGGED_IN", req.vanisPermissions) || 
-            !hasPermission("LIST_OWNED_SKINS", req.vanisPermissions))
-            return void res.sendStatus(403);
+        // if (!hasPermission("LOGGED_IN", req.vanisPermissions) || 
+        //     !hasPermission("LIST_OWNED_SKINS", req.vanisPermissions))
+        //     return void res.sendStatus(403);
 
         this.logger.debug(req.rawHeaders);
 
@@ -23,13 +23,13 @@ const endpoint = {
 
         if (pendingSkins.includes(skinID)) {
 
-            if (!hasPermission("LIST_OTHER_SKINS") && 
-                !(await this.skins.checkOwnership(req.vanisUser.discordID, skinID))) {
+            // if (!hasPermission("LIST_OTHER_SKINS") && 
+            //     !(await this.skins.checkOwnership(req.vanisUser.discordID, skinID))) {
 
-                return void res.sendStatus(403);
-            } else {
+            //     return void res.sendStatus(403);
+            // } else {
                 return void res.sendFile(PENDING_SKIN_STATIC + "/" + skinID + ".png");
-            }
+            // }
             
         } else {
             return void res.redirect("/api/p/skin/404");

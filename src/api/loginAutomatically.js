@@ -19,6 +19,7 @@ const endpoint = {
             this.config.userinfoCacheTime || 
             !Object.keys(req.vanisUser.cacheInfo).length) {
 
+            this.logger.debug(`Ensuring discord auth of ${req.vanisUser.discordID}`);
             discordUserInfo = await this.provision.ensureDiscordAuthorization(
                 req.vanisUser, true);
 
@@ -27,6 +28,7 @@ const endpoint = {
 
             req.vanisUser.cacheTimestamp = Date.now();
             req.vanisUser.cacheInfo = discordUserInfo;
+            this.logger.debug("Saving info", discordUserInfo);
 
             await req.vanisUser.save();
         } else discordUserInfo = req.vanisUser.cacheInfo;

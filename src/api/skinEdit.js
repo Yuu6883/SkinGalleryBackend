@@ -24,7 +24,7 @@ const endpoint = {
 
         let success = await this.skins.edit({skinID, name, isPublic: req.query.public == "true" });
 
-        await this.skins.restartUpdatePublic(success);
+        await this.skins.restartUpdatePublic();
         
         res.json({ success });
     },

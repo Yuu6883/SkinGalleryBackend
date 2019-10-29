@@ -415,7 +415,7 @@ class VanisSkinsDiscordBot extends Client {
     async updateReview() {
 
         let pendingSkins = await this.app.skins.getPending();
-        this.logger.debug(`Checking ${pendingSkins.length} pending reviews...`);
+        // this.logger.debug(`Checking ${pendingSkins.length} pending reviews...`);
 
         let length = pendingSkins.length;
         if (length) {

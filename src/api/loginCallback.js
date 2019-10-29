@@ -13,7 +13,7 @@ const endpoint = {
         const discordInfo = await this.discordAPI.fetchUserInfo(discordAuthorization.access_token);
         if (discordAuthorization.error != null) {
             this.logger.onError(`Initial Discord info fetch failed: ${discordInfo.error} (${discordInfo.error_description})`);
-            return void res.sendStatus(502);
+            return void res.sendStatus(500);
         }
 
         this.logger.debug(`Authorizing`, discordAuthorization);

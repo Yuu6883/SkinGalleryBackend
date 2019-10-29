@@ -38,7 +38,8 @@ const endpoint = {
             return void res.sendStatus(500);
 
         res.cookie(VANIS_TOKEN_COOKIE, req.vanisUser.vanisToken, { maxAge: VANIS_TOKEN_AGE });
-        res.json({
+        
+        let responseObject = {
             id: discordUserInfo.id,
             username: discordUserInfo.username,
             discriminator: discordUserInfo.discriminator,
@@ -46,7 +47,10 @@ const endpoint = {
             moderator: req.vanisUser.moderator,
             bannedUntil: req.vanisUser.bannedUntil && 
                          req.vanisUser.bannedUntil.getTime()
-        });
+        };
+
+        this.logger.debug(responseObject);
+        res.json(responseObject);
     },
     method: "post",
     path: "/login"

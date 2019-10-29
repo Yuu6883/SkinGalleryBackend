@@ -594,7 +594,8 @@ class VanisSkinsDiscordBot extends Client {
             if (!(await this.isMod(user.id))) {
                 // this.logger.inform(`${name} not a mod, removing emoji`);
                 await reaction.remove(user);
-            } else count++;
+            } else if (this.isAdmin(user.id)) count += 2
+            else count++;
         }
 
         return count;

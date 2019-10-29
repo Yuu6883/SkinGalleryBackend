@@ -391,7 +391,7 @@ class VanisSkinsDiscordBot extends Client {
 
             let embed = new RichEmbed()
                 .setTitle(`Skin ${skinDoc.skinID} (recovered)`)
-                .setDescription(`\`${skinName.replace("`", "\\`")}\` submitted by <@${skinDoc.ownerID}>`) 
+                .setDescription(`\`${skinDoc.skinName.replace("`", "\\`")}\` submitted by <@${skinDoc.ownerID}>`) 
                 .setFooter(`${this.config.approveThreshold} ${this.config.approveEmoji} to approve | ` + 
                            `${this.config.rejectThreshold } ${this.config.rejectEmoji } to reject`)
                 .setTimestamp();

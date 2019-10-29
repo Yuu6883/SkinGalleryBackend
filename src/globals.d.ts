@@ -18,6 +18,7 @@ interface AppConfig {
 
     publicUpdateInterval: string;
     publicPageLimit: string;
+    cfToken: string;
 
     skinLimit: number;
     nsfwLowThreshold:  number;

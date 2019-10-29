@@ -22,7 +22,6 @@ const endpoint = {
             this.config.userinfoCacheTime || 
             !Object.keys(discordUserInfo).length) {
 
-            this.logger.debug(`Ensuring discord auth of ${req.vanisUser.discordID}`);
             discordUserInfo = await this.provision.ensureDiscordAuthorization(
                 req.vanisUser, true);
 
@@ -31,7 +30,6 @@ const endpoint = {
 
             req.vanisUser.cacheTimestamp = Date.now();
             req.vanisUser.cacheInfo = jsonToMap(discordUserInfo);
-            this.logger.debug("Saving info", discordUserInfo);
 
             await req.vanisUser.save();
         }
@@ -42,7 +40,7 @@ const endpoint = {
 
         res.cookie(VANIS_TOKEN_COOKIE, req.vanisUser.vanisToken, { maxAge: VANIS_TOKEN_AGE });
         
-        let responseObject = {
+        res.json({
             id: discordUserInfo.id,
             username: discordUserInfo.username,
             discriminator: discordUserInfo.discriminator,
@@ -50,10 +48,7 @@ const endpoint = {
             moderator: req.vanisUser.moderator,
             bannedUntil: req.vanisUser.bannedUntil && 
                          req.vanisUser.bannedUntil.getTime()
-        };
-
-        this.logger.debug(responseObject);
-        res.json(responseObject);
+        });
     },
     method: "post",
     path: "/login"

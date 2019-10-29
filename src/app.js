@@ -6,6 +6,7 @@ const Logger = require("./modules/Logger");
 const Webserver = require("./modules/Webserver");
 const DiscordAPI = require("./modules/DiscordAPI");
 const NSFWbot = require("./modules/NSFWbot");
+const Cloudflare = require("./modules/Cloudflare");
 
 // Models
 const SkinCollection = require("./models/Skins");
@@ -24,6 +25,7 @@ class VanisSkinsApp {
         this.logger = new Logger();
         this.webserver = new Webserver(this);
         this.discordAPI = new DiscordAPI(this);
+        this.cloudflare = new Cloudflare(this);
         this.nsfwBot = new NSFWbot(this);
 
         // Models
@@ -50,6 +52,7 @@ class VanisSkinsApp {
     async stop() {
         this.logger.inform("App stop");
         await this.webserver.stop();
+        await this.cloudflare.applyPurge();
         await this.bot.stop();
         await mongoose.disconnect();
         this.logger.inform("Disconnected from database");

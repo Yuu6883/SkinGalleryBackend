@@ -34,6 +34,9 @@ const endpoint = {
         
         await this.skins.restartUpdatePublic();
         
+        if (skinDoc.status == "approved")
+            await this.cloudflare.purgeCache(`https://skins.vanis.io/s/${skinDoc.skinID}`);
+        
         res.json({ success });
         
     },

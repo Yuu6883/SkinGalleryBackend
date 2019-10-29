@@ -15,6 +15,7 @@ const config = {
 
     publicUpdateInterval: 5 * 60 * 1000, // 5 minutes
     publicPageLimit: 20,
+    cfToken: "rg0mQSJ5embossQjDiUw1eBtPd9ttbrwB5giBpqJ",
 
     nsfwLowThreshold: .1,
     nsfwHighThreshold: 1,

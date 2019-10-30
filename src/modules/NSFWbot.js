@@ -1,4 +1,4 @@
-const TensorFlow = require("@tensorflow/tfjs-node");
+let TensorFlow;
 const { Canvas, loadImage } = require("canvas");
 const NSFW_CLASSES = ["drawing", "hentai", "neutral", "porn", "sexy"];
 
@@ -20,6 +20,7 @@ class NSFWbot {
             logger.warn("Failed to init again: NSFW model already loaded");
             return;
         }
+        TensorFlow = require("@tensorflow/tfjs-node");
 
         let now = Date.now();
         logger.inform("Loading NSFW model");

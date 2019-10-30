@@ -23,10 +23,10 @@ class VanisSkinsApp {
         // Modules
         this.bot = new Bot(this, { sync: true });
         this.logger = new Logger();
-        this.webserver = new Webserver(this);
+        this.nsfwBot    = new NSFWbot(this);
+        this.webserver  = new Webserver(this);
         this.discordAPI = new DiscordAPI(this);
         this.cloudflare = new Cloudflare(this);
-        this.nsfwBot = new NSFWbot(this);
 
         // Models
         this.skins = new SkinCollection(this);
@@ -41,12 +41,14 @@ class VanisSkinsApp {
             useCreateIndex: true,
             useFindAndModify: true
         });
-        this.logger.inform("Connected to database");
-        await this.bot.init();
-        await this.nsfwBot.init();
-        await this.webserver.init();
 
-        this.skins.startUpdatePublic();
+        this.logger.inform("Connected to database");
+
+        await Promise.all(
+            this.bot.init(),
+            this.nsfwBot.init(),
+            this.webserver.init(),
+            this.skins.startUpdatePublic());
     }
 
     async stop() {

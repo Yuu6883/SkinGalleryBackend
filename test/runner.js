@@ -4,9 +4,9 @@ const App = require("../src/app");
 /** @type {AppConfig} */
 const config = require("../cli/config");
 
-module.exports = async () => {
+module.exports = async noInit => {
     const app = new App(config);
     require("../cli/log-handler")(app);
-    await app.init();
+    noInit || await app.init();
     return app;
 };

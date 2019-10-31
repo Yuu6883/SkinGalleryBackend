@@ -48,6 +48,9 @@ class SkinCollection {
         this.publicSkins = [];
         this.TIME_0 = TIME_0;
 
+        if (this.app.config.env == "development")
+            this.model = SkinModel;
+
         this.publicCache = new SkinCache(app);
     }
 
@@ -64,8 +67,8 @@ class SkinCollection {
     }
 
     restartUpdatePublic(force) {
-        // Limit operation at most once every 10 seconds
-        if (force || Date.now() - this.publicRefreshTimestamp >= 10 * 1000) {
+        // Limit operation at most once every 15 seconds
+        if (force || Date.now() - this.publicRefreshTimestamp >= 15 * 1000) {
             this.publicRefreshTimestamp = Date.now();
             this.stopUpdatePublic();
             return this.startUpdatePublic();

@@ -1,34 +1,50 @@
 const fs = require("fs");
 const { inspect } = require("util");
+const mongoose = require("mongoose");
 const DiscordJS = require("discord.js");
 const { execSync } = require("child_process");
-const { Attachment, RichEmbed, Client } = DiscordJS;
 
-const table = require("./StringTable");
+const Cloudflare = require("./Cloudflare");
+const SkinCollection = require("../models/Skins");
+const UserCollection = require("../models/Users");
+const DiscordLogger = require("./DiscordLogger");
+
+const { Attachment, RichEmbed, Client } = DiscordJS;
 const { SKIN_STATIC, PENDING_SKIN_STATIC } = require("../constant");
 
-class VanisSkinsDiscordBot extends Client {
-    /**
-     * @param {App} app
-     * @param {DiscordJS.ClientOptions} options
-     */
-    constructor(app, options) {
-        super(options);
-        this.app = app;
-        this.enabled = false;
-        this.prefix = app.config.prefix || "!";
+class SkinsDiscordBot extends Client {
 
-        this.on("ready",   () => {
+    /**
+     * @param {DiscordJS.ClientOptions} options
+     * @param {AppConfig} config
+     */
+    constructor(options, config) {
+        super(options);
+        this.enabled = false;
+        this.config = config;
+        this.prefix = config.prefix || "!";
+        this.logger = new DiscordLogger(this);
+
+        this.cloudflare = new Cloudflare({ logger: this.logger });
+        this.dbusers = new UserCollection({ logger: this.logger, config: this.config, cloudflare: this.cloudflare });
+        this.dbskins = new SkinCollection({ logger: this.logger, config: this.config, cloudflare: this.cloudflare });
+
+        this.on("ready", () => {
             /** @type {DiscordJS.TextChannel} */
             this.debugChannel = this.findChannelByID(this.config.debugChannelID);
-            this.debugChannel.send("Bot ready")
+            this.logger.logChannel = this.debugChannel;
         });
     }
 
-    get config() { return this.app.config; }
-    get logger() { return this.app.logger; }
-
     async init() {
+
+        await mongoose.connect(this.config.dbPath, {
+            useNewUrlParser: true,
+            useCreateIndex: true,
+            useFindAndModify: true
+        });
+        this.logger.debug("Connected to database");
+
         await this.login(this.config.discordBotToken);
         this.logger.inform(`Discord bot (${this.user.username}#${this.user.discriminator}) logged in`);
 
@@ -145,6 +161,22 @@ class VanisSkinsDiscordBot extends Client {
             this.approveAll(message);
         }
 
+        if (message.content.startsWith(`${this.prefix}loglevel`)) {
+            await this.logger.printLogLevel();
+        }
+
+        if (message.content == `${this.prefix}flush`) {
+            await this.logger.flush();
+        }
+        
+        if (message.content == `${this.prefix}format`) {
+            await message.channel.send(`Log format: \`${this.logger.format}\``);
+        }
+
+        if (message.content == `${this.prefix}logs`) {
+            await message.channel.send(`Log number: \`${this.logger.logs.length}\``);
+        }
+        
         if (message.content == `${this.prefix}exit`) {
             this.logger.inform("Exiting via discord command");
             process.emit("SIGINT");
@@ -212,13 +244,13 @@ class VanisSkinsDiscordBot extends Client {
      * @param {DiscordJS.Message} message 
      */
     async purge(userID, message) {
-        let skins = await this.app.skins.findByOwnerID(userID);
+        let skins = await this.dbskins.findByOwnerID(userID);
         if (skins.length) {
             await message.reply(`Purging skin(s): \`${skins.map(s => s.skinID).join("\`, \`")}\``);
             for (let s of skins) {
                 await this.delete(s.skinID, message);
             }
-            await this.app.skins.restartUpdatePublic();
+            await this.dbskins.restartUpdatePublic();
         } else {
             await message.reply(`Nothing to purge`);
         }
@@ -232,7 +264,7 @@ class VanisSkinsDiscordBot extends Client {
         if (!/^\w{6}$/.test(skinID))
             return await message.reply(`Invalid skin ID: \`${skinID}\``);
 
-        let skinDoc = await this.app.skins.findBySkinID(skinID);
+        let skinDoc = await this.dbskins.findBySkinID(skinID);
 
         if (skinDoc === null)
             return message.reply(`Can't find skin ID \`${skinID}\``);
@@ -248,10 +280,10 @@ class VanisSkinsDiscordBot extends Client {
         if (!(await this.deleteReview(skinDoc.messageID, skinDoc.status)))
             this.logger.warn("Bot failed to delete review");
         
-        let success = await this.app.skins.deleteByID(skinID);
+        let success = await this.dbskins.deleteByID(skinID);
 
         if (skinDoc.status == "approved")
-            await this.app.cloudflare.purgeCache(`https://skins.vanis.io/s/${skinDoc.skinID}`);
+            await this.cloudflare.purgeCache(`https://skins.vanis.io/s/${skinDoc.skinID}`);
         
         await message.channel.send(success ? `Skin \`${skinID}\` deleted` :
             `Failed to delete skin \`${skinID}\``);
@@ -263,7 +295,7 @@ class VanisSkinsDiscordBot extends Client {
      */
     async ban(userID, message) {
         if (userID) {
-            let banned = await this.app.users.ban(userID);
+            let banned = await this.dbusers.ban(userID);
 
             if (!banned)
                 return message.reply(`Can't find user ${userID}`);
@@ -287,7 +319,7 @@ class VanisSkinsDiscordBot extends Client {
      */
     async unban(userID, message) {
         if (userID) {
-            let unbanned = await this.app.users.unban(userID);
+            let unbanned = await this.dbusers.unban(userID);
 
             if (!unbanned)
                 return message.reply(`Can't find user \`${userID}\``);
@@ -336,7 +368,7 @@ class VanisSkinsDiscordBot extends Client {
             return;
         }
 
-        let pending = await this.app.skins.getPending();
+        let pending = await this.dbskins.getPending();
 
         pending = pending.filter(s => Date.now() - s.createdAt > 10000);
 
@@ -511,7 +543,7 @@ class VanisSkinsDiscordBot extends Client {
 
     async updateReview() {
 
-        let pendingSkins = await this.app.skins.getPending();
+        let pendingSkins = await this.dbskins.getPending();
         // this.logger.debug(`Checking ${pendingSkins.length} pending reviews...`);
 
         let length = pendingSkins.length;
@@ -723,7 +755,7 @@ class VanisSkinsDiscordBot extends Client {
     }
 
     async updateMods() {
-        this.modsCache = (await this.app.users.getMods()).map(d => d.discordID);
+        this.modsCache = (await this.dbusers.getMods()).map(d => d.discordID);
         this.modsCacheTimestamp = Date.now();
         // console.log("MODS: ", this.modsCache);
         return false;
@@ -734,14 +766,14 @@ class VanisSkinsDiscordBot extends Client {
 
     /** @param {string} discordID */
     async addMod(discordID) {
-        let r = await this.app.users.addMod(discordID);
+        let r = await this.dbusers.addMod(discordID);
         await this.updateMods();
         return r;
     }
 
     /** @param {string} discordID */
     async removeMod(discordID) {
-        let r = await this.app.users.removeMod(discordID);
+        let r = await this.dbusers.removeMod(discordID);
         await this.updateMods();
         return r;
     }
@@ -761,13 +793,9 @@ class VanisSkinsDiscordBot extends Client {
     }
 
     async stop() {
-        
-        await this.debugChannel.send("Bot stopping");
         await this.destroy();
         this.logger.inform("Discord bot logged out");
     }
 }
 
-module.exports = VanisSkinsDiscordBot;
-
-const App = require("../app");
+module.exports = SkinsDiscordBot;

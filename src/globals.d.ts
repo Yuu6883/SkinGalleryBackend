@@ -1,4 +1,4 @@
-declare type LogEventLevel = "DEBUG" | "ACCESS" | "INFO" | "WARN" | "ERROR" | "FATAL";
+declare type LogEventLevel = "DEBUG" | "ACCESS" | "INFO" | "PRINT" | "WARN" | "ERROR" | "FATAL" | "TEST";
 declare type LogEvent = (date: Date, level: LogEventLevel, message: string) => void;
 declare type LogMessageData = any[];
 

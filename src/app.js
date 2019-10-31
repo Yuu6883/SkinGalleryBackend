@@ -1,11 +1,9 @@
 const mongoose = require("mongoose");
 
 // Modules
-const Bot = require("./modules/DiscordBot");
 const Logger = require("./modules/Logger");
 const Webserver = require("./modules/Webserver");
 const DiscordAPI = require("./modules/DiscordAPI");
-const NSFWbot = require("./modules/NSFWbot");
 const Cloudflare = require("./modules/Cloudflare");
 
 // Models
@@ -13,7 +11,7 @@ const SkinCollection = require("./models/Skins");
 const UserCollection = require("./models/Users");
 const Provision = require("./models/Provision");
 
-class VanisSkinsApp {
+class SkinsApp {
     /**
      * @param {AppConfig} config
      */
@@ -21,9 +19,7 @@ class VanisSkinsApp {
         this.config = config;
 
         // Modules
-        this.bot = new Bot(this, { sync: true });
         this.logger = new Logger();
-        this.nsfwBot    = new NSFWbot(this);
         this.webserver  = new Webserver(this);
         this.discordAPI = new DiscordAPI(this);
         this.cloudflare = new Cloudflare(this);
@@ -61,4 +57,4 @@ class VanisSkinsApp {
     }
 }
 
-module.exports = VanisSkinsApp;
+module.exports = SkinsApp;

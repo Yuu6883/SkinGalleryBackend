@@ -1,6 +1,6 @@
-const top    = (kl, vl) => "┏" + "━".repeat(kl + vl + 5) + "┓";
-const middle = (kl, vl) => "┣" + "━".repeat(kl + vl + 5) + "┫";
-const bottom = (kl, vl) => "┗" + "━".repeat(kl + vl + 5) + "┛";
+// const top    = (kl, vl) => "┏" + "━".repeat(kl + vl + 5) + "┓";
+// const middle = (kl, vl) => "┣" + "━".repeat(kl + vl + 5) + "┫";
+// const bottom = (kl, vl) => "┗" + "━".repeat(kl + vl + 5) + "┛";
 
 /** @param {Object.<string, string|number>} obj */
 module.exports = obj => {

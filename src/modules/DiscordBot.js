@@ -444,7 +444,7 @@ class VanisSkinsDiscordBot extends Client {
             embed.attachFile(new Attachment(nsfwResult.data, `SPOILER_${skinName}.png`));
         else if (this.config.env == "production") {
             let url = `https://skins.vanis.io/api/p/skin/${skinID}`;
-            embed.setThumbnail(url).setURL(url);
+            embed.setImage(url).setURL(url);
         }
 
         /** @type {DiscordJS.Message} */
@@ -475,7 +475,8 @@ class VanisSkinsDiscordBot extends Client {
             .setTimestamp();
 
         if (this.config.env === "production") {
-            embed.setThumbnail(`https://skins.vanis.io/s/${skinID}`);
+            let url = `https://skins.vanis.io/s/${skinID}`;
+            embed.setURL(url).setThumbnail(url);
         }
             
         /** @type {DiscordJS.Message} */
@@ -627,6 +628,9 @@ class VanisSkinsDiscordBot extends Client {
 
         if (fs.existsSync(skinPath))
             embed.attachFile(new Attachment(skinPath, "SPOILER_" + skinDoc.skinName + ".png"));
+
+        if (this.app.config.env == "production")
+            await this.app.cloudflare.purgeCache(`https://skins.vanis.io/api/p/${skinDoc.skinID}`);
 
         let message = await this.rejectedChannel.send(embed);
 

@@ -16,6 +16,7 @@ class SkinCache {
      */
     constructor(app) {
         this.app = app;
+        /** @type {Number} */
         this.cacheLength = 0;
         
         /** @type {{sortByFav:Buffer,sortByName:Buffer,sortByTime:Buffer}} */

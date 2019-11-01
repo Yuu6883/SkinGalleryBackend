@@ -22674,11 +22674,6 @@ module.exports = new class API extends EventEmitter {
 }
 
 },{"crypto":55,"events":82}],157:[function(require,module,exports){
-
-
-/** @type {import("jquery")} */
-const $ = window.$;
-
 const API = require("./api");
 const Prompt = require("./prompt");
 const Starfield = require("./starfield");

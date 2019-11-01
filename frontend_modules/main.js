@@ -1,8 +1,3 @@
-
-
-/** @type {import("jquery")} */
-const $ = window.$;
-
 const API = require("./api");
 const Prompt = require("./prompt");
 const Starfield = require("./starfield");

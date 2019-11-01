@@ -40,11 +40,11 @@ class SkinsApp {
 
         this.logger.inform("Connected to database");
 
-        await Promise.all(
+        await Promise.all([
             this.bot.init(),
             this.nsfwBot.init(),
             this.webserver.init(),
-            this.skins.startUpdatePublic());
+            this.skins.startUpdatePublic()]);
     }
 
     async stop() {

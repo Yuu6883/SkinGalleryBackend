@@ -1,8 +1,3 @@
-
-
-/** @type {import("jquery")} */
-const $ = window.$;
-
 const API = require("./api");
 const Prompt = require("./prompt");
 const Starfield = require("./starfield");
@@ -72,7 +67,7 @@ $(window).on("load", () => {
 
     if (localStorage.theme == "halloween" || 
         (month == 10 && date >= 15) ||
-        (month == 11 && data == 1)) {
+        (month == 11 && date == 1)) {
             
         halloween = true;
         // Halloween theme

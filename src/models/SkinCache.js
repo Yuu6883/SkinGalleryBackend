@@ -16,10 +16,12 @@ class SkinCache {
      */
     constructor(app) {
         this.app = app;
+        /** @type {Number} */
         this.cacheLength = 0;
         
         /** @type {{sortByFav:Buffer,sortByName:Buffer,sortByTime:Buffer}} */
         this.cache = {};
+        this.BYTES_PER_SKIN = BYTES_PER_SKIN;
     }
 
     /** @param {SkinDocument[]} skinDocs */

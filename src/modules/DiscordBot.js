@@ -396,9 +396,9 @@ class VanisSkinsDiscordBot extends Client {
                            `${this.config.rejectThreshold } ${this.config.rejectEmoji } to reject`)
                 .setTimestamp();
 
-            let url = `https://skins.vanis.io/api/p/skin/${skinDoc.skinID}`;
+            let url = `https://skins.vanis.io/api/p/skin/SPOILER_${skinDoc.skinID}.png`;
             
-            embed.setURL(url).setThumbnail(url);
+            embed.setImage(url).setThumbnail(url);
 
             if (skinOwner) {
                 embed.setAuthor(`${skinOwner.username}#${skinOwner.discriminator}` + 
@@ -443,7 +443,7 @@ class VanisSkinsDiscordBot extends Client {
         if (nsfwResult.data && this.config.env == "development")
             embed.attachFile(new Attachment(nsfwResult.data, `SPOILER_${skinName}.png`));
         else if (this.config.env == "production") {
-            let url = `https://skins.vanis.io/api/p/skin/${skinID}`;
+            let url = `https://skins.vanis.io/api/p/skin/SPOILER_${skinID}.png`;
             embed.setImage(url).setURL(url);
         }
 

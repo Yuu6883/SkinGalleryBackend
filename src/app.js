@@ -41,8 +41,6 @@ class SkinsApp {
         this.logger.inform("Connected to database");
 
         await Promise.all([
-            this.bot.init(),
-            this.nsfwBot.init(),
             this.webserver.init(),
             this.skins.startUpdatePublic()]);
     }
@@ -51,7 +49,6 @@ class SkinsApp {
         this.logger.inform("App stop");
         await this.webserver.stop();
         await this.cloudflare.applyPurge();
-        await this.bot.stop();
         await mongoose.disconnect();
         this.logger.inform("Disconnected from database");
     }

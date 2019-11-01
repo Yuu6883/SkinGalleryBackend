@@ -1,13 +1,15 @@
-const SKIN_ID_BYTES = 6;
-const SKIN_NAME_BYTES = 32;
-const SKIN_TAG_BYTES = 8
-const SKIN_TAG_LENGTH = 64;
-const FAV_BYTES = 2;
-const TIME_BYTES = 4;
-const DISCORD_ID_BYTES = 8;
-
-const BYTES_PER_SKIN = SKIN_ID_BYTES + SKIN_NAME_BYTES + SKIN_TAG_BYTES +
-    FAV_BYTES + TIME_BYTES + DISCORD_ID_BYTES;
+const {
+    SKIN_ID_BYTES,
+    SKIN_NAME_BYTES,
+    SKIN_TAG_BYTES,
+    SKIN_TAG_LENGTH,
+    FAV_BYTES,
+    TIME_BYTES,
+    DISCORD_ID_BYTES,
+    BYTES_PER_SKIN,
+    TAGS,
+    TIME_0
+} = require("../common/constants");
 
 class SkinCache {
 
@@ -26,7 +28,6 @@ class SkinCache {
 
     /** @param {SkinDocument[]} skinDocs */
     createCache(skinDocs) {
-
         // Reallocate buffer if size changed
         if (this.cacheLength != skinDocs.length) 
             this.rellocCache(BYTES_PER_SKIN * skinDocs.length);
@@ -77,16 +78,16 @@ class SkinCache {
 
             buffer.writeUInt32BE(skin.createdAt, offset);
             offset += TIME_BYTES;
-
-            let ownerID = BigInt(skin.ownerID);
-            let view = new DataView(buffer.buffer, offset);
-            view.setBigUint64(0, ownerID);
             
+            let ownerID = BigInt(skin.ownerID);
+
+            buffer.writeBigInt64BE(ownerID, offset);
             offset += DISCORD_ID_BYTES;
         }
     }
 
     /** 
+     * @description Template used for parsing in tests, not used by client
      * @param {Buffer} buffer
      */
     readCache(buffer) {
@@ -136,19 +137,19 @@ class SkinCache {
      * @param {Buffer} buffer 
      * @param {Number} offset
      */
-    readTags(buffer, offset) {
+    readTags(buffer, offset) { 
         let tags = [];
         let number1 = buffer.readUInt32BE(offset);
         let number2 = buffer.readUInt32BE(offset + 4);
         // Read first 32 bits
         for (let i = 0; i < 32; i++)
             if (number1.toString(2)[i] == 1)
-                tags.push(this.app.config.tags[i]);
+                tags.push(TAGS[i]);
 
         // Read second 32 bits
         for (let i = 0; i < 32; i++)
-            if (number1.toString(2)[i] == 1)
-                tags.push(this.app.config.tags[32 + i]);
+            if (number2.toString(2)[i] == 1)
+                tags.push(TAGS[32 + i]);
 
         return tags.filter(t => t);
     }
@@ -186,7 +187,7 @@ class SkinCache {
         let unsigned = new Uint32Array(1);
         
         for (let index = 0; index < SKIN_TAG_LENGTH / 2; index++) {
-            let tag = this.app.config.tags[index];
+            let tag = TAGS[index];
 
             // tag && console.log(`Checking tag: ${tag} at index ${index}`);
 
@@ -198,18 +199,18 @@ class SkinCache {
                 // console.log(`Current value: ${unsigned[0].toString(2)}`);
             }
         }
-        buffer.writeUInt32BE(unsigned[0], offset);
-        // console.log(`Writing [${unsigned[0].toString(2)}] at ${offset}`);
+        buffer.writeUInt32LE(unsigned[0], offset);
+        // console.log(`Writing [${unsigned[0].toString(2).padStart(32, "0")}] at ${offset}`);
         
         // Second half, 32 bits
         unsigned[0] = 0;
         for (let index = 0; index < SKIN_TAG_LENGTH / 2; index++) {
-            let tag = this.app.config.tags[SKIN_TAG_LENGTH / 2 + index];
+            let tag = TAGS[SKIN_TAG_LENGTH / 2 + index];
             if (tag && tags.includes(tag))
                 unsigned[0] |= 1 << (SKIN_TAG_LENGTH / 2 - index - 1);
         }
-        buffer.writeUInt32BE(unsigned[0], offset + 4);
-        // console.log(`Writing [${unsigned[0].toString(2)}] at ${offset + 4}`);
+        buffer.writeUInt32LE(unsigned[0], offset + 4);
+        // console.log(`Writing [${unsigned[0].toString(2).padStart(32, "0")}] at ${offset + 4}`);
     }
 
     rellocCache(length) {
@@ -218,5 +219,7 @@ class SkinCache {
         this.cache.sortByTime = Buffer.allocUnsafe(length);
     }
 }
+
+SkinCache.TIME_0 = TIME_0;
 
 module.exports = SkinCache;

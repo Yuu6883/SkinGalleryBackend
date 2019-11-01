@@ -33,7 +33,6 @@ interface AppConfig {
     approveThreshold: number;
     rejectThreshold:  number;
     reviewInterval:   number;
-    tags:   string[];
     admins: string[];
     prefix: string;
 }

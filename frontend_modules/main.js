@@ -2,6 +2,8 @@ const API = require("./api");
 const Prompt = require("./prompt");
 const Starfield = require("./starfield");
 
+window.API = API;
+
 const emptySkinPanel = 
 `<div class="uk-width-1-5@l uk-width-1-4@m uk-width-1-2 uk-card uk-margin-top">
     <div class="padding-s uk-inline-clip uk-transition-toggle uk-text-center card">

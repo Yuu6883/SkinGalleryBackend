@@ -1,4 +1,5 @@
 const { EventEmitter } = require("events");
+const DecryptSkin = require("./decode");
 const Crypto = require("crypto");
 
 /** @typedef {{ username: String, discriminator: String, avatar: String, id: String }} UserInfo */
@@ -190,6 +191,11 @@ module.exports = new class API extends EventEmitter {
      */
     async getPublic(page, sort) {
         let res = await fetch(`/api/public?page=${~~page}&sort=${sort}`);
-        let total = res.headers.get("x-skin-total");
+        let total = ~~res.headers.get("x-skin-total");
+
+        let buffer = await res.arrayBuffer();
+        let skins = DecryptSkin(buffer);
+        sort[0] == "-" && skins.reverse();
+        return { total, skins };
     }
 }

@@ -21,6 +21,7 @@ class SkinCache {
         
         /** @type {{sortByFav:Buffer,sortByName:Buffer,sortByTime:Buffer}} */
         this.cache = {};
+        this.BYTES_PER_SKIN = BYTES_PER_SKIN;
     }
 
     /** @param {SkinDocument[]} skinDocs */

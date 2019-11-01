@@ -19,6 +19,12 @@ const endpoint = {
         let buffer;
 
         switch (sort) {
+
+            case "time":
+            case "-time":
+                buffer = this.skins.publicCache.sortByTime;
+                break;
+
             case "fav":
             case "-fav":
                 buffer = this.skins.publicCache.sortByFav;
@@ -30,11 +36,15 @@ const endpoint = {
                 break;
 
             default:
-                buffer = this.skins.publicCache.sortByTime;
+                return void res.sendStatus(400);
         }
 
-        let start = page * this.config.publicPageLimit;
-        let end = Math.max(start + this.config.publicPageLimit, buffer.byteLength);
+        let BYTES_PER_SKIN = this.skins.publicCache.BYTES_PER_SKIN;
+
+        let start = page * this.config.publicPageLimit * BYTES_PER_SKIN;
+        let end = Math.max((start + this.config.publicPageLimit) * BYTES_PER_SKIN, buffer.byteLength);
+        res.header("x-skin-total", this.skins.publicCache.cacheLength);
+
         if (reverse) {
             res.send(buffer.slice(start, end));
         } else {

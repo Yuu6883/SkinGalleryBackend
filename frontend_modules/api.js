@@ -2,8 +2,6 @@ const { EventEmitter } = require("events");
 const Crypto = require("crypto");
 
 /** @typedef {{ username: String, discriminator: String, avatar: String, id: String }} UserInfo */
-/** @type {import("jquery")} */
-const $ = window.$;
 
 module.exports = new class API extends EventEmitter {
 
@@ -183,5 +181,15 @@ module.exports = new class API extends EventEmitter {
             },
             error: console.error
         });
+    }
+
+    /**
+     * 
+     * @param {Number} page 
+     * @param {"-time"|"time"|"-fav"|"fav"|"-name"|"name"} sort 
+     */
+    async getPublic(page, sort) {
+        let res = await fetch(`/api/public?page=${~~page}&sort=${sort}`);
+        let total = res.headers.get("x-skin-total");
     }
 }

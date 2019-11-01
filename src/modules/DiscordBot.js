@@ -398,7 +398,7 @@ class VanisSkinsDiscordBot extends Client {
 
             let url = `https://skins.vanis.io/api/p/skin/SPOILER_${skinDoc.skinID}.png`;
             
-            embed.setImage(url).setThumbnail(url);
+            embed.setImage(url).setURL(url);
 
             if (skinOwner) {
                 embed.setAuthor(`${skinOwner.username}#${skinOwner.discriminator}` + 

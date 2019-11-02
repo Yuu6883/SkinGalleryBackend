@@ -41,7 +41,7 @@ if (config.env === "development" || process.env.NODE_ENV == "development") {
     config.notifChannelID     = "603808828487761941";
     config.discordAppID       = "607173234688786432";
     config.discordAppSecret   = "NrITYkjlxOJ91LObpEZ8kDIWpaTSRvKy";
-    config.discordAppRedirect = "http://localhost/api/login/callback";
+    config.discordAppRedirect = "https://skins.gallery/api/login/callback";
     config.discordBotToken    = "NjA3MTczMjM0Njg4Nzg2NDMy.XbGFKg.sx3yMszTEc2C6CsgzJGd69tVMEA";
 
     config.skinApprovedChannelID = config.skinDeletedChannelID = 

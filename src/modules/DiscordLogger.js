@@ -108,7 +108,7 @@ class DiscordLogger extends Logger {
             if (!this.config[logObj.level]) continue;
 
             let msg = `${logObj.level == "PRINT" ? "" : 
-                      `$${process.env.PM_ID}[${process.env.name}:out] ` + 
+                       process.env.PM_ID ? `$${process.env.PM_ID}[${process.env.name}:out] ` : "" + 
                       `[${logObj.level}]`.padEnd(7, " ")}${logObj.message + (logObj.level == "PRINT" ? "" : "\n")}`;
 
             if ((build + msg.trim()).length > 2000) {

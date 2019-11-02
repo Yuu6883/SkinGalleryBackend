@@ -60,6 +60,7 @@ class SkinsApp {
         if (process.env.PM_ID == undefined) {
             const DiscordBot = require("./modules/DiscordBot");
             this.bot = new DiscordBot({}, this.config);
+            this.bot.app = this;
             placeholder1 = this.bot.init();
 
             const NSFWBot = require("./modules/NSFWbot");

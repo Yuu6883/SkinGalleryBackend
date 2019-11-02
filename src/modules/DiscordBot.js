@@ -21,6 +21,8 @@ class SkinsDiscordBot extends Client {
      */
     constructor(options, config) {
         super(options);
+        /** @type {import("../app")} */
+        this.app = null;
         this.enabled = false;
         this.config = config;
         this.prefix = config.prefix || "!";

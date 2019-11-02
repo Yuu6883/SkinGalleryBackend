@@ -83,8 +83,8 @@ class Webserver {
         
         // Prevent cross-origin requests
         app.use((req, res, next) => {
-            const origin = req.get("origin") || req.get("referer");
-            
+            let origin = req.get("origin") || req.get("referer");
+
             if (origin && origin[origin.length - 1] == "/") 
                 origin = origin.slice(0, -1);
 

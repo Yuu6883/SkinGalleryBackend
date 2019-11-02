@@ -46,7 +46,6 @@ if (config.env === "development" || process.env.NODE_ENV == "development") {
 
     config.skinApprovedChannelID = config.skinDeletedChannelID = 
     config.skinPendingChannelID = config.skinRejectedChannelID = config.debugChannelID;
-    config.webDomain = "http://localhost";
 }
 
 module.exports = config;

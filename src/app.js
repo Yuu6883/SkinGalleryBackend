@@ -46,9 +46,10 @@ class SkinsApp {
     async init() {
         this.logger.debug("App init");
         await mongoose.connect(this.config.dbPath, {
+            useCreateIndex: true,
             useNewUrlParser: true,
             useFindAndModify: true,
-            useCreateIndex: true,
+            useUnifiedTopology: true,
         });
 
         this.logger.debug("Connected to database");

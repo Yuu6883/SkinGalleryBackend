@@ -23,12 +23,9 @@ const endpoint = {
         let skinPath = skinDoc.status === "approved" ? SKIN_STATIC : PENDING_SKIN_STATIC;
         skinPath += `/${skinDoc.skinID}.png`;
 
-        if (!fs.existsSync(skinPath)) {
-            this.logger.warn(`Can't find skin at ${skinPath}`);
-        } else fs.unlinkSync(skinPath);
+        let uid = this.bot.moveToTrash(skinPath);
 
-        if (!(await this.bot.deleteReview(skinDoc.messageID, skinDoc.status)))
-            this.logger.warn("Bot failed to delete review");
+        await this.bot.deleteReview(skinDoc.messageID, skinDoc.status, `${this.config.webDomain}/d/${uid}`);
 
         let success = await this.skins.deleteByID(req.params.skinID);
         

@@ -287,9 +287,9 @@ class SkinsDiscordBot extends Client {
                             SKIN_STATIC : PENDING_SKIN_STATIC;
         skinPath += `/${skinDoc.skinID}.png`;
 
-        this.moveToTrash(skinPath);
+        let uid = this.moveToTrash(skinPath);
 
-        await this.deleteReview(skinDoc.messageID, skinDoc.status);
+        await this.deleteReview(skinDoc.messageID, skinDoc.status, `${this.config.webDomain}/d/${uid}`);
         
         let success = await this.dbskins.deleteByID(skinID);
 
@@ -736,14 +736,19 @@ class SkinsDiscordBot extends Client {
     /** 
      * @param {string} messageID
      * @param {SkinStatus} status
+     * @param {string} newURL
      */
-    async deleteReview(messageID, status) {
+    async deleteReview(messageID, status, newURL) {
         if (!messageID) return (this.logger.warn("DeleteReview: undefined messageID"), false);
         /** @type {DiscordJS.Message} */
         let message = await this[`${status}Channel`].fetchMessage(messageID).catch(() => {});
         if (!message) return (this.logger.warn("DeleteReview: can't find review message"), false);
 
-        await this.deletedChannel.send(this.copyEmbed(message.embeds[0]));
+        let embed = this.copyEmbed(message.embeds[0]);
+
+        if (newURL) embed.setURL(newURL).setThumbnail(newURL);
+
+        await this.deletedChannel.send(embed);
 
         message.deletable && (await message.delete());
         return true;

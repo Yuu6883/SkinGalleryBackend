@@ -55,8 +55,8 @@ ipc.serve(BOT_SOCKET, () => {
             { id: ipc.config.id, message: { error: "Discord bot process not ready" }});
 
         try {
-            let { messageID, status } = data.message;
-            let message = await bot.deleteReview(messageID, status);
+            let { messageID, status, newURL } = data.message;
+            let message = await bot.deleteReview(messageID, status, newURL);
             ipc.server.emit(socket, "delete", { id: ipc.config.id, message });
         } catch (e) {
             bot && bot.logger.onError(`Error while deleting skin`, e);

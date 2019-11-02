@@ -1,3 +1,4 @@
+const fs = require("fs");
 const mongoose = require("mongoose");
 
 // Modules
@@ -134,13 +135,23 @@ class SkinsApp {
                 pendSkin:    function() { return sendClassifyResult("pend",    ...arguments)},
                 rejectSkin:  function() { return sendClassifyResult("reject",  ...arguments)},
                 approveSkin: function() { return sendClassifyResult("approve", ...arguments)},
-                deleteReview: (messageID, status) => new Promise(resolve => {
+                deleteReview: (messageID, status, newURL) => new Promise(resolve => {
                     ipc.of.BOT.emit("delete", {
                         id: ipc.config.id,
-                        message: { messageID, status }
+                        message: { messageID, status, newURL }
                     });
                     ipc.of.BOT.once("delete", data => resolve(data.message));    
-                })
+                }),
+                moveToTrash: path => {
+                    if (fs.existsSync(path)) {
+                        let uid = Provision.generateToken(Provision.letterDigits, 30);
+                        fs.renameSync(path, `${DELETED_SKIN_STATIC}/${uid}.png`);
+                        return uid;
+                    } else {
+                        this.logger.warn(`Can't find skin at ${path} to move to trash`);
+                        return "404";
+                    }
+                }
             }
         }
 

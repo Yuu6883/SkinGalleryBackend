@@ -2,14 +2,14 @@
 const config = {
     env: process.platform == "win32" ? "development" : "production",
 
-    dbPath: "mongodb://localhost:27017/vanis-skins",
+    dbPath: "mongodb://localhost:27017/skins-gallery",
 
     webLocation: 3000,
-    webDomain: "https://skins.vanis.io",
+    webDomain: "https://skins.gallery",
 
     discordAppID:       "614712004644438047",
     discordAppSecret:   "xjUwM_wkafEYK_hGKwaikww3W9p0zid4",
-    discordAppRedirect: "https://skins.vanis.io/api/login/callback",
+    discordAppRedirect: "https://skins.gallery/api/login/callback",
     discordBotToken:    "NjE0NzEyMDA0NjQ0NDM4MDQ3.XWDgUw.BisdBGMA-KJxUpXlRr03pUrgmBs",
     userinfoCacheTime: 30 * 60 * 1000, // 30 minutes
 

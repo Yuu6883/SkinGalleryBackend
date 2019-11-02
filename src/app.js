@@ -23,7 +23,8 @@ class SkinsApp {
         // Modules
         this.logger = new Logger();
         this.logger._onLog = (_, level, message) => {
-            if (level == "ACCESS" || level == "DEBUG") return;
+            if (level == "ACCESS") return;
+            if (this.config.env == "production" && level == "DEBUG") return;
             console.log(`[${level}] ${message}`);
         }
 
@@ -46,8 +47,8 @@ class SkinsApp {
         this.logger.debug("App init");
         await mongoose.connect(this.config.dbPath, {
             useNewUrlParser: true,
+            useFindAndModify: true,
             useCreateIndex: true,
-            useFindAndModify: true
         });
 
         this.logger.debug("Connected to database");

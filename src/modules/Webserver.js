@@ -17,7 +17,7 @@ class Webserver {
         /** @type {import("http").Server} */
         this.webserver = null;
         this.allowedOrigins =
-            app.config.webDomain ? [`https://${app.config.webDomain}`] : [];
+            app.config.webDomain ? [app.config.webDomain] : [];
     }
 
     get config() { return this.app.config; }

@@ -7,7 +7,6 @@ pm2.connect(async err => {
     await new Promise(resolve => pm2.start({
         script: `${__dirname}/bot.js`,
         name: "BOT",
-        env: process.env,
         restart_delay: 10000,
         max_memory_restart: "75M"
     }, err => {
@@ -19,7 +18,6 @@ pm2.connect(async err => {
     await new Promise(resolve => pm2.start({
         script: `${__dirname}/nsfw.js`,
         name: "NSFW",
-        env: process.env,
         restart_delay: 10000,
         max_memory_restart: "400M"
     }, err => {
@@ -32,7 +30,6 @@ pm2.connect(async err => {
         script: `${__dirname}/server.js`,
         name: "SERVER",
         restart_delay: 10000,
-        env: process.env,
         exec_mode: "cluster",
         instances: Math.min((require("os").cpus().length - 1) || 1, 4),
         max_memory_restart: "65M"

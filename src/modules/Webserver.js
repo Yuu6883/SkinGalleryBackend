@@ -89,10 +89,12 @@ class Webserver {
                 origin = origin.slice(0, -1);
 
             if (this.allowedOrigins.length && origin !== "http://localhost" &&
-                !this.allowedOrigins.includes(origin)) {
+                !this.allowedOrigins.includes(origin) && !origin.startsWith("https://discordapp.com/oauth2/")) {
                 this.logger.warn(`Blocked request from unknown origin: ${origin} ${req.rawHeaders.join("\n")}`)
                 return void res.sendStatus(403);
             }
+
+            res.ip = req.get("CF-Connecting-IP") || req.socket.remoteAddress;
             
             this.logger.onAccess(`Request Origin: ${origin || "*"}`);
             res.set("Access-Control-Allow-Origin", origin || "*");

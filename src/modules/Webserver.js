@@ -83,7 +83,7 @@ class Webserver {
         
         // Prevent cross-origin requests
         app.use((req, res, next) => {
-            const origin = req.get("origin");
+            const origin = req.get("origin") || req.get("referer");
 
             if (this.allowedOrigins.length && !this.allowedOrigins.includes(origin)) {
                 this.logger.warn(`Blocked request from unknown origin: ${origin}`)

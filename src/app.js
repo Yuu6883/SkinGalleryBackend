@@ -130,14 +130,13 @@ class SkinsApp {
                 pendSkin:    function() { return sendClassifyResult("pend",    ...arguments)},
                 rejectSkin:  function() { return sendClassifyResult("reject",  ...arguments)},
                 approveSkin: function() { return sendClassifyResult("approve", ...arguments)},
-                deleteReview: async (messageID, status) => {
+                deleteReview: (messageID, status) => new Promise(resolve => {
                     ipc.of.BOT.emit("delete", {
                         id: ipc.config.id,
                         message: { messageID, status }
                     });
-    
                     ipc.of.BOT.once("delete", data => resolve(data.message));    
-                }
+                })
             }
         }
 

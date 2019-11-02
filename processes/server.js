@@ -6,4 +6,17 @@ if (process.env.PM_ID == undefined) {
 const SkinApp = require("../src/app");
 let config = require("../cli/config");
 
-new SkinApp(config).init();
+let app = new SkinApp(config)
+app.init();
+
+process.on("uncaughtException", e => {
+    app.logger.onError(e);
+    if (config.env == "development") 
+        process.emit("SIGINT");
+});
+
+process.on("unhandledRejection", e => {
+    app.logger.onError(e);
+    if (config.env == "development") 
+        process.emit("SIGINT");
+});

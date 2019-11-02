@@ -8,9 +8,10 @@ const Cloudflare = require("./Cloudflare");
 const SkinCollection = require("../models/Skins");
 const UserCollection = require("../models/Users");
 const DiscordLogger = require("./DiscordLogger");
+const Provision = require("../models/Provision");
 
 const { Attachment, RichEmbed, Client } = DiscordJS;
-const { SKIN_STATIC, PENDING_SKIN_STATIC } = require("../constant");
+const { SKIN_STATIC, PENDING_SKIN_STATIC, DELETED_SKIN_STATIC } = require("../constant");
 
 class SkinsDiscordBot extends Client {
 
@@ -25,7 +26,7 @@ class SkinsDiscordBot extends Client {
         this.prefix = config.prefix || "!";
         this.logger = new DiscordLogger(this);
 
-        this.cloudflare = new Cloudflare({ logger: this.logger });
+        this.cloudflare  = new Cloudflare({ logger: this.logger, config: this.config });
         this.dbusers = new UserCollection({ logger: this.logger, config: this.config, cloudflare: this.cloudflare });
         this.dbskins = new SkinCollection({ logger: this.logger, config: this.config, cloudflare: this.cloudflare });
 
@@ -180,6 +181,17 @@ class SkinsDiscordBot extends Client {
             this.logger.inform("Exiting via discord command");
             process.emit("SIGINT");
         }
+
+        if (message.content == `${this.prefix}debug `) {
+            if (message.content.split(" ")[1] == "on" ||
+                message.content.split(" ")[1] == "true") {
+                this.debug(true);
+                await message.reply("Debug mode is now **ON**")
+            } else {
+                this.debug(false);
+                await message.reply("Debug mode is now **OFF**")
+            }
+        }
     }
 
     /** @param {DiscordJS.Message} message */
@@ -272,17 +284,14 @@ class SkinsDiscordBot extends Client {
                             SKIN_STATIC : PENDING_SKIN_STATIC;
         skinPath += `/${skinDoc.skinID}.png`;
 
-        if (!fs.existsSync(skinPath)) {
-            this.logger.warn(`Can't find skin at \`${skinPath}\``);
-        } else fs.unlinkSync(skinPath);
+        this.moveToTrash(skinPath);
 
-        if (!(await this.deleteReview(skinDoc.messageID, skinDoc.status)))
-            this.logger.warn("Bot failed to delete review");
+        await this.deleteReview(skinDoc.messageID, skinDoc.status);
         
         let success = await this.dbskins.deleteByID(skinID);
 
-        if (skinDoc.status == "approved")
-            await this.cloudflare.purgeCache(`https://skins.vanis.io/s/${skinDoc.skinID}`);
+        if (skinDoc.status == "approved" && this.config.env == "production")
+            await this.cloudflare.purgeCache(`${this.config.webDomain}/s/${skinDoc.skinID}`);
         
         await message.channel.send(success ? `Skin \`${skinID}\` deleted` :
             `Failed to delete skin \`${skinID}\``);
@@ -331,6 +340,14 @@ class SkinsDiscordBot extends Client {
         } else {
             return message.reply(`Use ${this.prefix}unban \`/\\D+/\` to unban someone from Vanis Skin`);
         }
+    }
+
+    /**
+     * @param {string} userID 
+     * @param {DiscordJS.Message} message 
+     */
+    async list(userID, message) {
+
     }
 
     startReviewCycle() {
@@ -427,7 +444,7 @@ class SkinsDiscordBot extends Client {
                            `${this.config.rejectThreshold } ${this.config.rejectEmoji } to reject`)
                 .setTimestamp();
 
-            let url = `https://skins.vanis.io/api/p/skin/${skinDoc.skinID}`;
+            let url = `${this.config.webDomain}/p/skin/${skinDoc.skinID}`;
             
             embed.setURL(url).setThumbnail(url);
 
@@ -448,6 +465,10 @@ class SkinsDiscordBot extends Client {
         }
 
         return message;
+    }
+
+    debug(bool) {
+        this.logger.config.DEBUG = !!bool;
     }
 
     /**
@@ -471,10 +492,16 @@ class SkinsDiscordBot extends Client {
                        `${this.config.rejectThreshold } ${this.config.rejectEmoji } to reject`)
             .setTimestamp();
 
-        if (nsfwResult.data && this.config.env == "development")
-            embed.attachFile(new Attachment(nsfwResult.data, `SPOILER_${skinName}.png`));
-        else if (this.config.env == "production") {
-            let url = `https://skins.vanis.io/api/p/skin/${skinID}`;
+        if (this.config.env == "development") {
+
+            if (nsfwResult.data) {
+                embed.attachFile(new Attachment(nsfwResult.data, `SPOILER_${skinName}.png`));
+            } else {
+                embed.attachFile(new Attachment(`${PENDING_SKIN_STATIC}/${skinID}.png`, `SPOILER_${skinName}.png`));
+            }
+
+        } else if (this.config.env == "production") {
+            let url = `${this.config.webDomain}/p/skin/${skinID}`;
             embed.setImage(url).setURL(url);
         }
 
@@ -506,7 +533,7 @@ class SkinsDiscordBot extends Client {
             .setTimestamp();
 
         if (this.config.env === "production") {
-            let url = `https://skins.vanis.io/s/${skinID}`;
+            let url = `${this.config.webDomain}/s/${skinID}`;
             embed.setURL(url).setThumbnail(url);
         }
             
@@ -533,8 +560,16 @@ class SkinsDiscordBot extends Client {
             .setFooter(`Automatically rejected`)
             .setTimestamp();
         
-        if (nsfwResult.data)
-            embed.attachFile(new Attachment(nsfwResult.data, `SPOILER_${skinName}.png`));
+        let uid = this.moveToTrash(`${PENDING_SKIN_STATIC}/${skinID}.png`);
+        if (this.config.env == "production") {
+            let url = `${this.config.webDomain}/d/${uid}`;
+            embed.setURL(url).setThumbnail(url);
+        } else {
+            if (nsfwResult.data)
+                embed.attachFile(new Attachment(nsfwResult.data, `SPOILER_${skinName}.png`));
+            else 
+                embed.attachFile(new Attachment(`${DELETED_SKIN_STATIC}/${skinID}.png`, `SPOILER_${skinName}.png`));
+        }
             
         /** @type {DiscordJS.Message} */
         let message = await this.rejectedChannel.send(embed);
@@ -548,9 +583,9 @@ class SkinsDiscordBot extends Client {
 
         let length = pendingSkins.length;
         if (length) {
-            await this.user.setActivity(`with ${length} pending skins`, { url: "https://skins.vanis.io", type: "PLAYING" });
+            await this.user.setActivity(`with ${length} pending skins`, { url: "${this.config.webDomain}", type: "PLAYING" });
         } else {
-            await this.user.setActivity(`for next skin submission`, { url: "https://skins.vanis.io", type: "WATCHING" });
+            await this.user.setActivity(`for next skin submission`, { url: "${this.config.webDomain}", type: "WATCHING" });
         }
 
         // Don't laugh
@@ -602,8 +637,11 @@ class SkinsDiscordBot extends Client {
                 .setTimestamp();
 
             if (this.config.env === "production") {
-                let url = `https://skins.vanis.io/s/${skinDoc.skinID}`;
+                let url = `${this.config.webDomain}/s/${skinDoc.skinID}`;
                 embed.setThumbnail(url).setURL(url);
+            } else {
+                // dev
+                embed.attachFile(new Attachment(`${SKIN_STATIC}/${skinDoc.skinID}.png`, skinDoc.skinName));
             }
 
             let message = await this.approvedChannel.send(embed);
@@ -617,8 +655,8 @@ class SkinsDiscordBot extends Client {
                 let skinEmbed = new RichEmbed()
                     .setTitle("Your skin was approved!")
                     .setColor("GREEN")
-                    .setDescription(`Skin URL: **\`https://skins.vanis.io/s/${skinDoc.skinID}\`**`)
-                    .setImage(`https://skins.vanis.io/s/${skinDoc.skinID}`)
+                    .setDescription(`Skin URL: **\`${this.config.webDomain}/s/${skinDoc.skinID}\`**`)
+                    .setImage(`${this.config.webDomain}/s/${skinDoc.skinID}`)
                     .setFooter("Thanks for using this app")
                     .setTimestamp();
 
@@ -657,17 +695,18 @@ class SkinsDiscordBot extends Client {
                 .setDescription(`\`${skinDoc.skinName.replace(/`/g, "\\`")}\` submitted by <@${skinDoc.ownerID}> ${extra}`)
                 .setTimestamp();
 
-        if (fs.existsSync(skinPath))
-            embed.attachFile(new Attachment(skinPath, "SPOILER_" + skinDoc.skinName + ".png"));
+        let uid = this.moveToTrash(skinPath);
 
-        if (this.app.config.env == "production")
-            await this.app.cloudflare.purgeCache(`https://skins.vanis.io/api/p/${skinDoc.skinID}`);
+        if (this.config.env == "production") {
+            await this.cloudflare.purgeCache(`${this.config.webDomain}/p/${skinDoc.skinID}`);
+            let url = `${this.config.webDomain}/d/${uid}`;
+            embed.setURL(url).setThumbnail(url);
+        } else {
+            embed.attachFile(new Attachment(`${DELETED_SKIN_STATIC}/${skinDoc.skinID}`, 
+                                            "SPOILER_" + skinDoc.skinName + ".png"));
+        }
 
         let message = await this.rejectedChannel.send(embed);
-
-        // if (fs.existsSync(skinPath))
-        //     fs.unlinkSync(skinPath);
-        // else this.logger.warn(`Can't find rejected skin file to delete`);
 
         skinDoc.messageID = message.id;
         await skinDoc.save();
@@ -696,10 +735,10 @@ class SkinsDiscordBot extends Client {
      * @param {SkinStatus} status
      */
     async deleteReview(messageID, status) {
-        if (!messageID) return false;
+        if (!messageID) return (this.logger.warn("DeleteReview: undefined messageID"), false);
         /** @type {DiscordJS.Message} */
         let message = await this[`${status}Channel`].fetchMessage(messageID).catch(() => {});
-        if (!message) return false;
+        if (!message) return (this.logger.warn("DeleteReview: can't find review message"), false);
 
         await this.deletedChannel.send(this.copyEmbed(message.embeds[0]));
 
@@ -716,10 +755,10 @@ class SkinsDiscordBot extends Client {
         embed.color  && (copy.setColor(embed.color));
         embed.title  && (copy.setTitle(embed.title));
         embed.description && (copy.setDescription(embed.description));
-        embed.thumbnail && (copy.setThumbnail(embed.thumbnail.proxyURL));
-        copy.setTimestamp();
+        embed.thumbnail   && (copy.setThumbnail(embed.thumbnail.url));
         embed.footer && (copy.setFooter(embed.footer.text));
-        embed.image  && (copy.setFooter(embed.image.proxyURL));
+        embed.image  && (copy.setImage(embed.image.url));
+        copy.setTimestamp();
 
         return copy;
     }
@@ -736,6 +775,18 @@ class SkinsDiscordBot extends Client {
 
         fs.renameSync(sourcePath, distPath);
         return true;
+    }
+
+    /** @param {string} path */
+    moveToTrash(path) {
+        if (fs.existsSync(path)) {
+            let uid = Provision.generateToken(Provision.letterDigits, 30);
+            fs.renameSync(path, `${DELETED_SKIN_STATIC}/${uid}.png`);
+            return uid;
+        } else {
+            this.logger.warn(`Can't find skin at ${path} to move to trash`);
+            return "404";
+        }
     }
 
     /** @param {DiscordJS.MessageReaction} reaction */

@@ -8,7 +8,7 @@ pm2.connect(async err => {
         script: `${__dirname}/bot.js`,
         name: "BOT",
         restart_delay: 10000,
-        max_memory_restart: "100M"
+        max_memory_restart: "75M"
     }, err => {
         if (err)
             console.log("Failed to start BOT: ", err);
@@ -31,8 +31,8 @@ pm2.connect(async err => {
         name: "SERVER",
         restart_delay: 10000,
         exec_mode: "cluster",
-        instances: 4,
-        max_memory_restart: "100M"
+        instances: Math.min((require("os").cpus().length - 1) || 1, 4),
+        max_memory_restart: "65M"
     }, err => {
         if (err)
             console.log("Failed to start SERVER: ", err);

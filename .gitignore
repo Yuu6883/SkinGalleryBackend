@@ -22,6 +22,9 @@ skins/*
 pending_skins/*
 !pending_skins/404.png
 
+deleted_skins/*
+!deleted_skins/404.png
+
 # legacy jpg
 *.jpg
 

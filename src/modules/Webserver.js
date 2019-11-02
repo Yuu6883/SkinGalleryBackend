@@ -16,10 +16,8 @@ class Webserver {
         this.app = app;
         /** @type {import("http").Server} */
         this.webserver = null;
-        this.webDomainRegex =
-            app.config.webDomain
-            ? new RegExp(`^https?://${app.config.webDomain}`)
-            : null;
+        this.allowedOrigins =
+            app.config.webDomain ? [`https://${app.config.webDomain}`] : [];
     }
 
     get config() { return this.app.config; }
@@ -87,7 +85,7 @@ class Webserver {
         app.use((req, res, next) => {
             const origin = req.get("origin");
 
-            if (this.webDomainRegex && !this.webDomainRegex.test(origin)) {
+            if (this.allowedOrigins.length && !this.allowedOrigins.includes(origin)) {
                 this.logger.warn(`Blocked request from unknown origin: ${origin}`)
                 return void res.sendStatus(403);
             }

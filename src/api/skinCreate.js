@@ -51,7 +51,7 @@ const endpoint = {
             if (!skinDoc) {
                 // Autism strikes
                 this.logger.warn(`${req.vanisUser.discordID} tried to submit more than limit.`);
-                res.sendStatus(500);
+                res.sendStatus(403);
 
                 if (fs.existsSync(skinPath))
                     fs.unlinkSync(skinPath);

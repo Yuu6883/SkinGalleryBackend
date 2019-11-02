@@ -42,6 +42,7 @@ module.exports = {
     WEB_STATIC_SOURCE: path.resolve(__dirname, "..", "web"),
     SKIN_STATIC: path.resolve(__dirname, "..", "skins"),
     PENDING_SKIN_STATIC: path.resolve(__dirname, "..", "pending_skins"),
+    DELETED_SKIN_STATIC: path.resolve(__dirname, "..", "deleted_skins"),
     VANIS_TOKEN_COOKIE: "vanis_skin_token",
     VANIS_TOKEN_AGE: 30 * 24 * 60 * 60 * 1000,
     SOCKET_PATH,

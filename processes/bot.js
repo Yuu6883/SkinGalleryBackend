@@ -31,10 +31,13 @@ ipc.serve(BOT_SOCKET, () => {
 
     // Initialize listener for three events
     for (let method of ["pend", "reject", "approve"]) {
+
         ipc.server.on(method, async (data, socket) => {
             if (!bot) return ipc.server.emit(socket, method, 
                 { id: ipc.config.id, message: { error: "Discord bot process not ready" }});
     
+            bot.logger.debug(`Received ${method}Skin call`);
+            
             try {
                 let { discordID, result, skinID, skinName } = data.message;
                 let message = await bot[`${method}Skin`](discordID, result, skinID, skinName);
@@ -48,16 +51,16 @@ ipc.serve(BOT_SOCKET, () => {
     }
 
     ipc.server.on("delete", async (data, socket) => {
-        if (!bot) return ipc.server.emit(socket, method, 
+        if (!bot) return ipc.server.emit(socket, "delete", 
             { id: ipc.config.id, message: { error: "Discord bot process not ready" }});
 
         try {
             let { messageID, status } = data.message;
             let message = await bot.deleteReview(messageID, status);
-            ipc.server.emit(socket, method, { id: ipc.config.id, message });
+            ipc.server.emit(socket, "delete", { id: ipc.config.id, message });
         } catch (e) {
             bot && bot.logger.onError(`Error while deleting skin`, e);
-            ipc.server.emit(socket, method, { id: ipc.config.id, 
+            ipc.server.emit(socket, "delete", { id: ipc.config.id, 
                 message: { error: e.message, stack: e.stack }});
         }
 

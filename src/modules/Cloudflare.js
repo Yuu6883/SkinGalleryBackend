@@ -1,6 +1,5 @@
 const fetch = require("node-fetch");
 const CF_PURGE_LIMIT = 30;
-const DOMAIN = "https://skins.vanis.io";
 
 class Cloudflare {
 
@@ -12,6 +11,8 @@ class Cloudflare {
         this.warnings = 0;
         /** @type {String[]} */
         this.purgeList = [];
+        this.zone = app.config.cfZone;
+        this.domain = app.config.webDomain;
     }
 
     get logger() { return this.app.logger }
@@ -20,11 +21,11 @@ class Cloudflare {
     async purgeCache(url) {
         if (this.app.config.env !== "production") return;
         
-        if (!url.startsWith(DOMAIN)) {
+        if (!url.startsWith(this.domain)) {
             this.logger.warn(`Trying to purge none-related url: ${url}`);
             return;
         }
-        this.logger.debug(`Adding ${url.replace(DOMAIN, "")} to purge list`);
+        this.logger.debug(`Adding ${url.replace(this.domain, "")} to purge list`);
 
         this.purgeList.push(url);
         await this.applyPurge();
@@ -35,7 +36,7 @@ class Cloudflare {
 
         if (!purging.length) return;
 
-        let res = await fetch("https://api.cloudflare.com/client/v4/zones/b61eca71559601bb216ff247629c2b1a/purge_cache", {
+        let res = await fetch(`https://api.cloudflare.com/client/v4/zones/${this.zone}/purge_cache`, {
             method: "POST",
             body: JSON.stringify({ files: purging }),
             headers: {

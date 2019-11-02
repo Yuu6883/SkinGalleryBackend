@@ -35,7 +35,10 @@ ipc.serve(NSFW_SOCKET, () => {
             { id: ipc.config.id, message: { error: "NSFW process not ready" }});
 
         try {
+            bot.logger.debug("Classifying");
             let message = await bot.classify(data.message);
+            bot.logger.debug("Classied: ", message);
+
             ipc.server.emit(socket, "classified", { id: ipc.config.id, message });
         } catch (e) {
             bot && bot.logger.onError("Error while classifying", e);

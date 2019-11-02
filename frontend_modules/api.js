@@ -29,7 +29,7 @@ module.exports = new class API extends EventEmitter {
             img.onerror = img.onabort = _ => resolve();
         });
 
-        img.src = `${window.origin}/${pending ? "api/p/skin" : "s"}/${skinID}`;
+        img.src = `${window.origin}/${pending ? "p/skin" : "s"}/${skinID}`;
         img.crossOrigin = "anonymous";
 
         let imageLoaded = await loadImagePromise;
@@ -177,6 +177,10 @@ module.exports = new class API extends EventEmitter {
             dataType: "json",
             success: res => {
                 if (res.success) {
+                    
+                    let index = this.mySkins.findIndex(s => s.skinID == skinID);
+                    if (index > 0) this.mySkins.splice(index, 1);
+
                     this.emit("skinDeleteSuccess", name);
                 }
             },

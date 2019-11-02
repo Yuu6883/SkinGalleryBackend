@@ -5,7 +5,7 @@ const config = {
     dbPath: "mongodb://localhost:27017/vanis-skins",
 
     webLocation: 3000,
-    webDomain: null,
+    webDomain: "https://skins.vanis.io",
 
     discordAppID:       "614712004644438047",
     discordAppSecret:   "xjUwM_wkafEYK_hGKwaikww3W9p0zid4",
@@ -16,6 +16,7 @@ const config = {
     publicUpdateInterval: 5 * 60 * 1000, // 5 minutes
     publicPageLimit: 20,
     cfToken: "rg0mQSJ5embossQjDiUw1eBtPd9ttbrwB5giBpqJ",
+    cfZone: "b61eca71559601bb216ff247629c2b1a",
 
     skinApprovedChannelID: "626201875129303060",
     skinPendingChannelID:  "620795314496077824",
@@ -42,6 +43,10 @@ if (config.env === "development") {
     config.discordAppSecret   = "NrITYkjlxOJ91LObpEZ8kDIWpaTSRvKy";
     config.discordAppRedirect = "http://localhost/api/login/callback";
     config.discordBotToken    = "NjA3MTczMjM0Njg4Nzg2NDMy.XbGFKg.sx3yMszTEc2C6CsgzJGd69tVMEA";
+
+    config.skinApprovedChannelID = config.skinDeletedChannelID = 
+    config.skinPendingChannelID = config.skinRejectedChannelID = config.debugChannelID;
+    config.webDomain = "http://localhost";
 }
 
 module.exports = config;

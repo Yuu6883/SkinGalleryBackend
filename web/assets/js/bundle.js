@@ -22443,7 +22443,7 @@ module.exports = new class API extends EventEmitter {
             img.onerror = img.onabort = _ => resolve();
         });
 
-        img.src = `${window.origin}/${pending ? "api/p/skin" : "s"}/${skinID}`;
+        img.src = `${window.origin}/${pending ? "p/skin" : "s"}/${skinID}`;
         img.crossOrigin = "anonymous";
 
         let imageLoaded = await loadImagePromise;
@@ -22591,6 +22591,10 @@ module.exports = new class API extends EventEmitter {
             dataType: "json",
             success: res => {
                 if (res.success) {
+                    
+                    let index = this.mySkins.findIndex(s => s.skinID == skinID);
+                    if (index > 0) this.mySkins.splice(index, 1);
+
                     this.emit("skinDeleteSuccess", name);
                 }
             },
@@ -22709,7 +22713,7 @@ const escapeHtml = unsafe => unsafe
 /** @param {{skinID:string,skinName:string,status:SkinStatus,public:boolean}} skinObject */
 const linkedSkinPanel = skinObject => {
 
-    let link = skinObject.status === "approved" ? `/s/${skinObject.skinID}` : `/api/p/skin/${skinObject.skinID}`;
+    let link = skinObject.status === "approved" ? `/s/${skinObject.skinID}` : `/p/skin/${skinObject.skinID}`;
     let labelClass = { "approved": "success", "pending": "warning", "rejected": "danger" }[skinObject.status];
     return "" +
     `<div class="uk-width-1-5@l uk-width-1-4@m uk-width-1-2 uk-card uk-margin-top">
@@ -23054,7 +23058,7 @@ module.exports = new class Prompt {
         } else if (skin.status == "pending") {
             this.alert.fire({
                 title: "Duplicate Skin",
-                imageUrl: `${window.origin}/api/p/skin/${skin.skinID}`,
+                imageUrl: `${window.origin}/p/skin/${skin.skinID}`,
                 imageClass: "skin-preview",
                 text:  "Please try not to submit a duplicate skin. " +
                        `This skin is pending right now. Moderators would normally review and ` + 

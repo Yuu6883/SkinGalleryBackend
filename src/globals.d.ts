@@ -19,6 +19,7 @@ interface AppConfig {
     publicUpdateInterval: string;
     publicPageLimit: string;
     cfToken: string;
+    cfZone:  string;
 
     skinLimit: number;
     nsfwLowThreshold:  number;
@@ -28,6 +29,7 @@ interface AppConfig {
     skinRejectedChannelID: string;
     skinDeletedChannelID:  string;
     notifChannelID:        string;
+    debugChannelID:        string;
     approveEmoji: string;
     rejectEmoji:  string;
     approveThreshold: number;

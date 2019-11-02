@@ -40,9 +40,10 @@ class SkinsDiscordBot extends Client {
     async init() {
 
         await mongoose.connect(this.config.dbPath, {
-            useNewUrlParser: true,
             useCreateIndex: true,
-            useFindAndModify: true
+            useNewUrlParser: true,
+            useFindAndModify: true,
+            useUnifiedTopology: true
         });
 
         this.logger.debug("Connected to database");

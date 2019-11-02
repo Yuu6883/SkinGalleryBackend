@@ -17,8 +17,6 @@ const config = {
     publicPageLimit: 20,
     cfToken: "rg0mQSJ5embossQjDiUw1eBtPd9ttbrwB5giBpqJ",
 
-    nsfwLowThreshold: .1,
-    nsfwHighThreshold: 1,
     skinApprovedChannelID: "626201875129303060",
     skinPendingChannelID:  "620795314496077824",
     skinRejectedChannelID: "626201904417996800",

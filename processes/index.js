@@ -1,0 +1,44 @@
+const pm2 = require("pm2");
+
+pm2.connect(async err => {
+    if (err)
+        return console.error(err);
+
+    await new Promise(resolve => pm2.start({
+        script: `${__dirname}/bot.js`,
+        name: "BOT",
+        restart_delay: 10000,
+        max_memory_restart: "100M"
+    }, err => {
+        if (err)
+            console.log("Failed to start BOT: ", err);
+        resolve();
+    }));
+
+    await new Promise(resolve => pm2.start({
+        script: `${__dirname}/nsfw.js`,
+        name: "NSFW",
+        restart_delay: 10000,
+        max_memory_restart: "400M"
+    }, err => {
+        if (err)
+            console.log("Failed to start NSFW: ", err);
+        resolve();
+    }));
+
+    await new Promise(resolve => pm2.start({
+        script: `${__dirname}/server.js`,
+        name: "SERVER",
+        restart_delay: 10000,
+        exec_mode: "cluster",
+        instances: 4,
+        max_memory_restart: "100M"
+    }, err => {
+        if (err)
+            console.log("Failed to start SERVER: ", err);
+        resolve();
+    }));
+
+    pm2.disconnect();
+    console.log("Done.");
+});

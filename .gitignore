@@ -1,10 +1,18 @@
 # CLI logs
 cli/logs
-cli/log-config.json
-
 # Test logs
 test/logs
-test/log-config.json
+# Process logs
+processes/logs/*
+
+# Unix sockets
+sockets/*
+
+# configs
+*-config.json
+
+# Ignore bundled js
+bundle.js*
 
 # Skins
 skins/*

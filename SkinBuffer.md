@@ -1,7 +1,7 @@
 SkinID:
     6 bytes, 6 digits * 1 byte
 SkinName:
-    32 bytes, 16 digits * 2 bytes (UTF16)
+    16 bytes, UTF8
 SkinTag:
     8 bytes, 64 bits, each bit 1 for tag at index, 0 for no tag at that index
 Favorites:

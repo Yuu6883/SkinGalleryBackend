@@ -43,10 +43,11 @@ class SkinsDiscordBot extends Client {
             useCreateIndex: true,
             useFindAndModify: true
         });
+
         this.logger.debug("Connected to database");
 
         await this.login(this.config.discordBotToken);
-        this.logger.inform(`Discord bot (${this.user.username}#${this.user.discriminator}) logged in`);
+        this.logger.inform(`${this.user.username}#${this.user.discriminator} logged in`);
 
         /** @type {DiscordJS.TextChannel} */
         this.pendingChannel = this.findChannelByID(this.config.skinPendingChannelID);
@@ -66,12 +67,10 @@ class SkinsDiscordBot extends Client {
         await this.updateMods();
         this.startReviewCycle();
 
-        // this.users.forEach(u => {
-        //     console.log(u.username + "#" + u.discriminator + "(" + u.id + ")");
-        // });
-
         this.on("message", message => this.onMessage(message));
         this.on("error",   error   => this.logger.onError(error));
+
+        return this;
     }
 
     /** @param {DiscordJS.Message} message */
@@ -457,7 +456,7 @@ class SkinsDiscordBot extends Client {
      * @param {string} skinID
      * @param {string} skinName 
      */
-    async pendSkinReview(ownerID, nsfwResult, skinID, skinName) {
+    async pendSkin(ownerID, nsfwResult, skinID, skinName) {
 
         let color = nsfwResult.avarage_color.replace(/\D/g, " ").match(/\S+/g).map(c => ~~c);
         nsfwResult.color = nsfwResult.avarage_color;

@@ -37,7 +37,7 @@ module.exports = buffer => {
         let skinID = readUTF8(buffer.slice(index, index + SKIN_ID_BYTES));
         index += SKIN_ID_BYTES;
 
-        let skinName = readUTF16(buffer.slice(index, index + SKIN_NAME_BYTES))
+        let skinName = readUTF8(buffer.slice(index, index + SKIN_NAME_BYTES))
                             .replace(/\u0000/g, "");
         index += SKIN_NAME_BYTES;
 

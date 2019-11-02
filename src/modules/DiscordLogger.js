@@ -1,6 +1,5 @@
 const Logger = require("./Logger");
 const table = require("./StringTable");
-const pm2 = require("pm2");
 
 /**
  * @param {String} format
@@ -48,7 +47,7 @@ class DiscordLogger extends Logger {
             PRINT:  true,
             ERROR:  true,
             FATAL:  true,
-            DEBUG:  true
+            DEBUG:  false
         }
 
         /** @type {LogEvent} */
@@ -63,24 +62,31 @@ class DiscordLogger extends Logger {
             process.exit(0);
         });
 
-        if (process.env.PM_ID !== undefined) this.initPM2Log();
+        if (process.env.PM_ID !== undefined) {
+            this.pm2 = require("pm2");
+            this.initPM2Log();
+        }
     }
 
-    initPM2Log() {
-        pm2.connect(err => {
+    async initPM2Log() {
+        await new Promise(resolve => this.pm2.connect(err => {
             if (err) return this.onError("Failed to connect to pm2", err);
-            this.inform("Connected to pm2");
+            resolve();
+        }));
 
-            pm2.launchBus((err, bus) => {
-                if (err) return this.onError("Failed to call pm2.launchBus", err);
+        this.pm2.launchBus((err, bus) => {
+            if (err) return this.onError("Failed to call pm2.launchBus", err);
 
-                bus.on("log:out", packet => {
-                    this.print(`[${packet.process.name}:stdout] ${packet.data.replace(/\x1b\[\d+m/g, "").slice(11)}`);
-                });
+            bus.on("log:out", packet => {
+                this.print(`$${packet.process.pm_id}[${packet.process.name}:out] ${packet.data
+                            .replace(/\x1b\[\d+m/g, "")
+                            .replace(/^\d{4}\-\d{2}\-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}/)}`, "");
+            });
 
-                bus.on("log:err", packet => {
-                    this.print(`[${packet.process.name}:stderr] ${packet.data.replace(/\x1b\[\d+m/g, "").slice(11)}`);
-                });
+            bus.on("log:err", packet => {
+                this.print(`$${packet.process.pm_id}[${packet.process.name}:err] ${packet.data
+                            .replace(/\x1b\[\d+m/g, "")
+                            .replace(/^\d{4}\-\d{2}\-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}/)}`, "");
             });
         });
     }
@@ -101,14 +107,15 @@ class DiscordLogger extends Logger {
 
             if (!this.config[logObj.level]) continue;
 
-            let msg = `${logObj.level == "PRINT" ? "" : (dateToString(this.format, logObj.date) + 
-                      `[${logObj.level}]  `.slice(0, 8))}${logObj.message + (logObj.level == "PRINT" ? "" : "\n")}`;
+            let msg = `${logObj.level == "PRINT" ? "" : 
+                      `$${process.env.PM_ID}[${process.env.name}:out] ` + 
+                      `[${logObj.level}]`.padEnd(7, " ")}${logObj.message + (logObj.level == "PRINT" ? "" : "\n")}`;
 
-            if ((build + msg).length > 2000) {
+            if ((build + msg.trim()).length > 2000) {
                 this.logs.unshift(logObj);
                 break;
             } else {
-                build += msg;
+                build += msg.trim() + "\n";
             }
         }
 

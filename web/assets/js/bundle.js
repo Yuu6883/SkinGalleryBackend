@@ -22654,7 +22654,7 @@ module.exports = buffer => {
         let skinID = readUTF8(buffer.slice(index, index + SKIN_ID_BYTES));
         index += SKIN_ID_BYTES;
 
-        let skinName = readUTF16(buffer.slice(index, index + SKIN_NAME_BYTES))
+        let skinName = readUTF8(buffer.slice(index, index + SKIN_NAME_BYTES))
                             .replace(/\u0000/g, "");
         index += SKIN_NAME_BYTES;
 
@@ -22904,6 +22904,7 @@ const readImage = file => new Promise(resolve => {
 
 /** @param {Date} date */
 const MMDDYYYY = date => `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()}`;
+const toUTF8 = str => unescape(encodeURIComponent(str));
 
 module.exports = new class Prompt {
     
@@ -22999,6 +23000,7 @@ module.exports = new class Prompt {
                            ` 512x512 skin recommended. Other size will be force scaled.`
 
         let isPublic = true;
+        let skinName = skin.name.split(".").slice(0, -1).join(".").slice(0, 16);
         this.alert.fire({
             title: "Preview",
             text: extraMessage,
@@ -23007,11 +23009,23 @@ module.exports = new class Prompt {
             inputAttributes: {
                 maxLength: 16
             },
-            inputValidator: value => !(value && value.length <= 16),
+            /** @param {String} value */
+            inputValidator: value => {
+                this.alert.getInput().value = "";
+                if (!value)
+                    return "Skin name can't be empty";
+                if (value.length > 16) 
+                    return "Skin name must not be longer than 16 characters";
+                for (let char of value.split("")) {
+                    if (char != toUTF8(char))
+                        return `Skin name must be UTF8 characters (${char} is not UTF8)`;
+                }
+                this.alert.getInput().value = value;
+            },
             inputAutoTrim: true,
             confirmButtonText: "Submit",
             showCancelButton: true,
-            inputValue: skin.name.split(".").slice(0, -1).join(".").slice(0, 16),
+            inputValue: toUTF8(skinName),
             onOpen: () => {
                 $(this.alert.getContent()).prepend(canvas);
                 $(this.alert.getContent()).append(
@@ -23379,7 +23393,7 @@ module.exports = Starfield;
  * @description Shared commonly between server and client
  */
 const SKIN_ID_BYTES = 6;
-const SKIN_NAME_BYTES = 32;
+const SKIN_NAME_BYTES = 16;
 const SKIN_TAG_BYTES = 8
 const SKIN_TAG_LENGTH = 64;
 const FAV_BYTES = 2;

@@ -36,15 +36,17 @@ const USER_MOD_AUTH_LEVEL       = USER_BASIC_AUTH_LEVEL | p.LIST_OTHER_SKINS | p
                                     p.APPROVE_SKIN | p.REJECT_SKIN | p.BAN_USER | p.UNBAN_USER;
 
 const path = require("path");
+const SOCKET_PATH = path.resolve(__dirname, "..", "sockets");
 
 module.exports = {
     WEB_STATIC_SOURCE: path.resolve(__dirname, "..", "web"),
     SKIN_STATIC: path.resolve(__dirname, "..", "skins"),
     PENDING_SKIN_STATIC: path.resolve(__dirname, "..", "pending_skins"),
-
     VANIS_TOKEN_COOKIE: "vanis_skin_token",
     VANIS_TOKEN_AGE: 30 * 24 * 60 * 60 * 1000,
-
+    SOCKET_PATH,
+    NSFW_SOCKET: `${SOCKET_PATH}/nsfw.sock`,
+    BOT_SOCKET: `${SOCKET_PATH}/bot.sock`,
     PERMISSIONS: p,
     AUTH_LEVELS: {
         NONE: NO_AUTH_LEVEL,

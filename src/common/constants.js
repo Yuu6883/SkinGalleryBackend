@@ -2,7 +2,7 @@
  * @description Shared commonly between server and client
  */
 const SKIN_ID_BYTES = 6;
-const SKIN_NAME_BYTES = 32;
+const SKIN_NAME_BYTES = 16;
 const SKIN_TAG_BYTES = 8
 const SKIN_TAG_LENGTH = 64;
 const FAV_BYTES = 2;

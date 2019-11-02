@@ -1,36 +1,57 @@
+/** @type {import("@tensorflow/tfjs-node")} */
 let TensorFlow;
 const { Canvas, loadImage } = require("canvas");
 const NSFW_CLASSES = ["drawing", "hentai", "neutral", "porn", "sexy"];
 
-class NSFWbot {
+class NSFWBot {
+    
     /**
-     * @param {import("../app")} app
+     * @param {Number} size 
      */
-    constructor(app) {
-        this.app = app;
-        this.size = 299;
-        this.canvas = new Canvas(299, 299);
-        this.ctx = this.canvas.getContext("2d");
+    constructor() {
+        this.size = 0;
+
+        /** @type {import("./Logger")} */
+        this.logger = {
+            inform: console.log,
+            warn:   console.warn,
+            debug: () => {}
+        };
     }
 
     async init() {
-        let logger = this.app.logger;
 
-        if (this.model) {
-            logger.warn("Failed to init again: NSFW model already loaded");
-            return;
+        if (this.model)
+            return (this.logger.warn("Failed to init again: NSFW model already loaded"), this);
+            
+        let handler;
+        try {
+            TensorFlow = require("@tensorflow/tfjs-node");
+            handler = TensorFlow.io.fileSystem(`${__dirname}/../../nsfw_model/model.json`);
+            this.size = 299;
+        } catch (_) {
+            // Windows have cancer???
+            TensorFlow = require("@tensorflow/tfjs");
+            // Get rid of a super long and dumb message
+            TensorFlow.ENV.set("IS_NODE", false);
+            
+            handler = "https://nsfwjs.com/quant_nsfw_mobilenet/model.json";
+            this.size = 224;
         }
-        TensorFlow = require("@tensorflow/tfjs-node");
+
+        this.canvas = new Canvas(this.size, this.size);
+        this.ctx = this.canvas.getContext("2d");
 
         let now = Date.now();
-        logger.inform("Loading NSFW model");
-        this.model = await TensorFlow.loadLayersModel(TensorFlow.io.fileSystem(__dirname + "/../../nsfw_model/model.json"));
-        logger.inform(`NSFW model loaded, time elasped: ${Date.now() - now}ms`);
+        this.logger.inform(`Loading NSFW model(${this.size})`);
+        this.model = await TensorFlow.loadLayersModel(handler);
+        this.logger.inform(`NSFW model loaded, time elasped: ${Date.now() - now}ms`);
         
+        return this;
     }
 
     /**
-     * @param {string} src
+     * @param {String|Buffer} src
      * @returns {NSFWPrediction}
      */
     async classify(src) {
@@ -73,34 +94,10 @@ class NSFWbot {
             return prev;
         }, {});
 
-        // result.avarage_rgb = (mean[0] + mean[1] + mean[2]) / 3;
         result.avarage_color = `rgb(${mean[0]},${mean[1]},${mean[2]})`;
-        // result.color_STD = (std[0] + std[1] + std[2]) / 3;
-        result.data = this.canvas.toBuffer("image/png");
 
         return result;
     }
-
-    /**
-     * @param {NSFWPrediction} result
-     * @returns {SkinStatus}
-     */
-    nsfwStatus(result) {
-
-        if (result.hentai > this.app.config.nsfwHighThreshold || 
-            result.porn > this.app.config.nsfwHighThreshold)
-            return "rejected";
-
-        if (result.hentai < this.app.config.nsfwLowThreshold &&
-            result.porn < this.app.config.nsfwLowThreshold) {
-            delete result.avarage_rgb;
-            return "approved";
-        }
-
-        delete result.avarage_rgb;
-        return "pending";        
-    }
-
 }
 
-module.exports = NSFWbot;
+module.exports = NSFWBot;

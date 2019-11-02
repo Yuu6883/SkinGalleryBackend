@@ -110,7 +110,6 @@ interface NSFWPrediction {
     sexy: number;
     avarage_color: string;
     color_STD: string;
-    data: Buffer;
 }
 
 declare type APIRequest = import("express").Request & {

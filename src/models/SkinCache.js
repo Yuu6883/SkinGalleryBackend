@@ -66,8 +66,8 @@ class SkinCache {
                 offset, SKIN_ID_BYTES);
             offset += SKIN_ID_BYTES;
 
-            this.writeUTF16(buffer, skin.skinName, 
-                offset, SKIN_NAME_BYTES / 2);
+            this.writeUTF8(buffer, skin.skinName, 
+                offset, SKIN_NAME_BYTES);
             offset += SKIN_NAME_BYTES;
 
             this.writeTags(buffer, skin.tags,  offset);
@@ -102,8 +102,8 @@ class SkinCache {
                                                     index +  SKIN_ID_BYTES);
             index += SKIN_ID_BYTES;
                                                     
-            let skinName = buffer.toString("utf16le", index,
-                                                    index +  SKIN_NAME_BYTES)
+            let skinName = buffer.toString("utf8", index,
+                                                   index +  SKIN_NAME_BYTES)
                                  .replace(/\u0000/g, "");
             index += SKIN_NAME_BYTES;
 

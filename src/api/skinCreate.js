@@ -1,5 +1,6 @@
 const { hasPermission, PENDING_SKIN_STATIC, SKIN_STATIC } = require("../constant");
 const fs = require("fs");
+const NSFWStatus = require("../modules/NSFWStatus");
 const expressForms = require("body-parser");
 
 /** @type {APIEndpointHandler} */
@@ -21,11 +22,7 @@ const endpoint = {
 
         try {
             let result = await this.nsfwBot.classify(req.body);
-            let nsfwStatus = this.nsfwBot.nsfwStatus(result);
-
-            if (await this.bot.isMod(req.vanisUser.discordID)) {
-                if (nsfwStatus === "rejected") nsfwStatus = "pending";
-            }
+            let nsfwStatus = NSFWStatus(result);
 
             let skinID = await this.provision.generateSkinID();
             let imageBase64Data = req.body.replace("data:image/png;base64,", "");
@@ -37,7 +34,7 @@ const endpoint = {
             let messageID;
 
             if (nsfwStatus === "pending") {
-                messageID = await this.bot.pendSkinReview(req.vanisUser.discordID, result, skinID, req.params.skinName);
+                messageID = await this.bot.pendSkin(req.vanisUser.discordID, result, skinID, req.params.skinName);
             }
 
             if (nsfwStatus === "approved") {
@@ -49,7 +46,7 @@ const endpoint = {
             }
 
             let skinDoc = await this.skins.create(req.vanisUser.discordID, skinID, 
-                                    req.params.skinName, nsfwStatus, !!req.query.public,messageID);
+                                    req.params.skinName, nsfwStatus, !!req.query.public, messageID);
 
             if (!skinDoc) {
                 // Autism strikes

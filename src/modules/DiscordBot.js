@@ -600,9 +600,12 @@ class SkinsDiscordBot extends Client {
 
         let length = pendingSkins.length;
         if (length) {
-            await this.user.setActivity(`with ${length} pending skins`, { url: "${this.config.webDomain}", type: "PLAYING" });
+            await this.user.setActivity(`with ${length} pending skins`, 
+                { url: `${this.config.webDomain}`, type: "PLAYING" });
+
         } else {
-            await this.user.setActivity(`for next skin submission`, { url: "${this.config.webDomain}", type: "WATCHING" });
+            await this.user.setActivity(`for next skin submission`, 
+                { url: `${this.config.webDomain}`, type: "WATCHING" });
         }
 
         // Don't laugh

@@ -53,7 +53,7 @@ class Cloudflare {
             this.warnings++;
         } else {
             this.purgeList = this.purgeList.slice(CF_PURGE_LIMIT);
-            this.logger.debug(`Purged URL's: ${purging.map(p => p.replace(DOMAIN, "")).join(", ")}`);
+            this.logger.debug(`Purged URL's: ${purging.map(p => p.replace(this.domain, "")).join(", ")}`);
         }
     }
 }

@@ -2,7 +2,7 @@
 const config = {
     env: process.env.NODE_ENV == "production" ? "production" : "development",
 
-    dbPath: "mongodb://localhost:27017/skins-gallery",
+    dbPath: "mongodb://localhost:27017/vanis-skins",
 
     webLocation: 3000,
     webDomain: "https://skins.vanis.io",
@@ -15,8 +15,8 @@ const config = {
 
     publicUpdateInterval: 5 * 60 * 1000, // 5 minutes
     publicPageLimit: 20,
-    cfToken: "o8ZJKfs_nhtI972QWv9DjD3tD_-Soztkn5eXZECL",
-    cfZone: "24c6173ecb1c2449d9e010b6728a7078",
+    cfToken: "rg0mQSJ5embossQjDiUw1eBtPd9ttbrwB5giBpqJ",
+    cfZone: "b61eca71559601bb216ff247629c2b1a",
 
     skinApprovedChannelID: "626201875129303060",
     skinPendingChannelID:  "620795314496077824",
@@ -33,7 +33,7 @@ const config = {
 
     // pro hardcode
     admins: ["214154668044058624", "297567645044310017"],
-    prefix: "."
+    prefix: "!"
 };
 
 if (config.env === "development") {

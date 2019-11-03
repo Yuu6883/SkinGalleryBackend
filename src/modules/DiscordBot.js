@@ -497,6 +497,9 @@ class SkinsDiscordBot extends Client {
      */
     async pendSkin(ownerID, nsfwResult, skinID, skinName) {
 
+        if (nsfwResult.error)
+            return await this.pendingChannel.send(`Error: ${nsfwResult.error}`);
+
         let color = nsfwResult.avarage_color.replace(/\D/g, " ").match(/\S+/g).map(c => ~~c);
         nsfwResult.color = nsfwResult.avarage_color;
         delete nsfwResult.avarage_color;

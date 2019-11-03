@@ -33,7 +33,7 @@ const config = {
 
     // pro hardcode
     admins: ["214154668044058624", "297567645044310017"],
-    prefix: "!"
+    prefix: "."
 };
 
 if (config.env === "development") {

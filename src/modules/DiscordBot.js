@@ -292,7 +292,8 @@ class SkinsDiscordBot extends Client {
                             SKIN_STATIC : PENDING_SKIN_STATIC;
         skinPath += `/${skinDoc.skinID}.png`;
 
-        let uid = this.moveToTrash(skinPath);
+        let uid = this.moveToTrash(skinPath, skinDoc.status);
+        uid += skinDoc.status;
 
         await this.deleteReview(skinDoc.messageID, skinDoc.status, `${this.config.webDomain}/d/${uid}`);
         
@@ -798,11 +799,14 @@ class SkinsDiscordBot extends Client {
         return true;
     }
 
-    /** @param {string} path */
-    moveToTrash(path) {
+    /** 
+     * @param {string} path 
+     * @param {SkinStatus} status
+     */
+    moveToTrash(path, status) {
         if (fs.existsSync(path)) {
             let uid = Provision.generateToken(Provision.letterDigits, 30);
-            fs.renameSync(path, `${DELETED_SKIN_STATIC}/${uid}.png`);
+            fs.renameSync(path, `${DELETED_SKIN_STATIC}/${uid}${status}.png`);
             return uid;
         } else {
             this.logger.warn(`Can't find skin at ${path} to move to trash`);

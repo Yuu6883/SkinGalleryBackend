@@ -23,7 +23,7 @@ const endpoint = {
         let skinPath = skinDoc.status === "approved" ? SKIN_STATIC : PENDING_SKIN_STATIC;
         skinPath += `/${skinDoc.skinID}.png`;
 
-        let uid = this.bot.moveToTrash(skinPath);
+        let uid = this.bot.moveToTrash(skinPath, skinDoc.status);
 
         await this.bot.deleteReview(skinDoc.messageID, skinDoc.status, `${this.config.webDomain}/d/${uid}`);
 

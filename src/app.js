@@ -142,10 +142,14 @@ class SkinsApp {
                     });
                     ipc.of.BOT.once("delete", data => resolve(data.message));    
                 }),
-                moveToTrash: path => {
+                /** 
+                 * @param {String} path 
+                 * @param {SkinStatus} status 
+                 */
+                moveToTrash: (path, status) => {
                     if (fs.existsSync(path)) {
                         let uid = Provision.generateToken(Provision.letterDigits, 30);
-                        fs.renameSync(path, `${DELETED_SKIN_STATIC}/${uid}.png`);
+                        fs.renameSync(path, `${DELETED_SKIN_STATIC}/${uid}${status}.png`);
                         return uid;
                     } else {
                         this.logger.warn(`Can't find skin at ${path} to move to trash`);

@@ -39,11 +39,11 @@ module.exports = new class Prompt {
 
     /** @param {string} text */
     showLoader(text) {
-
         return this.alert.fire({
             background: "transparent",
             showConfirmButton: false,
             showCancelButton: false,
+            width: 0,
             title: $(`<div class="lds-spinner">${"<div></div>".repeat(12)}<div>`),
             text: text || "",
             timer: 10000,

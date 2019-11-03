@@ -1,6 +1,6 @@
 /** @type {AppConfig} */
 const config = {
-    env: process.platform == "win32" ? "development" : "production",
+    env: process.env.NODE_ENV == "production" ? "production" : "development",
 
     dbPath: "mongodb://localhost:27017/skins-gallery",
 
@@ -36,7 +36,7 @@ const config = {
     prefix: "!"
 };
 
-if (config.env === "development" || process.env.NODE_ENV == "development") {
+if (config.env === "development") {
     config.prefix = "?";
     config.notifChannelID     = "603808828487761941";
     config.discordAppID       = "607173234688786432";

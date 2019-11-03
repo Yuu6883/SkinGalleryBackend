@@ -211,7 +211,9 @@ class SkinsDiscordBot extends Client {
         }
 
         if (message.content.startsWith(`${this.prefix}ban `)) {
-            let userID = message.content.replace(/\D/g, "").trim();
+            let userID = message.content.split(" ").find(token => 
+                /^<@\d+>$/.test(token) || /^\d+$/.test(token));
+            userID && (userID = userID.replace(/\D/g, ""));
             this.ban(userID, message);
         }
 
@@ -313,18 +315,35 @@ class SkinsDiscordBot extends Client {
      */
     async ban(userID, message) {
         if (userID) {
-            let banned = await this.dbusers.ban(userID);
+            let banTime = message.content.split(" ").find(token => 
+                /^\d+(h|d|m|y)$/gi.test(token));
+
+            if (!banTime) {
+                return message.reply(`Use ${this.prefix}ban {**UserID**} 
+                    {number[**h**|**d**|**m**|**y**]} to ban someone`);
+            }
+
+            const H = 60 * 60 * 1000;
+            let unit = {"h":H,"d":24*H,"m":30*24*H,"y":365*24*H}[banTime.slice(-1)];
+            let time = ~~banTime.slice(0,-1) * unit;
+
+            if (time <= 0) {
+                return message.reply("You are retarded.");
+            }
+
+            let banned = await this.dbusers.ban(userID, time);
 
             if (!banned)
                 return message.reply(`Can't find user ${userID}`);
 
             if (await this.isMod(userID)) {
-                await message.reply(`Stop abusing <@${userID}>`);
+                let u = this.findUserByID(userID);
+                await message.reply(`Stop abusing ${u ? u.username : `<@${userID}>`}.`);
             } else {
                 await this.purge(userID, message);
             }
 
-            message.reply(`User banned: \`${userID}\``);
+            message.reply(`User banned: \`${userID}\` for ${banTime}`);
             
         } else {
             return message.reply(`Use ${this.prefix}ban \`/\\D+/\` to ban someone from Vanis Skin`);
@@ -880,8 +899,10 @@ class SkinsDiscordBot extends Client {
     }
 
     async stop() {
+        this.stopReviewCycle();
+        this.logger.inform("Discord bot logging out");
+        await this.logger.flush();
         await this.destroy();
-        this.logger.inform("Discord bot logged out");
     }
 }
 

@@ -757,7 +757,7 @@ class SkinsDiscordBot extends Client {
 
         let embed = this.copyEmbed(message.embeds[0]);
 
-        if (newURL) embed.setURL(newURL).setThumbnail(newURL);
+        if (newURL) embed.setThumbnail(newURL);
 
         embed.title.replace(new RegExp(status, "i"), "Deleted");
 

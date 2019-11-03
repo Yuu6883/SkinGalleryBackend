@@ -15,8 +15,8 @@ const config = {
 
     publicUpdateInterval: 5 * 60 * 1000, // 5 minutes
     publicPageLimit: 20,
-    cfToken: "rg0mQSJ5embossQjDiUw1eBtPd9ttbrwB5giBpqJ",
-    cfZone: "b61eca71559601bb216ff247629c2b1a",
+    cfToken: "o8ZJKfs_nhtI972QWv9DjD3tD_-Soztkn5eXZECL",
+    cfZone: "24c6173ecb1c2449d9e010b6728a7078",
 
     skinApprovedChannelID: "626201875129303060",
     skinPendingChannelID:  "620795314496077824",

@@ -185,7 +185,7 @@ class SkinsDiscordBot extends Client {
             process.emit("SIGINT");
         }
 
-        if (message.content == `${this.prefix}debug `) {
+        if (message.content.startsWith(`${this.prefix}debug `)) {
             if (message.content.split(" ")[1] == "on" ||
                 message.content.split(" ")[1] == "true") {
                 this.debug(true);

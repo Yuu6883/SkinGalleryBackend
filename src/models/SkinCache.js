@@ -165,7 +165,7 @@ class SkinCache {
      */
     writeUTF8(buffer, string, offset, maxlength) {
         for (let i = 0; i < maxlength; i++)
-            buffer.writeUInt8(Math.max(string.charCodeAt(i) || 0, 255), offset + i);
+            buffer.writeUInt8(Math.min(string.charCodeAt(i) || 0, 255), offset + i);
     }
 
     /**

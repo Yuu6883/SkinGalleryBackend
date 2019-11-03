@@ -21,10 +21,14 @@ class Cloudflare {
     async purgeCache(...urls) {
         if (this.app.config.env !== "production") return;
         
-        if (!url.startsWith(this.domain)) {
-            this.logger.warn(`Trying to purge none-related url: ${urls.join(", ")}`);
-            return;
-        }
+        if (!urls.every(url => {
+            if (!url.startsWith(this.domain)) {
+                this.logger.warn(`Trying to purge none-related url: ${urls.join(", ")}`);
+                return false;
+            }
+            return true;
+        })) return;
+
         this.logger.debug(`Adding ${urls.map(u => u.replace(this.domain, "")).join(", ")} to purge list`);
 
         this.purgeList.push(...urls);

@@ -695,8 +695,6 @@ class SkinsDiscordBot extends Client {
     async rejectPending(skinDoc, rejectReactions) {
         skinDoc.status = "rejected";
         await skinDoc.save();
-
-        let skinPath =`${PENDING_SKIN_STATIC}/${skinDoc.skinID}.png`;
         let extra = rejectReactions ? `This skin was rejected by: \n**` + 
                                         rejectReactions.users.filter(u => u !== this.user)
                                                     .map(u => `<@${u.id}>`).join(" ") + "**\n" :
@@ -761,7 +759,7 @@ class SkinsDiscordBot extends Client {
 
         if (newURL) {
             embed.setThumbnail(newURL);
-            this.logger.debug(newURL);
+            embed.setImage("");
         }
 
         embed.title = embed.title.replace(new RegExp(status, "i"), "Deleted");

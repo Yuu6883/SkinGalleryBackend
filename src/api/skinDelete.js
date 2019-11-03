@@ -24,6 +24,7 @@ const endpoint = {
         skinPath += `/${skinDoc.skinID}.png`;
 
         let uid = this.bot.moveToTrash(skinPath, skinDoc.status);
+        uid += skinDoc.status;
 
         await this.bot.deleteReview(skinDoc.messageID, skinDoc.status, `${this.config.webDomain}/d/${uid}`);
 

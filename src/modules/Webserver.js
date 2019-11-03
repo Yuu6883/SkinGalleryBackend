@@ -90,7 +90,8 @@ class Webserver {
 
             if (this.allowedOrigins.length && origin !== "http://localhost" &&
                 !this.allowedOrigins.includes(origin) && !origin.startsWith("https://discordapp.com/oauth2/")) {
-                this.logger.warn(`Blocked request from unknown origin: ${origin} ${req.rawHeaders.join("\n")}`)
+                this.logger.warn(`Blocked request from unknown origin: ${origin} ${req.originalUrl} headers: \n` +
+                                    ` ${req.rawHeaders.join("\n")}`);
                 return void res.sendStatus(403);
             }
 

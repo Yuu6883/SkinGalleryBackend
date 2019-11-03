@@ -164,7 +164,7 @@ module.exports = new class Prompt {
         } else if (skin.status == "pending") {
             this.alert.fire({
                 title: "Duplicate Skin",
-                imageUrl: `${window.origin}/p/skin/${skin.skinID}`,
+                imageUrl: `${window.origin}/p/${skin.skinID}`,
                 imageClass: "skin-preview",
                 text:  "Please try not to submit a duplicate skin. " +
                        `This skin is pending right now. Moderators would normally review and ` + 

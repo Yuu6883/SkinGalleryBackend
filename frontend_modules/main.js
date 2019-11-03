@@ -24,7 +24,7 @@ const escapeHtml = unsafe => unsafe
 /** @param {{skinID:string,skinName:string,status:SkinStatus,public:boolean}} skinObject */
 const linkedSkinPanel = skinObject => {
 
-    let link = skinObject.status === "approved" ? `/s/${skinObject.skinID}` : `/p/skin/${skinObject.skinID}`;
+    let link = skinObject.status === "approved" ? `/s/${skinObject.skinID}` : `/p/${skinObject.skinID}`;
     let labelClass = { "approved": "success", "pending": "warning", "rejected": "danger" }[skinObject.status];
     return "" +
     `<div class="uk-width-1-5@l uk-width-1-4@m uk-width-1-2 uk-card uk-margin-top">

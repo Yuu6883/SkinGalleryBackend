@@ -29,7 +29,7 @@ module.exports = new class API extends EventEmitter {
             img.onerror = img.onabort = _ => resolve();
         });
 
-        img.src = `${window.origin}/${pending ? "p/skin" : "s"}/${skinID}`;
+        img.src = `${window.origin}/${pending ? "p" : "s"}/${skinID}`;
         img.crossOrigin = "anonymous";
 
         let imageLoaded = await loadImagePromise;

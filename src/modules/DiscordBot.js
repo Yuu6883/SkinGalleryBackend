@@ -447,7 +447,7 @@ class SkinsDiscordBot extends Client {
                            `${this.config.rejectThreshold } ${this.config.rejectEmoji } to reject`)
                 .setTimestamp();
 
-            let url = `${this.config.webDomain}/p/skin/${skinDoc.skinID}`;
+            let url = `${this.config.webDomain}/p/${skinDoc.skinID}`;
             
             embed.setURL(url).setThumbnail(url);
 
@@ -504,7 +504,7 @@ class SkinsDiscordBot extends Client {
             }
 
         } else if (this.config.env == "production") {
-            let url = `${this.config.webDomain}/p/skin/${skinID}`;
+            let url = `${this.config.webDomain}/p/${skinID}`;
             embed.setImage(url).setURL(url);
         }
 

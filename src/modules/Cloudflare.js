@@ -17,17 +17,17 @@ class Cloudflare {
 
     get logger() { return this.app.logger }
 
-    /** @param {String} url */
-    async purgeCache(url) {
+    /** @param {String[]} urls */
+    async purgeCache(...urls) {
         if (this.app.config.env !== "production") return;
         
         if (!url.startsWith(this.domain)) {
-            this.logger.warn(`Trying to purge none-related url: ${url}`);
+            this.logger.warn(`Trying to purge none-related url: ${urls.join(", ")}`);
             return;
         }
-        this.logger.debug(`Adding ${url.replace(this.domain, "")} to purge list`);
+        this.logger.debug(`Adding ${urls.map(u => u.replace(this.domain, "")).join(", ")} to purge list`);
 
-        this.purgeList.push(url);
+        this.purgeList.push(...urls);
         await this.applyPurge();
     }
 

@@ -195,6 +195,11 @@ class SkinsDiscordBot extends Client {
                 await message.reply("Debug mode is now **OFF**")
             }
         }
+
+        if (message.content == `${this.prefix}update`) {
+            await this.updateSite();
+            message.channel.send("Site updated");
+        }
     }
 
     /** @param {DiscordJS.Message} message */
@@ -351,6 +356,14 @@ class SkinsDiscordBot extends Client {
      */
     async list(userID, message) {
 
+    }
+
+    updateSite() {
+        return this.cloudflare.purgeCache(
+            `${this.config.webDomain}/`,
+            `${this.config.webDomain}/assets/js/bundle.js`,
+            `${this.config.webDomain}/assets/css/main.css`
+        );
     }
 
     startReviewCycle() {

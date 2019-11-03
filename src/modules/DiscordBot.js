@@ -684,7 +684,7 @@ class SkinsDiscordBot extends Client {
                     let dm = await user.createDM();
                     await dm.send(skinEmbed);
                 } catch(_) {
-                    await this.notifChannel.send(`<@${skinDoc.ownerID}>`, embed).catch(_ => {});
+                    await this.notifChannel.send(`<@${skinDoc.ownerID}>`, skinEmbed).catch(_ => {});
                 }
             }
 

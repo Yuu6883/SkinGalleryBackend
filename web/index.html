@@ -11,15 +11,24 @@
         <meta property="og:image" content="https://skins.gallery/favicon.ico" />
         <meta property="og:description" content="Upload your skins for blob games here and checkout other players' skins!" />
         <!-- <link rel="shortcut icon" href="assets/img/favicon.ion" /> -->
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-151323617-1"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
 
+        gtag('config', 'UA-151323617-1');
+        </script>
         <!-- I love UIKit -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.7/css/uikit.min.css" integrity="sha256-1NCiLO1eL8xsDn3wFHlM37FhxQjBruKz/veyTbWSWHk=" crossorigin="anonymous" />
         
         <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.7/js/uikit.min.js" integrity="sha256-Si/RSqVaI2Nt0NBCIADY5gtwKd6MVxsARUchEjnOoh4=" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+        
         <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.7/js/uikit-icons.min.js" integrity="sha256-xx24qw2IGUl97Dv7hUvw9UKnw2G7iVq+MmE4nkM/WJs=" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
-
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="assets/css/main.css">
         <link rel="stylesheet" href="assets/css/loader.css">
         <script src="assets/js/bundle.js"></script>
@@ -34,9 +43,9 @@
                 <h1 class="uk-heading text">Skin Library</h1>
             </div>
         </div> -->
-        <div class="center uk-width-3-5@l uk-width-4-5@m uk-width-4-5@s">
+        <div class="center uk-width-4-5@l uk-width-4-5@m uk-width-4-5@s">
             <div class="uk-text-center">
-                <h1 class="uk-heading uk-margin-top text">Vanis Skin Library
+                <h1 class="uk-heading uk-margin-top text">Skin Gallery
                     <span class="theme-color info" uk-icon="icon:info;ratio:1.5"></span>
                     <div class="uk-card uk-card-body card" uk-dropdown>
                         <h5 id="extra-info" class="text uk-text-center uk-margin-remove"></h5>
@@ -69,10 +78,12 @@
                 </div>
             </div>
             <div class="uk-card uk-margin-top uk-animation-fade" id="skin-panel">
-                <ul class="uk-flex-center uk-margin-remove-bottom" uk-tab uk-switcher="animation: uk-animation-fade">
+                <ul class="uk-flex-center uk-margin-remove-bottom uk-margin-remove-left" uk-tab uk-switcher="animation: uk-animation-fade">
                     <li class="uk-active text"><a href="#">My Skins</a></li>
                     <li class="text"><a href="#">Favorites</a></li>
                     <li class="text"><a href="#">Public Skins</a></li>
+                </ul>
+                <ul id="pager" class="uk-flex-center uk-pagination uk-margin-remove-bottom text">
                 </ul>
                 <ul class="uk-switcher">
                     <li><div id="my-skins"  class="uk-grid-small uk-flex-middle" uk-grid uk-lightbox></div></li>

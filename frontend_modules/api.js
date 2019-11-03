@@ -13,6 +13,8 @@ module.exports = new class API extends EventEmitter {
         this.userInfo = null;
         /** @type {ClientSkinWithHash[]} */
         this.mySkins = [];
+        /** @type {ClientSkin[]} */
+        this.favorites = [];
     }
     
     /** @param {string} id */
@@ -182,6 +184,54 @@ module.exports = new class API extends EventEmitter {
                     if (index > 0) this.mySkins.splice(index, 1);
 
                     this.emit("skinDeleteSuccess", name);
+                }
+            },
+            error: console.error
+        });
+    }
+
+    /** @param {ClientSkin} skinObject */
+    addFavSkin(skinObject) {
+        $.ajax({
+            method: "PUT",
+            url: `/api/fav/${skinObject.skinID}`,
+            dataType: "json",
+            success: res => {
+                if (res.success) {
+                    this.favorites.push(skinObject);
+                    this.emit("favUpdate");
+                }
+            },
+            error: console.error
+        });
+    }
+
+    /** @param {String} skinID */
+    deleteFavSkin(skinID) {
+        $.ajax({
+            method: "DELETE",
+            url: `/api/fav/${skinID}`,
+            dataType: "json",
+            success: res => {
+                if (res.success) {
+                    let index = this.favorites.findIndex(s => s.skinID == skinID);
+                    if (index > 0) this.favorites.splice(index, 1);
+
+                    this.emit("favUpdate", name);
+                }
+            },
+            error: console.error
+        });
+    }
+
+    listFavSkin() {
+        $.get({
+            url: "/api/fav/@me",
+            dataType: "json",
+            success: res => {
+                if (Array.isArray(res)) {
+                    this.favorites = res;
+                    this.emit("favUpdate");
                 }
             },
             error: console.error

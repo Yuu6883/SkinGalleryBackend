@@ -29,7 +29,7 @@ class SkinCache {
 
     /** @param {SkinDocument[]} skinDocs */
     createCache(skinDocs) {
-        if (skinDocs) return;
+        if (!skinDocs || !skinDocs.length) return;
         
         // Reallocate buffer if size changed
         if (this.cacheLength != skinDocs.length) 

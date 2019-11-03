@@ -299,8 +299,9 @@ class SkinsDiscordBot extends Client {
         
         let success = await this.dbskins.deleteByID(skinID);
 
-        if (skinDoc.status == "approved" && this.config.env == "production")
-            await this.cloudflare.purgeCache(`${this.config.webDomain}/s/${skinDoc.skinID}`);
+        if (this.config.env == "production")
+            await this.cloudflare.purgeCache(`${this.config.webDomain}/` + 
+                `${skinDoc.status == "approved" ? "s" : "p"}/${skinDoc.skinID}`);
         
         await message.channel.send(success ? `Skin \`${skinID}\` deleted` :
             `Failed to delete skin \`${skinID}\``);
@@ -758,9 +759,12 @@ class SkinsDiscordBot extends Client {
 
         let embed = this.copyEmbed(message.embeds[0]);
 
-        if (newURL) embed.setThumbnail(newURL);
+        if (newURL) {
+            embed.setThumbnail(newURL);
+            this.logger.debug(newURL);
+        }
 
-        embed.title.replace(new RegExp(status, "i"), "Deleted");
+        embed.title = embed.title.replace(new RegExp(status, "i"), "Deleted");
 
         await this.deletedChannel.send(embed);
 

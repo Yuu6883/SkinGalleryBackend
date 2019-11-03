@@ -12,6 +12,9 @@ const endpoint = {
 
         page = page > 0  ? (page > maxPage ? maxPage : page) : 0;
 
+        if (!this.skins.publicCache.cacheLength)
+            return void res.json([]);
+
         /** @type {String} */
         let sort = req.query.sort;
         let reverse = sort[0] == "-";

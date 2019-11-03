@@ -24,6 +24,7 @@ class SkinCache {
         /** @type {{sortByFav:Buffer,sortByName:Buffer,sortByTime:Buffer}} */
         this.cache = {};
         this.BYTES_PER_SKIN = BYTES_PER_SKIN;
+        this.rellocCache(0);
     }
 
     /** @param {SkinDocument[]} skinDocs */
@@ -215,6 +216,7 @@ class SkinCache {
         // console.log(`Writing [${unsigned[0].toString(2).padStart(32, "0")}] at ${offset + 4}`);
     }
 
+    /** @param {Number} number */
     rellocCache(length) {
         this.cache.sortByFav  = Buffer.allocUnsafe(length);
         this.cache.sortByName = Buffer.allocUnsafe(length);

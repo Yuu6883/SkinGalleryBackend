@@ -5,11 +5,11 @@ const config = {
     dbPath: "mongodb://localhost:27017/skins-gallery",
 
     webLocation: 3000,
-    webDomain: "https://skins.gallery",
+    webDomain: "https://skins.vanis.io",
 
     discordAppID:       "614712004644438047",
     discordAppSecret:   "xjUwM_wkafEYK_hGKwaikww3W9p0zid4",
-    discordAppRedirect: "https://skins.gallery/api/login/callback",
+    discordAppRedirect: "https://skins.vanis.io/api/login/callback",
     discordBotToken:    "NjE0NzEyMDA0NjQ0NDM4MDQ3.XWDgUw.BisdBGMA-KJxUpXlRr03pUrgmBs",
     userinfoCacheTime: 30 * 60 * 1000, // 30 minutes
 
@@ -41,7 +41,7 @@ if (config.env === "development") {
     config.notifChannelID     = "603808828487761941";
     config.discordAppID       = "607173234688786432";
     config.discordAppSecret   = "NrITYkjlxOJ91LObpEZ8kDIWpaTSRvKy";
-    config.discordAppRedirect = "https://skins.gallery/api/login/callback";
+    config.discordAppRedirect = "https://skins.vanis.io/api/login/callback";
     config.discordBotToken    = "NjA3MTczMjM0Njg4Nzg2NDMy.XbGFKg.sx3yMszTEc2C6CsgzJGd69tVMEA";
 
     config.skinApprovedChannelID = config.skinDeletedChannelID = 

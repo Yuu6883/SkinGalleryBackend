@@ -3,7 +3,9 @@ module.exports = {
         name: "BOT",
         script: `./processes/bot.js`,
         restart_delay: 2500,
-        max_memory_restart: "100M"
+        max_memory_restart: "100M",
+        kill_timeout : 2500,
+        wait_ready: true
     }, {
         name: "NSFW",
         script: "./processes/nsfw.js",
@@ -15,6 +17,7 @@ module.exports = {
         restart_delay: 2500,
         max_memory_restart: "100M",
         exec_mode: "cluster",
-        instances: Math.min((require("os").cpus().length - 1) || 1, 4)
+        instances: Math.min((require("os").cpus().length - 1) || 1, 4),
+        kill_timeout : 2500
     }]
 }

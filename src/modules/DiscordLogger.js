@@ -62,7 +62,7 @@ class DiscordLogger extends Logger {
             process.exit(0);
         });
 
-        if (process.env.PM_ID !== undefined) {
+        if (process.env.NODE_APP_INSTANCE !== undefined) {
             this.pm2 = require("pm2");
             this.initPM2Log();
         }
@@ -108,7 +108,7 @@ class DiscordLogger extends Logger {
             if (!this.config[logObj.level]) continue;
 
             let msg = `${logObj.level == "PRINT" ? "" : 
-                       process.env.PM_ID ? `$${process.env.PM_ID}[${process.env.name}:out] ` : "" + 
+                       process.env.NODE_APP_INSTANCE ? `$${process.env.NODE_APP_INSTANCE}[${process.env.name}:out] ` : "" + 
                       `[${logObj.level}]`.padEnd(7, " ")}${logObj.message + (logObj.level == "PRINT" ? "" : "\n")}`;
 
             if ((build + msg.trim()).length > 2000) {

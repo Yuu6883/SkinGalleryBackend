@@ -62,7 +62,7 @@ class Webserver {
 
             apiRouter[endpoint.method](endpoint.path, endpoint.handler.bind(this.app));
 
-            this.logger.debug(`Registering route ${endpoint.method.toUpperCase()} ${endpoint.path}`);
+            // this.logger.debug(`Registering route ${endpoint.method.toUpperCase()} ${endpoint.path}`);
         });
 
         // Redirect lurkers

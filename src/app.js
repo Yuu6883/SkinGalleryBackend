@@ -59,7 +59,7 @@ class SkinsApp {
         let placeholder2 = new Promise(() => {});
 
         // Not running in pm2, require modules
-        if (process.env.PM_ID == undefined) {
+        if (process.env.NODE_APP_INSTANCE == undefined) {
             const DiscordBot = require("./modules/DiscordBot");
             this.bot = new DiscordBot({}, this.config);
             this.logger = this.bot.logger;
@@ -75,7 +75,7 @@ class SkinsApp {
         } else {
 
             const ipc = require("node-ipc");
-            ipc.config.id = `SERVER_${process.env.PM_ID||0}`;
+            ipc.config.id = `SERVER_${process.env.NODE_APP_INSTANCE||0}`;
             ipc.config.retry = 3 * 1000;
             ipc.config.sync = true;
             ipc.config.silent = true;

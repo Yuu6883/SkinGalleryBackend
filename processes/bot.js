@@ -1,4 +1,4 @@
-if (process.env.PM_ID == undefined) {
+if (process.env.NODE_APP_INSTANCE == undefined) {
     console.error("NSFW process must be started with pm2");
     process.exit(1);
 }
@@ -69,4 +69,8 @@ ipc.serve(BOT_SOCKET, () => {
 
 ipc.server.start();
 
-new DiscordBot({}, config).init().then(b => bot = b);
+new DiscordBot({}, config).init().then(b => {
+    bot = b;
+    // Make sure bot online first
+    process.send && process.send("ready");
+});

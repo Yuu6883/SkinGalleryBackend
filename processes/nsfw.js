@@ -1,4 +1,4 @@
-if (process.env.PM_ID == undefined) {
+if (process.env.NODE_APP_INSTANCE == undefined) {
     console.error("NSFW process must be started with pm2");
     process.exit(1);
 }

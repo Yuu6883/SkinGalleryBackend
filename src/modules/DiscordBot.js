@@ -748,6 +748,8 @@ class SkinsDiscordBot extends Client {
 
         if (newURL) embed.setURL(newURL).setThumbnail(newURL);
 
+        embed.title.replace(new RegExp(status, "i"), "Deleted");
+
         await this.deletedChannel.send(embed);
 
         message.deletable && (await message.delete());

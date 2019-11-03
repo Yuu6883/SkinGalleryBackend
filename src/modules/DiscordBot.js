@@ -316,20 +316,19 @@ class SkinsDiscordBot extends Client {
     async ban(userID, message) {
         if (userID) {
             let banTime = message.content.split(" ").find(token => 
-                /^\d+(h|d|m|y)$/gi.test(token));
+                /^\d+(s|h|d|m|y)$/gi.test(token));
 
             if (!banTime) {
-                return message.reply(`Use ${this.prefix}ban {**UserID**} 
-                    {number[**h**|**d**|**m**|**y**]} to ban someone`);
+                return message.reply(`Use ${this.prefix}ban {**UserID**} ` +
+                    `{time[**h**|**d**|**m**|**y**]} to ban someone`);
             }
 
             const H = 60 * 60 * 1000;
-            let unit = {"h":H,"d":24*H,"m":30*24*H,"y":365*24*H}[banTime.slice(-1)];
+            let unit = {"s":1000,"h":H,"d":24*H,"m":30*24*H,"y":365*24*H}[banTime.slice(-1)];
             let time = ~~banTime.slice(0,-1) * unit;
 
-            if (time <= 0) {
+            if (time <= 0)
                 return message.reply("You are retarded.");
-            }
 
             let banned = await this.dbusers.ban(userID, time);
 
@@ -343,7 +342,7 @@ class SkinsDiscordBot extends Client {
                 await this.purge(userID, message);
             }
 
-            message.reply(`User banned: \`${userID}\` for ${banTime}`);
+            message.reply(`User banned: \`${userID}\` for ${banTime} ${unit==1000?"**TROLLLOLOL**":""}`);
             
         } else {
             return message.reply(`Use ${this.prefix}ban \`/\\D+/\` to ban someone from Vanis Skin`);

@@ -462,7 +462,7 @@ class SkinsDiscordBot extends Client {
 
             let url = `${this.config.webDomain}/p/${skinDoc.skinID}`;
             
-            embed.setURL(url).setThumbnail(url);
+            embed.setURL(url).setImage(url);
 
             if (skinOwner) {
                 embed.setAuthor(`${skinOwner.username}#${skinOwner.discriminator}` + 
@@ -576,9 +576,8 @@ class SkinsDiscordBot extends Client {
             .setFooter(`Automatically rejected`)
             .setTimestamp();
         
-        let uid = this.moveToTrash(`${PENDING_SKIN_STATIC}/${skinID}.png`);
         if (this.config.env == "production") {
-            let url = `${this.config.webDomain}/d/${uid}`;
+            let url = `${this.config.webDomain}/p/${skinID}`;
             embed.setURL(url).setThumbnail(url);
         } else {
             if (nsfwResult.data)
@@ -711,17 +710,15 @@ class SkinsDiscordBot extends Client {
                 .setDescription(`\`${skinDoc.skinName.replace(/`/g, "\\`")}\` submitted by <@${skinDoc.ownerID}> ${extra}`)
                 .setTimestamp();
 
-        let uid = this.moveToTrash(skinPath);
-
         if (this.config.env == "production") {
-            await this.cloudflare.purgeCache(`${this.config.webDomain}/p/${skinDoc.skinID}`);
-            let url = `${this.config.webDomain}/d/${uid}`;
-            embed.setURL(url).setThumbnail(url);
+            let url = `${this.config.webDomain}/p/${skinDoc.skinID}`;
+            embed.setURL(url).setImage(url);
         } else {
             embed.attachFile(new Attachment(`${DELETED_SKIN_STATIC}/${skinDoc.skinID}`, 
                                             "SPOILER_" + skinDoc.skinName + ".png"));
         }
 
+        /** @type {DiscordJS.Message} */
         let message = await this.rejectedChannel.send(embed);
 
         skinDoc.messageID = message.id;
@@ -734,6 +731,7 @@ class SkinsDiscordBot extends Client {
             let skinEmbed = new RichEmbed()
                 .setTitle("Your skin was rejected!")
                 .setColor("RED")
+                .setImage(message.embeds[0].image.proxyURL)
                 .setDescription(`You may ask moderators why this skin was rejected.`)
                 .setTimestamp();
 

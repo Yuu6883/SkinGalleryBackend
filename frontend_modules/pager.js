@@ -175,7 +175,7 @@ module.exports = new class Pager {
         });
     
         this.clearView();
-        let view = createView({ curr: page, total: skins.length, min: 5,
+        let view = createView({ curr: page, total: Math.ceil(skins.length / 12), min: 5,
             onpage: p => {
                 this.viewMySkins(skins, p, p > page ? "right" : "left");
             }

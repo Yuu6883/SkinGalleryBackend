@@ -202,7 +202,7 @@ class SkinsDiscordBot extends Client {
         }
 
         if (message.content == `${this.prefix}list`) {
-            let userID = (message.mentions.users.first() || message.author).id;
+            let userID = message.author.id;
             this.list(userID, message);
         }
     }

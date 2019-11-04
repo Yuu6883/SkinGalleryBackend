@@ -45,7 +45,7 @@ const endpoint = {
         let BYTES_PER_SKIN = this.skins.publicCache.BYTES_PER_SKIN;
 
         let start = page * this.config.publicPageLimit * BYTES_PER_SKIN;
-        let end = Math.max((start + this.config.publicPageLimit) * BYTES_PER_SKIN, buffer.byteLength);
+        let end = Math.min((start + this.config.publicPageLimit) * BYTES_PER_SKIN, buffer.byteLength);
         res.header("x-skin-total", this.skins.publicCache.cacheLength);
 
         if (reverse) {

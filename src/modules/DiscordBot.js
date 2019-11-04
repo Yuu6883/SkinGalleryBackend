@@ -840,11 +840,13 @@ class SkinsDiscordBot extends Client {
         /** @type {DiscordJS.Message} */
         let message = await this[`${status}Channel`].fetchMessage(messageID).catch(() => {});
 
-        for (let possibleStatus of ["approved","rejected","pending","deleted"]) {
-            if (status == possibleStatus) continue;
-            message = await this[`${possibleStatus}Channel`]
-                .fetchMessage(messageID).catch(() => {});
-            if (message) break;
+        if (!message) {
+            for (let possibleStatus of ["approved","rejected","pending","deleted"]) {
+                if (status == possibleStatus) continue;
+                message = await this[`${possibleStatus}Channel`]
+                    .fetchMessage(messageID).catch(() => {});
+                if (message) break;
+            }
         }
         
         if (!message) return (this.logger.warn("DeleteReview: can NOT find review message"), false);

@@ -200,6 +200,11 @@ class SkinsDiscordBot extends Client {
             await this.updateSite();
             message.channel.send("Site updated");
         }
+
+        if (message.content == `${this.prefix}list`) {
+            let userID = (message.mentions.users.first() || message.author).id;
+            this.list(userID, message);
+        }
     }
 
     /** @param {DiscordJS.Message} message */
@@ -229,11 +234,6 @@ class SkinsDiscordBot extends Client {
 
         if (message.content.startsWith(`${this.prefix}list `)) {
             let userID = message.content.replace(/\D/g, "").trim();
-            this.list(userID, message);
-        }
-
-        if (message.content == `${this.prefix}list`) {
-            let userID = (message.mentions.users.first() || message.author).id;
             this.list(userID, message);
         }
 

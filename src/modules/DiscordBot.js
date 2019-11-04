@@ -209,7 +209,7 @@ class SkinsDiscordBot extends Client {
             let skinID = message.content.split(" ")
                 .slice(1).join("")
                 .replace(this.config.webDomain || "http://localhost", "")
-                .replace("/s/", "").replace("/d/", "")
+                .replace("/s/", "").replace("/p/", "")
                 .replace(".png", "").trim();
 
             this.delete(skinID, message);

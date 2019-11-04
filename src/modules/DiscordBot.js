@@ -421,7 +421,10 @@ class SkinsDiscordBot extends Client {
 
         await message.channel.send(`<@${userID}> has **${skins.length}** skins:`);
         while (urls.length) {
-            await message.channel.send(urls.splice(0, 3).join("\n"));
+            let url = urls.splice(0, 1);
+            let embed = new RichEmbed()
+                .setThumbnail(url).setURL(url);
+            await message.channel.send(embed);
         }
     }
 

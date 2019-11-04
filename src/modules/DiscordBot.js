@@ -66,7 +66,7 @@ class SkinsDiscordBot extends Client {
 
         if (!this.pendingChannel || !this.approvedChannel || !this.rejectedChannel ||
             !this.deletedChannel || !this.notifChannel    || !this.debugChannel) 
-            throw Error(`Can't find skin channels ${this.config.skinPendingChannelID}`);
+            throw Error(`Can NOT find skin channels`);
 
         await this.updateMods();
         this.startReviewCycle();
@@ -206,7 +206,12 @@ class SkinsDiscordBot extends Client {
     async runModCommand(message) {
 
         if (message.content.startsWith(`${this.prefix}delete `)) {
-            let skinID = message.content.trim().split(/ /g).slice(1).join(" ");
+            let skinID = message.content.split(" ")
+                .slice(1).join("")
+                .replace(this.config.webDomain || "http://localhost")
+                .replace("/s/", "").replace("/d/", "")
+                .replace(".png", "").trim();
+
             this.delete(skinID, message);
         }
 
@@ -220,6 +225,33 @@ class SkinsDiscordBot extends Client {
         if (message.content.startsWith(`${this.prefix}unban `)) {
             let userID = message.content.replace(/\D/g, "").trim();
             this.unban(userID, message);
+        }
+
+        if (message.content.startsWith(`${this.prefix}list `)) {
+            let userID = message.content.replace(/\D/g, "").trim();
+            this.list(userID, message);
+        }
+
+        if (message.content == `${this.prefix}list`) {
+            let userID = (message.mentions.users.first() || message.author).id;
+            this.list(userID, message);
+        }
+
+        if (message.content.toLowerCase().startsWith(`${this.prefix}ownerof `)) {
+            if (message.mentions.users && message.mentions.users.size > 0)
+                return await message.reply(`Yuu owns **${message.mentions.users
+                    .map(u => u.username).join("** **")}** lol`);
+
+            let skinID = message.content.split(" ")
+                .slice(1).join("")
+                .replace(this.config.webDomain || "http://localhost", "")
+                .replace("/s/", "").replace("/p/", "")
+                .replace(".png", "").trim();
+
+            if (!/^\S{6}$/.test(skinID))
+                return await message.reply(`Invalid skinID: **${skinID}**`);
+            
+            this.ownerOf(skinID, message);
         }
     }
 
@@ -375,7 +407,37 @@ class SkinsDiscordBot extends Client {
      * @param {DiscordJS.Message} message 
      */
     async list(userID, message) {
+        let userDoc = await this.dbusers.find(userID);
 
+        if (!userDoc)
+            return await message.reply(`Can't find userID **${userID}**`);
+
+        let skins = await this.dbskins.findByOwnerID(userID);
+        let urls = skins.map(doc => `${this.config.webDomain}/` +
+            `${doc.status=="approved"?"s":"p"}/${doc.skinID}`);
+
+        if (!skins.length)
+            return await message.reply(`<@${userID}> doesn't have a skin`);
+
+        await message.channel.send(`<@${userID}> has **${skins.length}** skins:`);
+        while (urls.length) {
+            await message.channel.send(urls.splice(0, 3).join("\n"));
+        }
+    }
+
+    /**
+     * @param {string} skinID 
+     * @param {DiscordJS.Message} message 
+     */
+    async ownerOf(skinID, message) {
+        let skin = await this.dbskins.findBySkinID(skinID);
+        if (!skin) return await message.reply(`Can't find skinID **${skinID}**`);
+
+        let userDoc = await this.dbusers.find(skin.ownerID);
+        if (!userDoc) return await message
+            .reply(`Can't owner of skinID **${skinID}** **HACKER**`);
+
+        await message.reply(`Owner of \`${skinID}\` is <@${userDoc.discordID}>`);
     }
 
     updateSite() {
@@ -777,7 +839,15 @@ class SkinsDiscordBot extends Client {
         if (!messageID) return (this.logger.warn("DeleteReview: undefined messageID"), false);
         /** @type {DiscordJS.Message} */
         let message = await this[`${status}Channel`].fetchMessage(messageID).catch(() => {});
-        if (!message) return (this.logger.warn("DeleteReview: can't find review message"), false);
+
+        for (let possibleStatus of ["approved","rejected","pending","deleted"]) {
+            if (status == possibleStatus) continue;
+            message = await this[`${possibleStatus}Channel`]
+                .fetchMessage(messageID).catch(() => {});
+            if (message) break;
+        }
+        
+        if (!message) return (this.logger.warn("DeleteReview: can NOT find review message"), false);
 
         let embed = this.copyEmbed(message.embeds[0]);
 
@@ -817,7 +887,7 @@ class SkinsDiscordBot extends Client {
         let distPath = `${SKIN_STATIC}/${skinID}.png`;
 
         if (!fs.existsSync(sourcePath)) {
-            this.logger.onError(`Can't find skin at ${sourcePath} while approving`);
+            this.logger.onError(`Can NOT find skin at ${sourcePath} while approving`);
             return false;
         }
 
@@ -835,7 +905,7 @@ class SkinsDiscordBot extends Client {
             fs.renameSync(path, `${DELETED_SKIN_STATIC}/${uid}${status}.png`);
             return uid;
         } else {
-            this.logger.warn(`Can't find skin at ${path} to move to trash`);
+            this.logger.warn(`Can NOT find skin at ${path} to move to trash`);
             return "404";
         }
     }

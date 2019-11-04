@@ -152,7 +152,7 @@ class SkinsApp {
                         fs.renameSync(path, `${DELETED_SKIN_STATIC}/${uid}${status}.png`);
                         return uid;
                     } else {
-                        this.logger.warn(`Can't find skin at ${path} to move to trash`);
+                        this.logger.warn(`Can NOT find skin at ${path} to move to trash`);
                         return "404";
                     }
                 }

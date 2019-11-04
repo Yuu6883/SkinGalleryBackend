@@ -208,7 +208,7 @@ class SkinsDiscordBot extends Client {
         if (message.content.startsWith(`${this.prefix}delete `)) {
             let skinID = message.content.split(" ")
                 .slice(1).join("")
-                .replace(this.config.webDomain || "http://localhost")
+                .replace(this.config.webDomain || "http://localhost", "")
                 .replace("/s/", "").replace("/d/", "")
                 .replace(".png", "").trim();
 
@@ -848,7 +848,7 @@ class SkinsDiscordBot extends Client {
                 if (message) break;
             }
         }
-        
+
         if (!message) return (this.logger.warn("DeleteReview: can NOT find review message"), false);
 
         let embed = this.copyEmbed(message.embeds[0]);

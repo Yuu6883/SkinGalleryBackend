@@ -32,9 +32,10 @@ const createView = ({ curr, total, min=0, onpage }) => {
             pages.push(page);
         }
     } else {
+        const PAD = 4;
         let between = [];
-        for (let i = 3; i < total - 4; i++)
-            Math.abs(i - curr) < 5 && (i - curr) < 4 && between.push(i);
+        for (let i = 2; i < total - 3; i++)
+            Math.abs(i - curr) < PAD + 1 && (i - curr) < PAD && between.push(i);
         let indices = [0, 1, ...between, total - 3, total - 2, total - 1];
         // Vacant value, push "..."
         indices.reduce((prev, val) => {

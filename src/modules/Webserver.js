@@ -18,6 +18,8 @@ class Webserver {
         this.webserver = null;
         this.allowedOrigins =
             app.config.webDomain ? [app.config.webDomain] : [];
+
+        this.blocked = {};
     }
 
     get config() { return this.app.config; }
@@ -91,7 +93,10 @@ class Webserver {
             if (this.allowedOrigins.length && !/^http(s?):\/\/localhost/.test(origin) &&
                 !this.allowedOrigins.some(o => origin.startsWith(o)) &&
                 !origin.startsWith("https://discordapp.com/oauth2/")) {
-                this.logger.warn(`Blocked request from unknown origin: ${origin}`);
+                // this.logger.warn(`Blocked request from unknown origin: ${origin}`);
+                if (this.blocked[origin]) this.blocked[origin]++;
+                else this.blocked[origin] = 1;
+                
                 return void res.sendStatus(403);
             }
 

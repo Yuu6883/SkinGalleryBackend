@@ -208,6 +208,7 @@ class SkinsDiscordBot extends Client {
 
         if (message.content == `${this.prefix}clean`) {
             await this.pendingChannel.bulkDelete(100);
+            message.channel.send("Site updated");
         }
     }
 

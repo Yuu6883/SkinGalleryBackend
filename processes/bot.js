@@ -36,7 +36,7 @@ ipc.serve(BOT_SOCKET, () => {
             if (!bot) return ipc.server.emit(socket, method, 
                 { id: ipc.config.id, message: { error: "Discord bot process not ready" }});
     
-            bot.logger.debug(`Received ${method}Skin call`);
+            // bot.logger.debug(`Received ${method}Skin call`);
             
             try {
                 let { discordID, result, skinID, skinName } = data.message;

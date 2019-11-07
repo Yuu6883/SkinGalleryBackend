@@ -19,15 +19,21 @@ class Cloudflare {
 
     /** @param {String[]} urls */
     async purgeCache(...urls) {
-        if (this.app.config.env !== "production") return;
         
-        if (!urls.every(url => {
+        if (this.app.config.env != "production") {
+            this.logger.warn("Trying to purge cloudflare cache in dev mode, returning");
+            return;
+        }
+        
+        urls = urls.filter(url => {
             if (!url.startsWith(this.domain)) {
                 this.logger.warn(`Trying to purge none-related url: ${urls.join(", ")}`);
                 return false;
             }
             return true;
-        })) return;
+        });
+
+        if (!urls.length) return;
 
         this.logger.debug(`Adding ${urls.map(u => u.replace(this.domain, "")).join(", ")} to purge list`);
 
@@ -55,7 +61,7 @@ class Cloudflare {
             this.logger.warn("Failed to purge CF cache", json.errors);
         } else {
             this.purgeList = this.purgeList.slice(purging.length);
-            this.logger.debug(`Purged URL's: ${purging.map(p => p.replace(this.domain, "")).join(", ")}`);
+            this.logger.debug(`Purged URL(s): ${purging.map(p => p.replace(this.domain, "")).join(", ")}`);
         }
     }
 }

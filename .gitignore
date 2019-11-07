@@ -10,6 +10,7 @@ sockets/*
 
 # configs
 *-config.json
+cli/config.js
 
 # Ignore bundled js
 bundle.js*

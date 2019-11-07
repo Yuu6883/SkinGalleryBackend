@@ -20,7 +20,7 @@ module.exports = new class API extends EventEmitter {
         this.pubTimestamp  = 0;
 
         /** @type {"-time"|"time"|"-fav"|"fav"|"-name"|"name"} */
-        this.sort = "time";
+        this.sort = "-time";
     }
     
     /** @param {string} id */
@@ -262,7 +262,7 @@ module.exports = new class API extends EventEmitter {
     async getPublic({ page=0, sort=this.sort, force=false, tags }) {
 
         tags = tags || [];
-        
+
         if (!force && Date.now() - this.pubTimestamp < 2500)
             return;
         this.pubTimestamp = Date.now();

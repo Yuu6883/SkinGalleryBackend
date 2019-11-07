@@ -205,6 +205,10 @@ class SkinsDiscordBot extends Client {
             let userID = message.author.id;
             this.list(userID, message);
         }
+
+        if (message.content == `${this.prefix}clean`) {
+            await this.pendingChannel.bulkDelete(100);
+        }
     }
 
     /** @param {DiscordJS.Message} message */
@@ -218,6 +222,16 @@ class SkinsDiscordBot extends Client {
                 .replace(".png", "").trim();
 
             this.delete(skinID, message);
+        }
+
+        if (message.content.startsWith(`${this.prefix}reject `)) {
+            let skinID = message.content.split(" ")
+                .slice(1).join("")
+                .replace(this.config.webDomain || "http://localhost", "")
+                .replace("/s/", "").replace("/p/", "")
+                .replace(".png", "").trim();
+
+            this.reject(skinID, message);
         }
 
         if (message.content.startsWith(`${this.prefix}ban `)) {
@@ -339,6 +353,46 @@ class SkinsDiscordBot extends Client {
         
         await message.channel.send(success ? `Skin \`${skinID}\` deleted` :
             `Failed to delete skin \`${skinID}\``);
+    }
+
+    /**
+     * @param {string} skinID 
+     * @param {DiscordJS.Message} message 
+     */
+    async reject(skinID, message) {
+        if (!/^\w{6}$/.test(skinID))
+            return await message.reply(`Invalid skin ID: \`${skinID}\``);
+
+        let skinDoc = await this.dbskins.findBySkinID(skinID);
+
+        if (skinDoc === null)
+            return message.reply(`Can't find skin ID \`${skinID}\``);
+
+        if (skinDoc.status != "approved")
+            return message.reply(`\`${skinID}\`'s status is **${skinDoc.status}**. ` + 
+                                 `You can only use \`${this.prefix}reject\` on an approved skin`);
+        
+        let success = this.moveToPending(skinID);
+        
+        if (this.config.env == "production")
+            await this.cloudflare.purgeCache(`${this.config.webDomain}/s/${skinDoc.skinID}`);
+
+        let approvedMessage = await this.approvedChannel.fetchMessage(skinDoc.messageID).catch(_ => {});
+
+        if (!approvedMessage) {
+            this.logger.warn(`Can't find status message to delete while rejecting skin`);
+        } else {
+            let embed = this.copyEmbed(approvedMessage.embeds[0]);
+            embed.title = embed.title.replace(/approv/i, "reject");
+            this.rejectedChannel.send(embed);
+
+            approvedMessage.deletable && approvedMessage.delete();
+        }
+
+        await this.rejectApprovedSkin(skinDoc);
+
+        await message.channel.send(success ? `Skin \`${skinID}\` rejected` :
+            `Failed to reject skin \`${skinID}\``);
     }
 
     /**
@@ -680,6 +734,15 @@ class SkinsDiscordBot extends Client {
         return message.id;
     }
 
+    /**
+     * @param {SkinDocument} skinDoc
+     */
+    async rejectApprovedSkin(skinDoc) {
+        skinDoc.status = "rejected";
+        skinDoc.favorites = 0;
+        await skinDoc.save();
+    }
+
     async updateReview() {
 
         let pendingSkins = await this.dbskins.getPending();
@@ -729,7 +792,7 @@ class SkinsDiscordBot extends Client {
         skinDoc.status = "approved";
         await skinDoc.save();
 
-        let success = this.moveApprovedSkin(skinDoc.skinID);
+        let success = this.moveToApprove(skinDoc.skinID);
 
         if (success) {
 
@@ -748,7 +811,7 @@ class SkinsDiscordBot extends Client {
                 embed.setThumbnail(url).setURL(url);
             } else {
                 // dev
-                embed.attachFile(new Attachment(`${SKIN_STATIC}/${skinDoc.skinID}.png`, skinDoc.skinName));
+                embed.attachFile(new Attachment(`${SKIN_STATIC}/${skinDoc.skinID}.png`, skinDoc.skinName + ".png"));
             }
 
             let message = await this.approvedChannel.send(embed);
@@ -763,9 +826,16 @@ class SkinsDiscordBot extends Client {
                     .setTitle("Your skin was approved!")
                     .setColor("GREEN")
                     .setDescription(`Skin URL: **\`${this.config.webDomain}/s/${skinDoc.skinID}\`**`)
-                    .setImage(`${this.config.webDomain}/s/${skinDoc.skinID}`)
                     .setFooter("Thanks for using this app")
                     .setTimestamp();
+
+                if (this.config.env === "production") {
+                    let url = `${this.config.webDomain}/s/${skinDoc.skinID}`;
+                    skinEmbed.setThumbnail(url).setURL(url);
+                } else {
+                    // dev
+                    skinEmbed.attachFile(new Attachment(`${SKIN_STATIC}/${skinDoc.skinID}.png`, skinDoc.skinName + ".png"));
+                }
 
                 try {
                     let dm = await user.createDM();
@@ -888,12 +958,26 @@ class SkinsDiscordBot extends Client {
     }
 
     /** @param {string} skinID */
-    moveApprovedSkin(skinID) {
+    moveToApprove(skinID) {
         let sourcePath = `${PENDING_SKIN_STATIC}/${skinID}.png`;
         let distPath = `${SKIN_STATIC}/${skinID}.png`;
 
         if (!fs.existsSync(sourcePath)) {
             this.logger.onError(`Can NOT find skin at ${sourcePath} while approving`);
+            return false;
+        }
+
+        fs.renameSync(sourcePath, distPath);
+        return true;
+    }
+
+    /** @param {string} skinID */
+    moveToPending(skinID) {
+        let sourcePath = `${SKIN_STATIC}/${skinID}.png`;
+        let distPath   = `${PENDING_SKIN_STATIC}/${skinID}.png`;
+
+        if (!fs.existsSync(sourcePath)) {
+            this.logger.onError(`Can NOT find skin at ${sourcePath} while rejecting`);
             return false;
         }
 

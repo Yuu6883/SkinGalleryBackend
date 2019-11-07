@@ -196,6 +196,17 @@ class SkinsDiscordBot extends Client {
             }
         }
 
+        if (message.content.startsWith(`${this.prefix}autoflush `)) {
+            if (message.content.toLowerCase().split(" ")[1] == "on" ||
+                message.content.split(" ")[1] == "true") {
+                this.logger.autoflush = true;
+                await message.reply("Auto flush is now **ON**")
+            } else {
+                this.logger.autoflush = false;
+                await message.reply("Auto flush is now **OFF**")
+            }
+        }
+
         if (message.content == `${this.prefix}update`) {
             await this.updateSite();
             message.channel.send("Site updated");

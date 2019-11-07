@@ -38,6 +38,7 @@ class DiscordLogger extends Logger {
         /** @type {{date:Date,level:LogEventLevel,message:String}[]} */
         this.logs = [];
         this.format = "%h:%m:%s.%z";
+        this.autoflush = bot.config.env != "production";
         
         this.config = {
             FILE:   true,
@@ -53,6 +54,7 @@ class DiscordLogger extends Logger {
         /** @type {LogEvent} */
         this._onLog = (date, level, message) => {
             this.logs.push({ date, level, message });
+            if (this.autoflush) this.flush();
         }
 
         process.on("SIGINT", async () => {

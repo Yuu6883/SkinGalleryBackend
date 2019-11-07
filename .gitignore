@@ -2,9 +2,18 @@
 cli/logs
 # Test logs
 test/logs
+# Process logs
+processes/logs/*
 
-# Config files
+# Unix sockets
+sockets/*
+
+# configs
 *-config.json
+cli/config.js
+
+# Ignore bundled js
+bundle.js*
 
 # Skins
 skins/*
@@ -13,6 +22,9 @@ skins/*
 
 pending_skins/*
 !pending_skins/404.png
+
+deleted_skins/*
+!deleted_skins/404.png
 
 # legacy jpg
 *.jpg

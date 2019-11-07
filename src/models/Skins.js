@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const SkinCache = require("./SkinCache");
-const TIME_0 = 1546243200000;
+const TIME_0 = SkinCache.TIME_0;
 
 /** @type {mongoose.Schema<SkinEntry>} */
 const SkinSchema = new mongoose.Schema({
@@ -78,51 +78,7 @@ class SkinCollection {
     async updatePublic() {
         this.publicSkins = await SkinModel
             .find({ status: "approved", public: true });
-    }
-
-    get publicSkinCount() { return this.publicSkins.length }
-
-    /**
-     * 
-     * @param {{ page: number, tag: string, sort: string }} param0 
-     */
-    getPublicSkins({page = 0, tag, sort = "" }) {
-        let lim = this.app.config.publicPageLimit;
-
-        let filtered = this.publicSkins
-            // Make sure the tag exists then filter it
-            .filter(obj => (tag && this.app.config.tags.includes(tag)) ? 
-                            obj.tags.includes(tag) : true);
-
-        let factor = sort[0] == "-" ? 1 : -1;
-        switch (sort) {
-            case "time":
-            case "-time":
-                filtered = filtered.sort((a, b) => factor * (a.createdAt - b.createdAt));
-                break;
-            case "name":
-            case "-name":
-                filtered = filtered.sort((a, b) => factor * (a.skinName.localeCompare(b)));
-                break;
-            case "fav":
-                filtered = filtered.sort((a, b) => factor * (a.favorites - b.favorites));
-                break;
-        }
-        
-        let total = filtered.length;
-
-        return {
-            skins: filtered
-                .slice(~~page * lim, (~~page + 1) * lim)
-                .map(skinDoc => ({
-                    id:   skinDoc.skinID,
-                    name: skinDoc.skinName,
-                    tags: skinDoc.tags,
-                    favorites: skinDoc.favorites,
-                    timestamp: skinDoc.createdAt
-                })),
-            total
-        };
+        this.publicCache.createCache(this.publicSkins);
     }
 
     /**

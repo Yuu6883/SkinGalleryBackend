@@ -1,12 +1,9 @@
-const top    = (kl, vl) => "┏" + "━".repeat(kl + vl + 5) + "┓";
-const middle = (kl, vl) => "┣" + "━".repeat(kl + vl + 5) + "┫";
-const bottom = (kl, vl) => "┗" + "━".repeat(kl + vl + 5) + "┛";
+// const top    = (kl, vl) => "┏" + "━".repeat(kl + vl + 5) + "┓";
+// const middle = (kl, vl) => "┣" + "━".repeat(kl + vl + 5) + "┫";
+// const bottom = (kl, vl) => "┗" + "━".repeat(kl + vl + 5) + "┛";
 
 /** @param {Object.<string, string|number>} obj */
 module.exports = obj => {
-
-    let buffer = obj.data;
-    delete obj.data;
 
     let keys = Object.keys(obj);
     
@@ -22,8 +19,6 @@ module.exports = obj => {
 
     keys = keys.map(k => k + " ".repeat(longestKey - k.length));
     values = values.map(v => v + " ".repeat(longestValue - v.length));
-
-    obj.data = buffer;
 
     return keys.map((k, i) => k + ": " + values[i]).join("\n");
 }

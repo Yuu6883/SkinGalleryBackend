@@ -10,11 +10,17 @@ const UserSchema = new mongoose.Schema({
     vanisToken:     { type: String, required: false },
     bannedUntil:    { type: Date,   required: false },
     moderator:      { type: Boolean, default: false },
-    favorites:      { type: [String], default: []   }
+    favorites:      { type: [String], default: []   },
+    limit:          { type: Number,  default: 60 }
 });
-UserSchema.index({ discordID: 1 }, { unique: true });
-UserSchema.index({ discordToken: 1 }, { unique: true, sparse: true });
-UserSchema.index({ vanisToken: 1 }, { unique: true, sparse: true });
+
+UserSchema.index({ discordID: 1 },    { unique: true });
+UserSchema.index({ vanisToken: 1 },   { unique: true, sparse: true });
+
+UserSchema.post("init", doc => {
+    doc.limit = doc.limit || 60;
+    doc.favorites = doc.favorites || [];
+});
 
 /** @type {mongoose.Model<UserDocument, {}>} */
 const UserModel = mongoose.model("users", UserSchema);

@@ -23,19 +23,17 @@ const endpoint = {
         let skinPath = skinDoc.status === "approved" ? SKIN_STATIC : PENDING_SKIN_STATIC;
         skinPath += `/${skinDoc.skinID}.png`;
 
-        if (!fs.existsSync(skinPath)) {
-            this.logger.warn(`Can't find skin at ${skinPath}`);
-        } else fs.unlinkSync(skinPath);
+        let uid = this.bot.moveToTrash(skinPath, skinDoc.status);
+        uid += skinDoc.status;
 
-        if (!(await this.bot.deleteReview(skinDoc.messageID, skinDoc.status)))
-            this.logger.warn("Bot failed to delete review");
+        await this.bot.deleteReview(skinDoc.messageID, skinDoc.status, `${this.config.webDomain}/d/${uid}`);
 
         let success = await this.skins.deleteByID(req.params.skinID);
         
         await this.skins.restartUpdatePublic();
         
-        if (skinDoc.status == "approved")
-            await this.cloudflare.purgeCache(`https://skins.vanis.io/s/${skinDoc.skinID}`);
+        if (skinDoc.status == "approved" && this.config.env == "production")
+            await this.cloudflare.purgeCache(`${this.config.webDomain}/s/${skinDoc.skinID}`);
         
         res.json({ success });
         

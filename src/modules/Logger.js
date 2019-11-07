@@ -82,6 +82,10 @@ class Logger {
     onFatal(...message) {
         this._onLog && this._onLog(new Date(), "FATAL", this._formatMessage(message));
     }
+
+    async flush() {
+        
+    }
 }
 
 module.exports = Logger;

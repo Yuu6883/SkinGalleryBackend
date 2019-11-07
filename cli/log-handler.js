@@ -27,7 +27,6 @@ let settings = {
 
 const { EOL } = require("os");
 const fs = require("fs");
-const path = require("path");
 const configPath = "./log-config.json";
 
 if (fs.existsSync(configPath))
@@ -165,6 +164,6 @@ process.once("exit", function(code) {
 /**
  * @param {App} app
  */
-module.exports = (app) => app.logger.onlog = write;
+module.exports = (app) => void(app.logger.onlog = write);
 
 const App = require("../src/app");

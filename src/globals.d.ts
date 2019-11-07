@@ -1,4 +1,4 @@
-declare type LogEventLevel = "DEBUG" | "ACCESS" | "INFO" | "WARN" | "ERROR" | "FATAL";
+declare type LogEventLevel = "DEBUG" | "ACCESS" | "INFO" | "PRINT" | "WARN" | "ERROR" | "FATAL" | "TEST";
 declare type LogEvent = (date: Date, level: LogEventLevel, message: string) => void;
 declare type LogMessageData = any[];
 
@@ -19,6 +19,7 @@ interface AppConfig {
     publicUpdateInterval: string;
     publicPageLimit: string;
     cfToken: string;
+    cfZone:  string;
 
     skinLimit: number;
     nsfwLowThreshold:  number;
@@ -28,12 +29,12 @@ interface AppConfig {
     skinRejectedChannelID: string;
     skinDeletedChannelID:  string;
     notifChannelID:        string;
+    debugChannelID:        string;
     approveEmoji: string;
     rejectEmoji:  string;
     approveThreshold: number;
     rejectThreshold:  number;
     reviewInterval:   number;
-    tags:   string[];
     admins: string[];
     prefix: string;
 }
@@ -111,7 +112,6 @@ interface NSFWPrediction {
     sexy: number;
     avarage_color: string;
     color_STD: string;
-    data: Buffer;
 }
 
 declare type APIRequest = import("express").Request & {

@@ -1,12 +1,10 @@
 const fs = require("fs");
 const path = require("path");
 
-const { WEB_STATIC_SOURCE, SKIN_STATIC, 
-        VANIS_TOKEN_COOKIE, AUTH_LEVELS } = require("../constant");
+const { VANIS_TOKEN_COOKIE, AUTH_LEVELS } = require("../constant");
 
 const express = require("express");
 const expressCookies = require("cookie-parser");
-const expressForms = require("body-parser");
 const nocache = require("nocache");
 const expressLogger = require("./ExpressLogger");
 
@@ -18,10 +16,8 @@ class Webserver {
         this.app = app;
         /** @type {import("http").Server} */
         this.webserver = null;
-        this.webDomainRegex =
-            app.config.webDomain
-            ? new RegExp(`^https?://${app.config.webDomain}`)
-            : null;
+        this.allowedOrigins =
+            app.config.webDomain ? [app.config.webDomain] : [];
     }
 
     get config() { return this.app.config; }
@@ -66,7 +62,7 @@ class Webserver {
 
             apiRouter[endpoint.method](endpoint.path, endpoint.handler.bind(this.app));
 
-            this.logger.inform(`Registering route ${endpoint.method.toUpperCase()} ${endpoint.path}`);
+            // this.logger.debug(`Registering route ${endpoint.method.toUpperCase()} ${endpoint.path}`);
         });
 
         // Redirect lurkers
@@ -87,12 +83,19 @@ class Webserver {
         
         // Prevent cross-origin requests
         app.use((req, res, next) => {
-            const origin = req.get("origin");
+            let origin = req.get("origin") || req.get("referer") || ("https://" + req.get("host"));
 
-            if (this.webDomainRegex && !this.webDomainRegex.test(origin)) {
-                this.logger.warn(`Blocked request from unknown origin: ${origin}`)
+            if (origin && origin[origin.length - 1] == "/") 
+                origin = origin.slice(0, -1);
+
+            if (this.allowedOrigins.length && !/^http(s?):\/\/localhost/.test(origin) &&
+                !this.allowedOrigins.some(o => origin.startsWith(o)) &&
+                !origin.startsWith("https://discordapp.com/oauth2/")) {
+                this.logger.warn(`Blocked request from unknown origin: ${origin}`);
                 return void res.sendStatus(403);
             }
+
+            res.ip = req.get("CF-Connecting-IP") || req.socket.remoteAddress;
             
             this.logger.onAccess(`Request Origin: ${origin || "*"}`);
             res.set("Access-Control-Allow-Origin", origin || "*");
@@ -106,7 +109,7 @@ class Webserver {
         return new Promise((res, rej) => {
             this.webserver = app.listen(this.config.webLocation, err => {
                 if (err) return void rej(err);
-                this.logger.inform("Webserver opened @", this.config.webLocation);
+                this.logger.inform(`Webserver started`);
                 res();
             });
         });
@@ -115,7 +118,7 @@ class Webserver {
         return new Promise((res, rej) => {
             this.webserver.close(err => {
                 if (err) return void rej(err);
-                this.logger.inform("Webserver closed");
+                this.logger.inform(`Webserver closed`);
                 res();
             });
             this.webserver = null;

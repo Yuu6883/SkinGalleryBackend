@@ -18,7 +18,7 @@ function getCaller(req) {
  * @param {import("express").Request} req
  */
 function logInitial(logger, req) {
-    logger.debug(getCaller(req));
+    // logger.debug(getCaller(req));
 }
 /**
  * @param {import("./Logger")} logger

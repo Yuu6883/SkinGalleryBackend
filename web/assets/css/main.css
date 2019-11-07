@@ -1,4 +1,6 @@
 :root {
+    --highlight-color: white;
+    --text-color: #dadada;
     --background-color: rgba(0,13,30,.75);
     --card--color: #172535;
 }
@@ -11,8 +13,40 @@ body, html {
     background-color: rgb(16, 16, 16);
 }
 
+#pager {
+    height: 40!important;
+}
+
+.page-btn {
+    font-size: 26px;
+    color: var(--text-color)!important;
+    opacity: 0.8;
+}
+
+.page-btn:hover {
+    color: var(--highlight-color)!important;
+    opacity: 1;
+}
+
+.page-active {
+    font-size: 26px;
+    color: #99610d!important;
+    opacity: 0.8;
+}
+
+.page-active:hover {
+    color: #b1700f!important;
+    opacity: 1;
+}
+
+.page-disable, .page-disable:hover {
+    font-size: 26px;
+    color: var(--text-color)!important;
+    opacity: 0.5;
+}
+
 .text {
-    color: #dadada!important;
+    color: var(--text-color)!important;
 }
 
 #overlay {
@@ -96,10 +130,10 @@ body, html {
     outline: none;
     border: 0;
     padding: 10px;
-    color: #dadada;
+    color: var(--text-color);
     box-shadow: 0 0 1px 1px #000;
     border-radius: 4px;
-    font-size: 16px;
+    font-size: 18px;
     text-shadow: 1px 1px 2px #000;
 }
 
@@ -196,13 +230,13 @@ body, html {
 }
 
 .uk-tab>.uk-active>a {
-    color: white;
+    color: var(--highlight-color);
     font-weight: bold;
     border-color: #b1700f;
 }
 
 .uk-tab>*>a {
-    font-size: 16px;
+    font-size: 20px;
 }
 
 .uk-tab::before {
@@ -220,4 +254,12 @@ body, html {
 
 .danger-text:hover {
     color: rgb(190, 0, 0)!important;
+}
+
+.skin-stars {
+    color: rgba(255, 115, 0, 0.8)!important;
+}
+
+.skin-stars:hover {
+    color: rgb(255, 115, 0)!important;
 }

@@ -101,4 +101,7 @@ class Provision {
     }
 }
 
+Provision.generateToken = generateToken;
+Provision.letterDigits = vanisTokenChars;
+
 module.exports = Provision;

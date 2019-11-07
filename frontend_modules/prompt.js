@@ -14,6 +14,7 @@ const readImage = file => new Promise(resolve => {
 
 /** @param {Date} date */
 const MMDDYYYY = date => `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()}`;
+const toUTF8 = str => unescape(encodeURIComponent(str));
 
 module.exports = new class Prompt {
     
@@ -38,11 +39,11 @@ module.exports = new class Prompt {
 
     /** @param {string} text */
     showLoader(text) {
-
         return this.alert.fire({
             background: "transparent",
             showConfirmButton: false,
             showCancelButton: false,
+            width: 0,
             title: $(`<div class="lds-spinner">${"<div></div>".repeat(12)}<div>`),
             text: text || "",
             timer: 10000,
@@ -109,6 +110,7 @@ module.exports = new class Prompt {
                            ` 512x512 skin recommended. Other size will be force scaled.`
 
         let isPublic = true;
+        let skinName = skin.name.split(".").slice(0, -1).join(".").slice(0, 16);
         this.alert.fire({
             title: "Preview",
             text: extraMessage,
@@ -117,11 +119,23 @@ module.exports = new class Prompt {
             inputAttributes: {
                 maxLength: 16
             },
-            inputValidator: value => !(value && value.length <= 16),
+            /** @param {String} value */
+            inputValidator: value => {
+                this.alert.getInput().value = "";
+                if (!value)
+                    return "Skin name can't be empty";
+                if (value.length > 16) 
+                    return "Skin name must not be longer than 16 characters";
+                for (let char of value.split("")) {
+                    if (char != toUTF8(char))
+                        return `Skin name must be UTF8 characters (${char} is not UTF8)`;
+                }
+                this.alert.getInput().value = value;
+            },
             inputAutoTrim: true,
             confirmButtonText: "Submit",
             showCancelButton: true,
-            inputValue: skin.name.split(".").slice(0, -1).join(".").slice(0, 16),
+            inputValue: toUTF8(skinName),
             onOpen: () => {
                 $(this.alert.getContent()).prepend(canvas);
                 $(this.alert.getContent()).append(
@@ -150,7 +164,7 @@ module.exports = new class Prompt {
         } else if (skin.status == "pending") {
             this.alert.fire({
                 title: "Duplicate Skin",
-                imageUrl: `${window.origin}/api/p/skin/${skin.skinID}`,
+                imageUrl: `${window.origin}/p/${skin.skinID}`,
                 imageClass: "skin-preview",
                 text:  "Please try not to submit a duplicate skin. " +
                        `This skin is pending right now. Moderators would normally review and ` + 

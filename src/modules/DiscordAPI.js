@@ -24,7 +24,11 @@ class DiscordAPI {
     async exchange(code, refresh) {
         const type = refresh ? "refresh_token" : "authorization_code";
         const codeType = refresh ? "refresh_token" : "code";
-        const url = `${this.oAuth2Url}token?grant_type=${type}&${codeType}=${code}&redirect_uri=${this.config.discordAppRedirect}`;
+        
+        let redir = process.platform == "win32" ?
+                "http://localhost/api/login/callback" : this.config.discordAppRedirect;
+
+        const url = `${this.oAuth2Url}token?grant_type=${type}&${codeType}=${code}&redirect_uri=${redir}`;
 
         const response = await fetch(url, {
             method: "POST",

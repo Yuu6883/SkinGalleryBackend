@@ -84,8 +84,9 @@ $(window).on("load", () => {
               .then(() => API.listSkin(true));
     });
 
-    $("#my-tab" ).click(() => API.listSkin());
-    $("#pub-tab").click(() => API.getPublic({}).then(result => Pager.viewPublicSkins(result)));
+    $("#my-tab" ).click(() => delete Pager.page && API.listSkin());
+    $("#pub-tab").click(() => delete Pager.page && API.getPublic({})
+        .then(result => Pager.viewPublicSkins(result)));
 
     API.init();
 

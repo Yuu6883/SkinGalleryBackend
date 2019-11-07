@@ -213,7 +213,7 @@ module.exports = new class Pager {
         let panel = $("#pub-skins");
 
         await new Promise(resolve => {
-            panel.hide("slide", { direction: 
+            panel.hide("slide", { direction:
                 dir == "left" ? "right" : "left" }, 500, resolve);
         });
     

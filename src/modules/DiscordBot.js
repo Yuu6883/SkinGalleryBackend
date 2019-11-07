@@ -219,7 +219,7 @@ class SkinsDiscordBot extends Client {
 
         if (message.content == `${this.prefix}clean`) {
             await this.pendingChannel.bulkDelete(100);
-            message.channel.send("Site updated");
+            message.channel.send("Pending channel cleaned");
         }
     }
 
@@ -418,7 +418,7 @@ class SkinsDiscordBot extends Client {
 
             if (!banTime) {
                 return message.reply(`Use ${this.prefix}ban {**UserID**} ` +
-                    `{time[**h**|**d**|**m**|**y**]} to ban someone`);
+                    `{time[**s**|**h**|**d**|**m**|**y**]} to ban someone`);
             }
 
             const H = 60 * 60 * 1000;

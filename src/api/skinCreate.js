@@ -33,6 +33,11 @@ const endpoint = {
 
             let messageID;
 
+            // CUCKED
+            if (nsfwStatus == "approved" && 
+                this.provision.createdRecently(req.vanisUser.discordID))
+                nsfwStatus = "pending";
+
             if (nsfwStatus === "pending") {
                 messageID = await this.bot.pendSkin(req.vanisUser.discordID, result, skinID, req.params.skinName);
             }

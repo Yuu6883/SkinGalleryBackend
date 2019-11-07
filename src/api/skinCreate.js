@@ -32,14 +32,18 @@ const endpoint = {
             fs.writeFileSync(skinPath, imageBase64Data, "base64");
 
             let messageID;
+            let cucked = false;
 
             // CUCKED
             if (nsfwStatus == "approved" && 
-                this.provision.createdRecently(req.vanisUser.discordID))
+                this.provision.createdRecently(req.vanisUser.discordID)) {
                 nsfwStatus = "pending";
+                cucked = true;
+            }
 
             if (nsfwStatus === "pending") {
-                messageID = await this.bot.pendSkin(req.vanisUser.discordID, result, skinID, req.params.skinName);
+                messageID = await this.bot.pendSkin(req.vanisUser.discordID, 
+                    result, skinID, cucked ? (req.params.skinName + " **(cucked)**") : req.params.skinName);
             }
 
             if (nsfwStatus === "approved") {

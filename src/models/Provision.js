@@ -81,11 +81,7 @@ class Provision {
         snowflake = parseInt(snowflake.slice(0, -22), 2);
 
         let timestamp = snowflake + 1420070400000;
-<<<<<<< HEAD
         let limit = this.app.config.recentLimit || 7 * 24 * 60 * 60 * 1000;
-=======
-        let limit = this.app.config.recentLimit || 7 * 24 * 60 * 60;
->>>>>>> 9aca6d5fae5e987dc1f8d4ff949210cda0d49ea7
 
         return Date.now() - timestamp < limit;
     }

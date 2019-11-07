@@ -11,9 +11,6 @@ $(window).on("load", () => {
     const Prompt = require("./prompt");
     const Pager = require("./pager");
     const Starfield = require("./starfield");
-    
-    window.API = API;
-    window.Pager = Pager;
 
     let halloween = false;
     let today = new Date();

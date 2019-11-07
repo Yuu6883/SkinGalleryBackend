@@ -14,11 +14,10 @@
         <!-- Global site tag (gtag.js) - Google Analytics -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=UA-151323617-1"></script>
         <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-
-        gtag('config', 'UA-151323617-1');
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'UA-151323617-1');
         </script>
         <!-- I love UIKit -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.7/css/uikit.min.css" integrity="sha256-1NCiLO1eL8xsDn3wFHlM37FhxQjBruKz/veyTbWSWHk=" crossorigin="anonymous" />
@@ -79,9 +78,9 @@
             </div>
             <div class="uk-card uk-margin-top uk-animation-fade" id="skin-panel">
                 <ul class="uk-flex-center uk-margin-remove-bottom uk-margin-remove-left" uk-tab uk-switcher="animation: uk-animation-fade">
-                    <li class="uk-active text"><a href="#">My Skins</a></li>
-                    <li class="text"><a href="#">Favorites</a></li>
-                    <li class="text"><a href="#">Public Skins</a></li>
+                    <li id="my-tab"  class="uk-active text"><a>My Skins</a></li>
+                    <li id="fav-tab" class="text"><a>Favorites</a></li>
+                    <li id="pub-tab" class="text"><a>Public Skins</a></li>
                 </ul>
                 <ul id="pager" class="uk-flex-center uk-pagination uk-margin-remove-bottom text">
                 </ul>

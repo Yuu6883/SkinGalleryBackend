@@ -55,9 +55,13 @@ class UserCollection {
      * @param {string} skinID 
      */
     async addFav(userDoc, skinID) {
+
         if (userDoc.favorites.includes(skinID)) return false;
         let skinDoc = await this.app.skins.findBySkinID(skinID);
-        if (!skinDoc) return false;
+
+        if (!skinDoc || skinDoc.status != "approved" || 
+            !skinDoc.public) return false;
+
         skinDoc.favorites++;
         userDoc.favorites.push(skinID);
         await Promise.all([skinDoc.save(), userDoc.save()]);
@@ -66,13 +70,16 @@ class UserCollection {
 
     /**
      * @param {UserDocument} userDoc 
-     * @param {string} skinID 
+     * @param {string|SkinDocument} skinID 
      */
     async removeFav(userDoc, skinID) {
-        let skinDoc = await this.app.skins.findBySkinID(skinID);
+
+        let skinDoc = typeof skinID == "string" ? 
+            await this.app.skins.findBySkinID(skinID) : skinID;
+            
         if (!skinDoc) return false;
         if (!userDoc.favorites.includes(skinID)) return false;
-        skinDoc.favorites--;
+        skinDoc.favorites && skinDoc.favorites--;
         userDoc.favorites.splice(userDoc.favorites.indexOf(skinID), 1);
         await Promise.all([skinDoc.save(), userDoc.save()]);
         return true;

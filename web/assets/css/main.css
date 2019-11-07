@@ -152,7 +152,7 @@ body, html {
 
 .skin-upload, .skin-edit, .toggle-public {
     color: #b1700f!important;
-    margin-bottom: 10px;
+    margin-top: 10px;
 }
 
 .skin-upload:hover, .skin-edit:hover, .toggle-public:hover {
@@ -161,6 +161,7 @@ body, html {
 
 .skin-delete {
     color: rgb(245, 92, 92)!important;
+    margin-top: 10px;
 }
 
 .skin-delete:hover {
@@ -169,7 +170,7 @@ body, html {
 
 .skin-link {
     color: rgb(100, 149, 194)!important;
-    margin-bottom: 10px;
+    margin-top: 10px;
 }
 
 .skin-link:hover {

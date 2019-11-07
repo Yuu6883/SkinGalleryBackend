@@ -63,5 +63,14 @@ module.exports = {
      */
     hasPermission(permission, permissions) {
         return (permissions & p[permission]) === p[permission];
-    }
+    },
+    /**
+     * @param {Map<string,string>} map
+     * @returns {Object<string,string>}
+     */
+    MapToJson: map => [...map.entries()].reduce((prev, curr) => (prev[curr[0]] = curr[1], prev), {}),
+    /**
+     * @param {Object<string,string>} obj
+     */
+    JsonToMap: obj => new Map(Object.entries(obj))
 };

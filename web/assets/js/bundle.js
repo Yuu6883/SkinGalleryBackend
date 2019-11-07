@@ -22429,6 +22429,12 @@ module.exports = new class API extends EventEmitter {
         this.mySkins = [];
         /** @type {ClientSkin[]} */
         this.favorites = [];
+
+        this.listTimestamp = 0;
+        this.pubTimestamp  = 0;
+
+        /** @type {"-time"|"time"|"-fav"|"fav"|"-name"|"name"} */
+        this.sort = "time";
     }
     
     /** @param {string} id */
@@ -22490,6 +22496,7 @@ module.exports = new class API extends EventEmitter {
         $.post({
             url: "/api/login",
             dataType: "json",
+            global: false,
             success: res => {
                 this.userInfo = res;
                 if (res.bannedUntil > Date.now()) {
@@ -22545,7 +22552,12 @@ module.exports = new class API extends EventEmitter {
         });
     }
 
-    listSkin(owner = "@me") {
+    listSkin(force = false, owner = "@me") {
+
+        if (!force && Date.now() - this.listTimestamp < 2500)
+            return;
+        this.listTimestamp = Date.now();
+
         $.get({
             url: "/api/skins/" + owner,
             dataType: "json",
@@ -22556,8 +22568,14 @@ module.exports = new class API extends EventEmitter {
                     this.emit("myskin", res);
                     let temp = [];
                     for (let s of res) {
-                        if (this.mySkins.find(skin => skin.skinID == s.skinID))
-                            return;
+                        let old = this.mySkins.find(skin => skin.skinID == s.skinID);
+                        if (old) {
+                            old.status = s.status;
+                            old.public = s.public;
+                            old.tags   = s.tags;
+                            old.favorites = s.favorites;
+                            continue;
+                        }
                         // console.log(`Calculating image hash for ${s.skinID}`);
 
                         s.hash = await this.getSkinHash(s.skinID, s.status != "approved");
@@ -22653,11 +22671,16 @@ module.exports = new class API extends EventEmitter {
     }
 
     /**
-     * 
-     * @param {Number} page 
-     * @param {"-time"|"time"|"-fav"|"fav"|"-name"|"name"} sort 
+     * @param {{sort:"-time"|"time"|"-fav"|"fav"|"-name"|"name",force:boolean,page:number,tags:string[]}} param0 
      */
-    async getPublic(page, sort) {
+    async getPublic({ page=0, sort=this.sort, force=false, tags }) {
+
+        tags = tags || [];
+        
+        if (!force && Date.now() - this.pubTimestamp < 2500)
+            return;
+        this.pubTimestamp = Date.now();
+
         let res = await fetch(`/api/public?page=${~~page}&sort=${sort}`);
         let total = ~~res.headers.get("x-skin-total");
 
@@ -22786,8 +22809,13 @@ $(window).on("load", () => {
         $("#username").text(API.fullName);
         $("#skin-panel").show();
 
-        API.listSkin();
+        API.listSkin(true);
         $(".center").css("min-height", "100%");
+    });
+
+    API.on("loginFail", () => {
+        Prompt.alert.fire("Login failed", "Please try again if you didn't" + 
+                          " cancel Discord authorization", "warning");
     });
 
     API.on("logoutSuccess", () => {
@@ -22808,18 +22836,21 @@ $(window).on("load", () => {
 
     API.on("skinUploaded", res => {
         if (res.error) return console.error(res.error);
-        Prompt.skinResult(res).then(() => API.listSkin());
+        Prompt.skinResult(res).then(() => API.listSkin(true));
     });
 
     API.on("skinEditSuccess", ({ newName, isPublic }) => {
         Prompt.skinEditResult({ name: escapeHtml(newName), isPublic })
-              .then(() => API.listSkin());
+              .then(() => API.listSkin(true));
     });
 
     API.on("skinDeleteSuccess", name => {
         Prompt.skinDeleteResult(escapeHtml(name))
-              .then(() => API.listSkin());
+              .then(() => API.listSkin(true));
     });
+
+    $("#my-tab" ).click(() => API.listSkin());
+    $("#pub-tab").click(() => API.getPublic({}).then(result => Pager.viewPublicSkins(result)));
 
     API.init();
 
@@ -22835,12 +22866,14 @@ $(window).on("load", () => {
 });
 },{"./api":155,"./pager":158,"./prompt":159,"./starfield":160}],158:[function(require,module,exports){
 const PAGE_LIMIT = 12;
+
 const Prompt = require("./prompt");
+const API = require("./api");
+
 /** @param {Number} p */
 const createPage = (curr, p) => $(`<li><a class="page-${curr == p ? "active" : "btn"}">${p}</a></li>`);
 /** @param {{curr:Number,total:Number,min:Number,onpage:Function}} param0 */
-const createView = ({ curr, total, min, onpage }) => {
-
+const createView = ({ curr, total, min=0, onpage }) => {
     total = Math.max(total, min);
     const prev = $(`<li><a class="page-${curr > 0         ? "btn" : "disable"}" id="prev-page">` + 
                    `<span uk-pagination-previous></span></a></li>`);
@@ -22873,14 +22906,15 @@ const createView = ({ curr, total, min, onpage }) => {
 
     return [prev, ...pages, next];
 }
-
-const emptySkinPanel = 
+/** @param {Boolean} allowUpload */
+const emptySkinPanel = allowUpload =>
 `<div class="uk-width-1-6@l uk-width-1-4@m uk-width-1-2 uk-card uk-margin-top">
     <div class="padding-s uk-inline-clip uk-transition-toggle uk-text-center card">
         <img src="assets/img/logo-grey.png" class="skin-preview skin-empty">
-        <div class="uk-position-center">
+        ${!!allowUpload ? 
+       `<div class="uk-position-center">
             <span class="text uk-transition-fade pointer skin-upload" uk-icon="icon:cloud-upload;ratio:2" uk-tooltip="Upload skin"></span>
-        </div>
+        </div>`:""}
     </div>
 </div>`;
 
@@ -22919,6 +22953,31 @@ const createMySkinPanel = skinObject => {
 
                 <span uk-icon="icon:trash;ratio:1.5"     class="text uk-transition-slide-bottom skin-delete"
                         skin-id="${skinObject.skinID}" skin-name="${skinObject.skinName}" uk-tooltip="Delete"></span>
+            </div>
+        </div>
+    </div>`;
+}
+
+/** @param {ClientSkin} skinObject */
+const createPubSkinPanel = skinObject => {
+    let link = `/s/${skinObject.skinID}`;
+    
+    return "" +
+    `<div class="uk-width-1-6@l uk-width-1-4@m uk-width-1-2 uk-card uk-margin-top">
+        <div class="padding-s uk-inline-clip pointer uk-text-center uk-transition-toggle card">
+            <div>
+                <a href="${link}" data-type="image" data-caption="<h1 class='text uk-margin-large-bottom'>${escapeHtml(skinObject.skinName)}</h1>">
+                    <img src="${link}" class="skin-preview uk-transition-scale-up uk-transition-opaque">
+                </a>
+            </div>
+            <h3 class="text uk-position-bottom-center uk-margin-small-bottom">${escapeHtml(skinObject.skinName)}</h3>
+            <div class="bottom-left">
+                <span uk-icon="icon:star;ratio:1.5" class="text uk-transition-slide-bottom info skin-stars"
+                    skin-id="${skinObject.skinID}" skin-name="${skinObject.skinName}" uk-tooltip="${skinObject.favorites} stars"></span>
+            </div>
+            <div class="bottom-right">
+                <span uk-icon="icon:link;ratio:1.5" class="text uk-transition-slide-bottom skin-link"
+                    link="${window.location.origin}${link}" uk-tooltip="Copy link"></span><br>
             </div>
         </div>
     </div>`;
@@ -22969,7 +23028,7 @@ module.exports = new class Pager {
         this.page = page = page == undefined ? this.page : page;
         let skinsInView = skins.slice(PAGE_LIMIT * page, PAGE_LIMIT * (page + 1));
         let skinsHTML = skinsInView.map(createMySkinPanel).join("");
-        let emptySkinsHTML = emptySkinPanel.repeat(PAGE_LIMIT - skinsInView.length);
+        let emptySkinsHTML = emptySkinPanel(true).repeat(PAGE_LIMIT - skinsInView.length);
 
         let panel = $("#my-skins");
 
@@ -22985,19 +23044,85 @@ module.exports = new class Pager {
             panel.show("slide", { direction }, 500);
         });
     
-        $(".skin-upload").click(() => Prompt.inputImage());
+        this.addSkinUpload();
+        this.addSkinEdit();
+        this.addSkinDelete();
+        this.addCopyLink();
     
+        this.clearView();
+        let view = createView({ curr: page, total: Math.ceil(skins.length / 12), min: 5,
+            onpage: p => {
+                this.viewMySkins(skins, p, p > page ? "right" : "left");
+            }
+        });
+
+        this.element.append(view);
+    }
+
+    /**
+     * @param {{total:Number,page:number,skins:ClientSkin[],dir:"up"|"left"|"right"}} param0
+     */
+    async viewPublicSkins({ total=0, page=0, skins, dir="up" }) {
+
+        skins = skins || [];
+        this.page = page = page == undefined ? this.page : page;
+        let skinsHTML = skins.map(createPubSkinPanel).join("");
+        let emptySkinsHTML = emptySkinPanel(false).repeat(Math.max(PAGE_LIMIT - skins.length, 0));
+        let panel = $("#pub-skins");
+
+        await new Promise(resolve => {
+            panel.hide("slide", { direction: 
+                dir == "left" ? "right" : "left" }, 500, resolve);
+        });
+    
+        panel.children().remove();
+        panel.append($(skinsHTML + emptySkinsHTML));
+        
+        requestAnimationFrame(() => {
+            panel.show("slide", { direction: dir }, 500);
+        });
+
+        this.addCopyLink();
+        this.addStar();
+
+        this.clearView();
+        let view = createView({ curr: page, total: Math.ceil(total / 12),
+            onpage: async p => {
+                let result = await API.getPublic({ page: p, force: true });
+                this.viewPublicSkins({ skins:result.skins, page: p, 
+                    total:result.total, dir: p > page ? "right" : "left" });
+            }
+        });
+
+        this.element.append(view);
+    }
+
+    addStar() {
+        $(".skin-stars").click(function() {
+            Prompt.starSkin($(this).attr("skin-id"), $(this).attr("skin-name"));
+        });
+    }
+
+    addSkinUpload() {
+        $(".skin-upload").click(() => Prompt.inputImage());
+    }
+
+    addSkinEdit() {
         $(".skin-edit").click(function() {
             Prompt.editSkin({ 
                 skinID: $(this).attr("skin-id"),
                 oldName: $(this).attr("skin-name"),
                 wasPublic: !!$(this).attr("skin-public") });
         });
-    
+    }
+
+    addSkinDelete() {
         $(".skin-delete").click(function() {
             Prompt.deleteSkin($(this).attr("skin-id"), $(this).attr("skin-name"));
         });
-    
+    }
+
+    addCopyLink() {
         let copyEl = this.copyEl;
         $(".skin-link").click(function() {
 
@@ -23009,22 +23134,13 @@ module.exports = new class Pager {
             else
                 Prompt.copyFail($(copyEl).val());
         });
-    
-        this.clearView();
-        let view = createView({ curr: page, total: Math.ceil(skins.length / 12), min: 5,
-            onpage: p => {
-                this.viewMySkins(skins, p, p > page ? "right" : "left");
-            }
-        });
-
-        this.element.append(view);
     }
     
     clearView() {
         this.element.children().remove();
     }
 }
-},{"./prompt":159}],159:[function(require,module,exports){
+},{"./api":155,"./prompt":159}],159:[function(require,module,exports){
 /** @type {import("sweetalert2").default} */
 const Swal = window.Swal;
 const API = require("./api");
@@ -23266,6 +23382,10 @@ module.exports = new class Prompt {
         });
     }
     
+    /**
+     * @param {String} skinID
+     * @param {String} name
+     */
     deleteSkin(skinID, name) {
         this.alert.fire({
             title: `Delete Skin`,
@@ -23277,6 +23397,21 @@ module.exports = new class Prompt {
         }).then(result => {
             if (result.dismiss) return;
             API.deleteSkin(skinID, name);
+        });
+    }
+
+    /**
+     * @param {String} skinID
+     * @param {String} name
+     */
+    starSkin(skinID, name) {
+        this.alert.fire({
+            title: "This function is not available yet ):",
+            text: "You will be able to star this skin",
+            imageUrl: `${window.origin}/s/${skinID}`,
+            imageClass: "skin-preview",
+            confirmButtonText: "Ok boomer",
+            showCancelButton: false
         });
     }
 

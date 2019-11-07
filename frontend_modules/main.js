@@ -47,8 +47,13 @@ $(window).on("load", () => {
         $("#username").text(API.fullName);
         $("#skin-panel").show();
 
-        API.listSkin();
+        API.listSkin(true);
         $(".center").css("min-height", "100%");
+    });
+
+    API.on("loginFail", () => {
+        Prompt.alert.fire("Login failed", "Please try again if you didn't" + 
+                          " cancel Discord authorization", "warning");
     });
 
     API.on("logoutSuccess", () => {
@@ -69,18 +74,21 @@ $(window).on("load", () => {
 
     API.on("skinUploaded", res => {
         if (res.error) return console.error(res.error);
-        Prompt.skinResult(res).then(() => API.listSkin());
+        Prompt.skinResult(res).then(() => API.listSkin(true));
     });
 
     API.on("skinEditSuccess", ({ newName, isPublic }) => {
         Prompt.skinEditResult({ name: escapeHtml(newName), isPublic })
-              .then(() => API.listSkin());
+              .then(() => API.listSkin(true));
     });
 
     API.on("skinDeleteSuccess", name => {
         Prompt.skinDeleteResult(escapeHtml(name))
-              .then(() => API.listSkin());
+              .then(() => API.listSkin(true));
     });
+
+    $("#my-tab" ).click(() => API.listSkin());
+    $("#pub-tab").click(() => API.getPublic({}).then(result => Pager.viewPublicSkins(result)));
 
     API.init();
 

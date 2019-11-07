@@ -239,6 +239,10 @@ module.exports = new class Prompt {
         });
     }
     
+    /**
+     * @param {String} skinID
+     * @param {String} name
+     */
     deleteSkin(skinID, name) {
         this.alert.fire({
             title: `Delete Skin`,
@@ -250,6 +254,21 @@ module.exports = new class Prompt {
         }).then(result => {
             if (result.dismiss) return;
             API.deleteSkin(skinID, name);
+        });
+    }
+
+    /**
+     * @param {String} skinID
+     * @param {String} name
+     */
+    starSkin(skinID, name) {
+        this.alert.fire({
+            title: "This function is not available yet ):",
+            text: "You will be able to star this skin",
+            imageUrl: `${window.origin}/s/${skinID}`,
+            imageClass: "skin-preview",
+            confirmButtonText: "Ok boomer",
+            showCancelButton: false
         });
     }
 

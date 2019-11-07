@@ -11,4 +11,4 @@ Timestamp:
 OwnerID:
     8 bytes, unsigned long
 
-Total: 60 bytes per skin document in-memory cache
+Total: 44 bytes per skin document in-memory cache

@@ -15,6 +15,12 @@ module.exports = new class API extends EventEmitter {
         this.mySkins = [];
         /** @type {ClientSkin[]} */
         this.favorites = [];
+
+        this.listTimestamp = 0;
+        this.pubTimestamp  = 0;
+
+        /** @type {"-time"|"time"|"-fav"|"fav"|"-name"|"name"} */
+        this.sort = "time";
     }
     
     /** @param {string} id */
@@ -76,6 +82,7 @@ module.exports = new class API extends EventEmitter {
         $.post({
             url: "/api/login",
             dataType: "json",
+            global: false,
             success: res => {
                 this.userInfo = res;
                 if (res.bannedUntil > Date.now()) {
@@ -131,7 +138,12 @@ module.exports = new class API extends EventEmitter {
         });
     }
 
-    listSkin(owner = "@me") {
+    listSkin(force = false, owner = "@me") {
+
+        if (!force && Date.now() - this.listTimestamp < 2500)
+            return;
+        this.listTimestamp = Date.now();
+
         $.get({
             url: "/api/skins/" + owner,
             dataType: "json",
@@ -142,8 +154,14 @@ module.exports = new class API extends EventEmitter {
                     this.emit("myskin", res);
                     let temp = [];
                     for (let s of res) {
-                        if (this.mySkins.find(skin => skin.skinID == s.skinID))
-                            return;
+                        let old = this.mySkins.find(skin => skin.skinID == s.skinID);
+                        if (old) {
+                            old.status = s.status;
+                            old.public = s.public;
+                            old.tags   = s.tags;
+                            old.favorites = s.favorites;
+                            continue;
+                        }
                         // console.log(`Calculating image hash for ${s.skinID}`);
 
                         s.hash = await this.getSkinHash(s.skinID, s.status != "approved");
@@ -239,11 +257,16 @@ module.exports = new class API extends EventEmitter {
     }
 
     /**
-     * 
-     * @param {Number} page 
-     * @param {"-time"|"time"|"-fav"|"fav"|"-name"|"name"} sort 
+     * @param {{sort:"-time"|"time"|"-fav"|"fav"|"-name"|"name",force:boolean,page:number,tags:string[]}} param0 
      */
-    async getPublic(page, sort) {
+    async getPublic({ page=0, sort=this.sort, force=false, tags }) {
+
+        tags = tags || [];
+        
+        if (!force && Date.now() - this.pubTimestamp < 2500)
+            return;
+        this.pubTimestamp = Date.now();
+
         let res = await fetch(`/api/public?page=${~~page}&sort=${sort}`);
         let total = ~~res.headers.get("x-skin-total");
 

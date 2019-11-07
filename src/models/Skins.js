@@ -162,6 +162,7 @@ class SkinCollection {
         if (doc == null) return false;
         doc.skinName = name;
         doc.public = !!isPublic;
+        if (!isPublic) doc.favorites = 0;
         await doc.save();
         return true;
     }

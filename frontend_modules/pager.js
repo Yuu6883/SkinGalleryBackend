@@ -1,10 +1,19 @@
 const PAGE_LIMIT = 12;
-const Prompt = require("./prompt");
-/** @param {Number} p */
-const createPage = (curr, p) => $(`<li><a class="page-${curr == p ? "active" : "btn"}">${p}</a></li>`);
-/** @param {{curr:Number,total:Number,min:Number,onpage:Function}} param0 */
-const createView = ({ curr, total, min, onpage }) => {
 
+const Prompt = require("./prompt");
+const API = require("./api");
+
+/**
+ * @param {Number} curr 
+ * @param {Number} p
+ * @param {Number} total
+ */
+const createPage = (curr, p, total) => $(`<li><a class="page-${p == "..." ? "disable" : 
+                    curr == p ? "active" : "btn"}">` + 
+                    `${String(p).padStart(String(total).length, " ").replace(/ /g, "&nbsp;")}</a></li>`);
+
+/** @param {{curr:Number,total:Number,min:Number,onpage:Function}} param0 */
+const createView = ({ curr, total, min=0, onpage }) => {
     total = Math.max(total, min);
     const prev = $(`<li><a class="page-${curr > 0         ? "btn" : "disable"}" id="prev-page">` + 
                    `<span uk-pagination-previous></span></a></li>`);
@@ -18,18 +27,19 @@ const createView = ({ curr, total, min, onpage }) => {
 
     if (total <= 9) {
         for (let i = 0; i < total; i++) {
-            let page = createPage(curr + 1, i + 1);
+            let page = createPage(curr + 1, i + 1, total);
             page.click(() => curr == i || onpage(i));
             pages.push(page);
         }
     } else {
-        let indices = [0, 1, 2, total - 3, total - 2, total - 1];
-        for (let i = 3; i < total - 3; i++)
-            Math.abs(i - curr)  < 3 && indices.push(i);
+        let between = [];
+        for (let i = 3; i < total - 4; i++)
+            Math.abs(i - curr) < 3 && (i - curr) < 2 && between.push(i);
+        let indices = [0, 1, 2, ...between, total - 4, total - 3, total - 2, total - 1];
         // Vacant value, push "..."
-        indices.reduce((val, prev) => {
-            let page = createPage(curr + 1, val == prev + 1 ? val + 1 : "...");
-            page.click(() => curr == i || onpage(i));
+        indices.reduce((prev, val) => {
+            let page = createPage(curr + 1, (val == prev + 1) ? val + 1 : "...", total);
+            page.click(() => curr == val || onpage(val));
             pages.push(page);
             return val;
         }, -1);
@@ -37,14 +47,15 @@ const createView = ({ curr, total, min, onpage }) => {
 
     return [prev, ...pages, next];
 }
-
-const emptySkinPanel = 
+/** @param {Boolean} allowUpload */
+const emptySkinPanel = allowUpload =>
 `<div class="uk-width-1-6@l uk-width-1-4@m uk-width-1-2 uk-card uk-margin-top">
     <div class="padding-s uk-inline-clip uk-transition-toggle uk-text-center card">
         <img src="assets/img/logo-grey.png" class="skin-preview skin-empty">
-        <div class="uk-position-center">
+        ${!!allowUpload ? 
+       `<div class="uk-position-center">
             <span class="text uk-transition-fade pointer skin-upload" uk-icon="icon:cloud-upload;ratio:2" uk-tooltip="Upload skin"></span>
-        </div>
+        </div>`:""}
     </div>
 </div>`;
 
@@ -83,6 +94,31 @@ const createMySkinPanel = skinObject => {
 
                 <span uk-icon="icon:trash;ratio:1.5"     class="text uk-transition-slide-bottom skin-delete"
                         skin-id="${skinObject.skinID}" skin-name="${skinObject.skinName}" uk-tooltip="Delete"></span>
+            </div>
+        </div>
+    </div>`;
+}
+
+/** @param {ClientSkin} skinObject */
+const createPubSkinPanel = skinObject => {
+    let link = `/s/${skinObject.skinID}`;
+    
+    return "" +
+    `<div class="uk-width-1-6@l uk-width-1-4@m uk-width-1-2 uk-card uk-margin-top">
+        <div class="padding-s uk-inline-clip pointer uk-text-center uk-transition-toggle card">
+            <div>
+                <a href="${link}" data-type="image" data-caption="<h1 class='text uk-margin-large-bottom'>${escapeHtml(skinObject.skinName)}</h1>">
+                    <img src="${link}" class="skin-preview uk-transition-scale-up uk-transition-opaque">
+                </a>
+            </div>
+            <h3 class="text uk-position-bottom-center uk-margin-small-bottom">${escapeHtml(skinObject.skinName)}</h3>
+            <div class="bottom-left">
+                <span uk-icon="icon:star;ratio:1.5" class="text uk-transition-slide-bottom info skin-stars"
+                    skin-id="${skinObject.skinID}" skin-name="${skinObject.skinName}" uk-tooltip="${skinObject.favorites} stars"></span>
+            </div>
+            <div class="bottom-right">
+                <span uk-icon="icon:link;ratio:1.5" class="text uk-transition-slide-bottom skin-link"
+                    link="${window.location.origin}${link}" uk-tooltip="Copy link"></span><br>
             </div>
         </div>
     </div>`;
@@ -133,7 +169,7 @@ module.exports = new class Pager {
         this.page = page = page == undefined ? this.page : page;
         let skinsInView = skins.slice(PAGE_LIMIT * page, PAGE_LIMIT * (page + 1));
         let skinsHTML = skinsInView.map(createMySkinPanel).join("");
-        let emptySkinsHTML = emptySkinPanel.repeat(PAGE_LIMIT - skinsInView.length);
+        let emptySkinsHTML = emptySkinPanel(true).repeat(PAGE_LIMIT - skinsInView.length);
 
         let panel = $("#my-skins");
 
@@ -149,19 +185,85 @@ module.exports = new class Pager {
             panel.show("slide", { direction }, 500);
         });
     
-        $(".skin-upload").click(() => Prompt.inputImage());
+        this.addSkinUpload();
+        this.addSkinEdit();
+        this.addSkinDelete();
+        this.addCopyLink();
     
+        this.clearView();
+        let view = createView({ curr: page, total: Math.ceil(skins.length / 12), min: 5,
+            onpage: p => {
+                this.viewMySkins(skins, p, p > page ? "right" : "left");
+            }
+        });
+
+        this.element.append(view);
+    }
+
+    /**
+     * @param {{total:Number,page:number,skins:ClientSkin[],dir:"up"|"left"|"right"}} param0
+     */
+    async viewPublicSkins({ total=0, page=0, skins, dir="up" }) {
+
+        skins = skins || [];
+        this.page = page = page == undefined ? this.page : page;
+        let skinsHTML = skins.map(createPubSkinPanel).join("");
+        let emptySkinsHTML = emptySkinPanel(false).repeat(Math.max(PAGE_LIMIT - skins.length, 0));
+        let panel = $("#pub-skins");
+
+        await new Promise(resolve => {
+            panel.hide("slide", { direction: 
+                dir == "left" ? "right" : "left" }, 500, resolve);
+        });
+    
+        panel.children().remove();
+        panel.append($(skinsHTML + emptySkinsHTML));
+        
+        requestAnimationFrame(() => {
+            panel.show("slide", { direction: dir }, 500);
+        });
+
+        this.addCopyLink();
+        this.addStar();
+
+        this.clearView();
+        let view = createView({ curr: page, total: Math.ceil(total / 12),
+            onpage: async p => {
+                let result = await API.getPublic({ page: p, force: true });
+                this.viewPublicSkins({ skins:result.skins, page: p, 
+                    total:result.total, dir: p > page ? "right" : "left" });
+            }
+        });
+
+        this.element.append(view);
+    }
+
+    addStar() {
+        $(".skin-stars").click(function() {
+            Prompt.starSkin($(this).attr("skin-id"), $(this).attr("skin-name"));
+        });
+    }
+
+    addSkinUpload() {
+        $(".skin-upload").click(() => Prompt.inputImage());
+    }
+
+    addSkinEdit() {
         $(".skin-edit").click(function() {
             Prompt.editSkin({ 
                 skinID: $(this).attr("skin-id"),
                 oldName: $(this).attr("skin-name"),
                 wasPublic: !!$(this).attr("skin-public") });
         });
-    
+    }
+
+    addSkinDelete() {
         $(".skin-delete").click(function() {
             Prompt.deleteSkin($(this).attr("skin-id"), $(this).attr("skin-name"));
         });
-    
+    }
+
+    addCopyLink() {
         let copyEl = this.copyEl;
         $(".skin-link").click(function() {
 
@@ -173,15 +275,6 @@ module.exports = new class Pager {
             else
                 Prompt.copyFail($(copyEl).val());
         });
-    
-        this.clearView();
-        let view = createView({ curr: page, total: Math.ceil(skins.length / 12), min: 5,
-            onpage: p => {
-                this.viewMySkins(skins, p, p > page ? "right" : "left");
-            }
-        });
-
-        this.element.append(view);
     }
     
     clearView() {

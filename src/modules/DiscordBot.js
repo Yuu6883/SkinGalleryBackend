@@ -802,6 +802,7 @@ class SkinsDiscordBot extends Client {
      */
     async approvePending(skinDoc, approvedReactions) {
         skinDoc.status = "approved";
+        skinDoc.createdAt = 0;
         await skinDoc.save();
 
         let success = this.moveToApprove(skinDoc.skinID);

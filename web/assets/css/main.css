@@ -18,7 +18,7 @@ body, html {
 }
 
 .page-btn {
-    font-size: 26px;
+    font-size: 20px;
     color: var(--text-color)!important;
     opacity: 0.8;
 }
@@ -29,7 +29,7 @@ body, html {
 }
 
 .page-active {
-    font-size: 26px;
+    font-size: 20px;
     color: #99610d!important;
     opacity: 0.8;
 }
@@ -40,7 +40,7 @@ body, html {
 }
 
 .page-disable, .page-disable:hover {
-    font-size: 26px;
+    font-size: 20px;
     color: var(--text-color)!important;
     opacity: 0.5;
 }

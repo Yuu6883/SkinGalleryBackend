@@ -34,12 +34,12 @@ const createView = ({ curr, total, min=0, onpage }) => {
     } else {
         let between = [];
         for (let i = 3; i < total - 4; i++)
-            Math.abs(i - curr) < 3 && (i - curr) < 2 && between.push(i);
-        let indices = [0, 1, 2, ...between, total - 4, total - 3, total - 2, total - 1];
+            Math.abs(i - curr) < 5 && (i - curr) < 4 && between.push(i);
+        let indices = [0, 1, ...between, total - 3, total - 2, total - 1];
         // Vacant value, push "..."
         indices.reduce((prev, val) => {
             let page = createPage(curr + 1, (val == prev + 1) ? val + 1 : "...", total);
-            page.click(() => curr == val || onpage(val));
+            page.click(() => curr != val && val == prev + 1 && onpage(val));
             pages.push(page);
             return val;
         }, -1);

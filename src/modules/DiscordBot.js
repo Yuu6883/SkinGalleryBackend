@@ -712,6 +712,10 @@ class SkinsDiscordBot extends Client {
             .setFooter(`Automatically approved`)
             .setTimestamp();
 
+        if (this.logger.config.DEBUG) {
+            embed.description += `\n\`\`\`prolog\n${Table(nsfwResult)}\`\`\``;
+        }
+
         if (this.config.env === "production") {
             let url = `${this.config.webDomain}/s/${skinID}`;
             embed.setURL(url).setThumbnail(url);
@@ -740,6 +744,10 @@ class SkinsDiscordBot extends Client {
             .setFooter(`Automatically rejected`)
             .setTimestamp();
         
+        if (this.logger.config.DEBUG) {
+            embed.description += `\n\`\`\`prolog\n${Table(nsfwResult)}\`\`\``;
+        }
+
         if (this.config.env == "production") {
             let url = `${this.config.webDomain}/p/${skinID}`;
             embed.setURL(url).setThumbnail(url);

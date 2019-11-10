@@ -99,9 +99,10 @@ class DiscordLogger extends Logger {
         return this.logChannel.send(msg).catch(console.error);
     }
     
-    async flush() {
+    async flush(force = false) {
 
         let build = "";
+        if (!force) return;
 
         while (this.logs.length) {
 
@@ -113,7 +114,7 @@ class DiscordLogger extends Logger {
                        process.env.NODE_APP_INSTANCE ? `$${process.env.NODE_APP_INSTANCE}[${process.env.name}:out] ` : "" + 
                       `[${logObj.level}]`.padEnd(7, " ")}${logObj.message + (logObj.level == "PRINT" ? "" : "\n")}`;
 
-            if ((build + msg.trim()).length > 2000) {
+            if ((build + msg.trim()).length > 1900) {
                 this.logs.unshift(logObj);
                 break;
             } else {
@@ -123,7 +124,7 @@ class DiscordLogger extends Logger {
 
         if (build)
             await this.send(`\`\`\`prolog\n${build}\`\`\``);
-        else
+        else if (force)
             await this.send("No new logs available");
     }
 

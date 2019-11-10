@@ -77,15 +77,44 @@ class SkinsApp {
             const ipc = require("node-ipc");
             ipc.config.id = `SERVER_${process.env.NODE_APP_INSTANCE||0}`;
             ipc.config.retry = 3 * 1000;
+            ipc.config.logDepth = 2;
             ipc.config.sync = true;
             ipc.config.silent = true;
 
+            let botQueue = [];
+            /** @type {{src:string,resolve:()=>void}[]} */
+            let nsfwQueue = [];
+
+            let botTimeout;
+            let nsfwTimeout;
+
+            const clearBot  = () => botTimeout  && (clearTimeout(botTimeout),  
+                botTimeout  = null);
+
+            const clearNSFW = () => nsfwTimeout && (clearTimeout(nsfwTimeout), 
+                nsfwTimeout = null);
+
+            const NSFW_ERROR = { error: "NSFW process timeout" };
+
             ipc.connectTo("NSFW", NSFW_SOCKET, () => {
+
                 ipc.of.NSFW.on("connect", () => {
                     this.logger.debug("Connected to NSFW process");
                 });
-                ipc.of.NSFW.on("disconnect", () => {
-                    this.logger.debug("Disconnected from NSFW process");
+
+                ipc.of.NSFW.on("disconnect", async () => {
+                    clearNSFW();
+                    for (let task of nsfwQueue) {
+                        task.resolve(NSFW_ERROR);
+                    }
+                    nsfwQueue = [];
+
+                    if (nsfwQueue.length) {
+                        this.logger.inform(`Disconnected from NSFW process\n` + 
+                                           `Aborting ${nsfwQueue.length} classify task(s)`);
+                    } else {
+                        this.logger.debug(`Disconnected from NSFW process`);
+                    }
                 });
             });
 
@@ -101,14 +130,40 @@ class SkinsApp {
             // Fake nsfwBot, just a wrapper to call pm2 trigger on the actual process
             this.nsfwBot = {
                 /** @param {String} src */
-                classify: src => new Promise(resolve => {
+                classify: (src, recursive = false) => new Promise(resolve => {
+
+                    if (!recursive) nsfwQueue.push({ src, resolve });
+
+                    if (nsfwQueue.length > 1 && !recursive) return;
+
                     ipc.of.NSFW.emit("classify", {
                         id: ipc.config.id,
                         message: src
                     });
 
-                    ipc.of.NSFW.once("classified", data => 
-                        resolve(data.message));
+                    const execNext = async () => {
+                        if (!nsfwQueue.length) return;
+                        let task = nsfwQueue.shift();
+                        task.resolve(await this.nsfwBot.classify(task.src, true));
+                    }
+
+                    const handler = data => {
+                        clearNSFW();
+                        if (!recursive) nsfwQueue.shift();
+                        execNext();
+                        resolve(data.message);
+                    }
+
+                    ipc.of.NSFW.once("classified", handler);
+
+                    nsfwTimeout = setTimeout(() => {
+                        clearNSFW();
+                        ipc.of.NSFW.off("classified", handler);
+                        execNext();
+                        this.logger.onError("NSFW process timeout");
+
+                        resolve(NSFW_ERROR);
+                    }, 5000);
                 })
             }
 
@@ -120,15 +175,46 @@ class SkinsApp {
              * @param {String} skinName 
              * @returns {NSFWPrediction}
              */
-            const sendClassifyResult = async (method, discordID, 
-                result, skinID, skinName) => new Promise(resolve => {
+            const sendClassifyResult = (method, discordID, result, skinID, 
+                                        skinName, recursive) => new Promise(resolve => {
+
+                if (!recursive) botQueue.push({ method, discordID, result,
+                    skinID, skinName, resolve });
+
+                if (botQueue.length > 1 && !recursive) return;
 
                 ipc.of.BOT.emit(method, {
                     id: ipc.config.id,
                     message: { discordID, result, skinID, skinName }
                 });
 
-                ipc.of.BOT.once(method, data => resolve(data.message));
+                const execNext = async () => {
+                    if (!botQueue.length) return;
+                    let task = botQueue.shift();
+                    let { method, discordID, result, skinID, skinName } = task;
+
+                    task.resolve(await sendClassifyResult(method, discordID, 
+                                result, skinID, skinName, true));
+                }
+
+                const handler = data => {
+                    clearBot();
+                    if (!recursive) botQueue.shift();
+                    execNext();
+                    resolve(data.message);
+                }
+
+                ipc.of.BOT.once(method, handler);
+
+                botTimeout = setTimeout(() => {
+                    clearBot();
+                    ipc.of.BOT.off(method, handler);
+                    execNext();
+                    this.logger.onError("BOT process timeout");
+
+                    resolve("NULL");
+                }, 5000);
+
             });
 
             this.bot = {
@@ -136,11 +222,26 @@ class SkinsApp {
                 rejectSkin:  function() { return sendClassifyResult("reject",  ...arguments)},
                 approveSkin: function() { return sendClassifyResult("approve", ...arguments)},
                 deleteReview: (messageID, status, newURL) => new Promise(resolve => {
+                    
                     ipc.of.BOT.emit("delete", {
                         id: ipc.config.id,
                         message: { messageID, status, newURL }
                     });
-                    ipc.of.BOT.once("delete", data => resolve(data.message));    
+
+                    let timeout;
+                    const handler = data => {
+                        resolve(data.message);
+                        timeout && clearTimeout(timeout);
+                    }
+
+                    ipc.of.BOT.once("delete", handler);
+
+                    timeout = setTimeout(() => {
+                        ipc.of.BOT.off("delete", handler);
+                        this.logger.onError("BOT process timeout on delete review");
+
+                        resolve(false);
+                    }, 5000);
                 }),
                 /** 
                  * @param {String} path 

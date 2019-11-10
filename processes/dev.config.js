@@ -19,7 +19,7 @@ module.exports = {
         restart_delay: 2500,
         max_memory_restart: "100M",
         exec_mode: "cluster",
-        instances: Math.min((require("os").cpus().length - 1) || 1, 4),
+        instances: 1,
         env: { "NODE_ENV": "development" },
         kill_timeout : 2500
     }]

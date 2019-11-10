@@ -170,7 +170,7 @@ class SkinsDiscordBot extends Client {
         }
 
         if (message.content == `${this.prefix}flush`) {
-            await this.logger.flush();
+            await this.logger.flush(true);
         }
         
         if (message.content == `${this.prefix}format`) {
@@ -615,14 +615,8 @@ class SkinsDiscordBot extends Client {
 
             let url = `${this.config.webDomain}/p/${skinDoc.skinID}`;
             
-            embed.setURL(url).setImage(url);
-
-            if (skinOwner) {
-                embed.setAuthor(`${skinOwner.username}#${skinOwner.discriminator}` + 
-                                `(${skinOwner.id})`, skinOwner.displayAvatarURL)
-            } else {
-                embed.setAuthor(`User ${skinDoc.ownerID}`);
-            }
+            if (this.config.env == "production")
+                embed.setURL(url).setImage(url);
 
             message = await this.pendingChannel.send(embed);
 
@@ -652,8 +646,8 @@ class SkinsDiscordBot extends Client {
      */
     async pendSkin(ownerID, nsfwResult, skinID, skinName) {
 
-        if (nsfwResult.error)
-            return await this.pendingChannel.send(`Error: ${nsfwResult.error}`);
+        // No color defaults to red (ERROR)
+        nsfwResult.avarage_color = nsfwResult.avarage_color || "rgb(255,0,0)";
 
         let color = nsfwResult.avarage_color.replace(/\D/g, " ").match(/\S+/g).map(c => ~~c);
         nsfwResult.color = nsfwResult.avarage_color;
@@ -701,8 +695,12 @@ class SkinsDiscordBot extends Client {
      * @param {string} skinName 
      */
     async approveSkin(ownerID, nsfwResult, skinID, skinName) {
-
+        
+        // No color defaults to red (ERROR)
+        nsfwResult.avarage_color = nsfwResult.avarage_color || "rgb(255,0,0)";
         let color = nsfwResult.avarage_color.replace(/\D/g, " ").match(/\S+/g).map(c => ~~c);
+        nsfwResult.color = nsfwResult.avarage_color;
+        delete nsfwResult.avarage_color;
 
         let embed = new RichEmbed()
             .setAuthor(this.user.username, this.user.displayAvatarURL)
@@ -963,6 +961,8 @@ class SkinsDiscordBot extends Client {
         }
 
         embed.title = embed.title.replace(new RegExp(status, "i"), "Deleted");
+
+        if (!embed.title.includes("Deleted")) embed.title += " Deleted";
 
         await this.deletedChannel.send(embed);
 

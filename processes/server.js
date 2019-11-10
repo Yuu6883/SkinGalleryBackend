@@ -6,8 +6,11 @@ if (process.env.NODE_APP_INSTANCE == undefined) {
 const SkinApp = require("../src/app");
 let config = require("../cli/config");
 
-let app = new SkinApp(config)
-app.init();
+let app = new SkinApp(config);
+
+app.init().then(() => {
+    process.send && process.send("ready");
+});
 
 process.on("uncaughtException", e => {
     app.logger.onError(e);

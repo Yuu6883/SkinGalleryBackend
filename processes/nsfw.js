@@ -49,4 +49,7 @@ ipc.serve(NSFW_SOCKET, () => {
 
 ipc.server.start();
 
-new NSFWBot().init().then(b => bot = b);
+new NSFWBot().init().then(b => {
+    bot = b;
+    process.send && process.send("ready");
+});

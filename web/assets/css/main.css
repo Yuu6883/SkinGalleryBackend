@@ -17,6 +17,10 @@ body, html {
     height: 40!important;
 }
 
+.half-width {
+    width: 50%;
+}
+
 .page-btn {
     font-size: 20px;
     color: var(--text-color)!important;

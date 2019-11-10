@@ -12,6 +12,9 @@ const { LOW, HIGH } = require("./nsfw-config.json");
  */
 module.exports = result => {
 
+    if (!result || result.error)
+        return "pending";
+
     if (result.hentai > HIGH || 
         result.porn   > HIGH)
         return "rejected";
@@ -19,10 +22,8 @@ module.exports = result => {
     if (result.hentai < LOW &&
         result.porn   < LOW &&
         result.sexy   < LOW * 2) {
-        delete result.avarage_rgb;
         return "approved";
     }
 
-    delete result.avarage_rgb;
     return "pending";        
 }

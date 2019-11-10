@@ -51,7 +51,7 @@ const createView = ({ curr, total, min=0, onpage }) => {
 /** @param {Boolean} allowUpload */
 const emptySkinPanel = allowUpload =>
 `<div class="uk-width-1-6@l uk-width-1-4@m uk-width-1-2 uk-card uk-margin-top">
-    <div class="padding-s uk-inline-clip uk-transition-toggle uk-text-center card">
+    <div class="half-width padding-s uk-inline-clip uk-transition-toggle uk-text-center card">
         <img src="assets/img/logo-grey.png" class="skin-preview skin-empty">
         ${!!allowUpload ? 
        `<div class="uk-position-center">
@@ -67,7 +67,7 @@ const createMySkinPanel = skinObject => {
     let labelClass = { "approved": "success", "pending": "warning", "rejected": "danger" }[skinObject.status];
     return "" +
     `<div class="uk-width-1-6@l uk-width-1-4@m uk-width-1-2 uk-card uk-margin-top">
-        <div class="padding-s uk-inline-clip pointer uk-text-center uk-transition-toggle card">
+        <div class="half-width padding-s uk-inline-clip pointer uk-text-center uk-transition-toggle card">
             <div>
                 <a href="${link}" data-type="image" data-caption="<h1 class='text uk-margin-large-bottom'>${escapeHtml(skinObject.skinName)}</h1>">
                     <img src="${link}" class="skin-preview uk-transition-scale-up uk-transition-opaque">
@@ -106,7 +106,7 @@ const createPubSkinPanel = skinObject => {
     
     return "" +
     `<div class="uk-width-1-6@l uk-width-1-4@m uk-width-1-2 uk-card uk-margin-top">
-        <div class="padding-s uk-inline-clip pointer uk-text-center uk-transition-toggle card">
+        <div class="half-width padding-s uk-inline-clip pointer uk-text-center uk-transition-toggle card">
             <div>
                 <a href="${link}" data-type="image" data-caption="<h1 class='text uk-margin-large-bottom'>${escapeHtml(skinObject.skinName)}</h1>">
                     <img src="${link}" class="skin-preview uk-transition-scale-up uk-transition-opaque">

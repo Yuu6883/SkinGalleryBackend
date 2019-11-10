@@ -74,6 +74,18 @@ class Provision {
         return str && /^data:image\/png;base64,(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(str);
     }
 
+    /** @param {String} discordID */
+    createdRecently(discordID) {
+        let snowflake = BigInt(discordID).toString(2).padStart(64, "0");
+        
+        snowflake = parseInt(snowflake.slice(0, -22), 2);
+
+        let timestamp = snowflake + 1420070400000;
+        let limit = this.app.config.recentLimit || 7 * 24 * 60 * 60 * 1000;
+
+        return Date.now() - timestamp < limit;
+    }
+
     /**
      * @param {UserDocument} user
      * @param {boolean} attemptRefresh

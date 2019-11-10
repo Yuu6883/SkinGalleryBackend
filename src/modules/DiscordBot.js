@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const DiscordJS = require("discord.js");
 const { execSync } = require("child_process");
 
+const Table = require("./StringTable");
 const Cloudflare = require("./Cloudflare");
 const SkinCollection = require("../models/Skins");
 const UserCollection = require("../models/Users");
@@ -637,6 +638,10 @@ class SkinsDiscordBot extends Client {
 
     debug(bool) {
         this.logger.config.DEBUG = !!bool;
+        if (bool) {
+            this.logger.flush();
+            this.logger.autoflush = true;
+        }
     }
 
     /**
@@ -662,6 +667,10 @@ class SkinsDiscordBot extends Client {
             .setFooter(`${this.config.approveThreshold} ${this.config.approveEmoji} to approve | ` + 
                        `${this.config.rejectThreshold } ${this.config.rejectEmoji } to reject`)
             .setTimestamp();
+
+        if (this.logger.config.DEBUG) {
+            embed.description += `\n\`\`\`prolog\n${Table(nsfwResult)}\`\`\``;
+        }
 
         if (this.config.env == "development") {
 

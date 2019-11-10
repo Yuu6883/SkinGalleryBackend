@@ -160,10 +160,10 @@ class SkinsApp {
                         clearNSFW();
                         ipc.of.NSFW.off("classified", handler);
                         execNext();
-                        this.logger.onError("NSFW process timeout");
+                        this.logger.onError(`NSFW process timeout ${nsfwQueue.length}`);
 
                         resolve(NSFW_ERROR);
-                    }, 5000);
+                    }, 10000);
                 })
             }
 
@@ -176,7 +176,7 @@ class SkinsApp {
              * @returns {NSFWPrediction}
              */
             const sendClassifyResult = (method, discordID, result, skinID, 
-                                        skinName, recursive) => new Promise(resolve => {
+                                        skinName, recursive = false) => new Promise(resolve => {
 
                 if (!recursive) botQueue.push({ method, discordID, result,
                     skinID, skinName, resolve });
@@ -213,7 +213,7 @@ class SkinsApp {
                     this.logger.onError("BOT process timeout");
 
                     resolve("NULL");
-                }, 5000);
+                }, 10000);
 
             });
 
@@ -241,7 +241,7 @@ class SkinsApp {
                         this.logger.onError("BOT process timeout on delete review");
 
                         resolve(false);
-                    }, 5000);
+                    }, 10000);
                 }),
                 /** 
                  * @param {String} path 

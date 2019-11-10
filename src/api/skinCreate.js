@@ -43,7 +43,7 @@ const endpoint = {
 
             if (nsfwStatus === "pending") {
                 messageID = await this.bot.pendSkin(req.vanisUser.discordID, 
-                    result, skinID, cucked ? (req.params.skinName + " **(cucked)**") : req.params.skinName);
+                    result, skinID, cucked ? (req.params.skinName + " (new user)") : req.params.skinName);
             }
 
             if (nsfwStatus === "approved") {

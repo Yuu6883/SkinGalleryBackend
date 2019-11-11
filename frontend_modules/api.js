@@ -63,16 +63,16 @@ module.exports = new class API extends EventEmitter {
         return this.mySkins.find(s => s.hash == hash);
     }
 
-    set pubTotal(value) {
-        $("#pub-stats").text(`Total: ${value}`);
+    set myTotal(value) {
+        $("#my-tab").attr("uk-tooltip", `${value}/60`);
     }
 
     set favTotal(value) {
-        $("#fav-stats").text(`${value}/200`);
+        $("#fav-tab").attr("uk-tooltip", `${value}/200`);
     }
 
-    set myTotal(value) {
-        $("#my-stats").text(`${value}/60`);
+    set pubTotal(value) {
+        $("#pub-tab").attr("uk-tooltip", `${value}`);
     }
 
     init() {
@@ -168,10 +168,12 @@ module.exports = new class API extends EventEmitter {
             /** @param {ClientSkin[]} res */
             async res => {
                 this.emit("myskin", res);
+
                 let temp = [];
                 for (let s of res) {
                     let old = this.mySkins.find(skin => skin.skinID == s.skinID);
-                    if (old) {
+                    
+                    if (old && old.hash) {
                         old.status = s.status;
                         old.public = s.public;
                         old.tags   = s.tags;
@@ -187,8 +189,9 @@ module.exports = new class API extends EventEmitter {
                     //     console.error(`Failed to calculate image hash for ${s.skinID}`);
                     temp.push(s);
                 }
-                this.myTotal = temp.length;
-                this.mySkins = temp;
+
+                this.mySkins.push(...temp);
+                this.myTotal = this.mySkins.length;
             },
             error: console.error
         });

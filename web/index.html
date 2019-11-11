@@ -46,7 +46,7 @@
             <div class="uk-text-center">
                 <h1 class="uk-heading uk-margin-top text">Skin Gallery
                     <span class="theme-color info" uk-icon="icon:info;ratio:1.5"></span>
-                    <div class="uk-card uk-card-body card" uk-dropdown>
+                    <div class="uk-card uk-card-body card" uk-dropdown="pos: top-center">
                         <h5 id="extra-info" class="text uk-text-center uk-margin-remove"></h5>
                         <h5 class="text uk-margin-remove">Copyright &copy; 2019 Yuu & Luka</h5>
                     </div>
@@ -78,24 +78,9 @@
             </div>
             <div class="uk-card uk-margin-top uk-animation-fade" id="skin-panel">
                 <ul class="uk-flex-center uk-margin-remove-bottom uk-margin-remove-left" uk-tab uk-switcher>
-                    <li id="my-tab"  class="uk-active text">
-                        <a>My Skins</a>
-                        <div class="uk-card uk-card-body card" uk-dropdown>
-                            <h4 id="my-stats" class="text uk-margin-remove">0/60</h4>
-                        </div>
-                    </li>
-                    <li id="fav-tab" class="text">
-                        <a>Favorites</a>
-                        <div class="uk-card uk-card-body card" uk-dropdown>
-                            <h4 id="fav-stats" class="text uk-margin-remove">0/200</h4>
-                        </div>
-                    </li>
-                    <li id="pub-tab" class="text">
-                        <a>Public Skins</a>
-                        <div class="uk-card uk-card-body card" uk-dropdown>
-                            <h4 id="pub-stats" class="text uk-margin-remove">Total: 0</h4>
-                        </div>
-                    </li>
+                    <li id="my-tab"  class="uk-active text" uk-tooltip="0/600"><a>My Skins</a></li>
+                    <li id="fav-tab" class="text" uk-tooltip="0/200"><a>Favorites</a> </li>
+                    <li id="pub-tab" class="text" uk-tooltip="Total: 0"><a>Public Skins</a></li>
                 </ul>
                 <ul id="pager" class="uk-flex-center uk-pagination uk-margin-remove-bottom text">
                 </ul>

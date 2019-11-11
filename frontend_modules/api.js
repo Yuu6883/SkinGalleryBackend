@@ -237,7 +237,6 @@ module.exports = new class API extends EventEmitter {
             url: `/api/fav/${skinID}`,
             dataType: "json",
             success: res => {
-                console.log(res);
                 if (res.success) {
                     this.favorites.push(res.skin);
                     this.favTotal = this.favorites.length;
@@ -259,7 +258,7 @@ module.exports = new class API extends EventEmitter {
             success: res => {
                 if (res.success) {
                     let index = this.favorites.findIndex(s => s.skinID == skinID);
-                    if (index > 0) this.favorites.splice(index, 1);
+                    if (index >= 0) this.favorites.splice(index, 1);
                     this.favTotal = this.favorites.length;
                     this.emit("favDelete", name);
                 }

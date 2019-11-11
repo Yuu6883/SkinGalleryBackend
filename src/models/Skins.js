@@ -159,8 +159,8 @@ class SkinCollection {
      * @returns {ClientSkin[]}
      */
     async findAll(ids) {
-        return await this.model.aggregate([{
-            $match:   { 
+        return await SkinModel.aggregate([{
+            $match:   {
                 $and: [ 
                     { public: true },
                     { status: "approved" },

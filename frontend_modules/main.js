@@ -12,8 +12,6 @@ $(window).on("load", () => {
     const Pager = require("./pager");
     const Starfield = require("./starfield");
 
-    window.API = API;
-
     let halloween = false;
     let today = new Date();
     let month = today.getMonth() + 1; // Autism

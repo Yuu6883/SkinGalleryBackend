@@ -178,6 +178,7 @@ module.exports = new class Pager {
 
         let panel = $("#my-skins");
     
+        panel.fadeIn(500);
         panel.children().remove();
         panel.append($(skinsHTML + emptySkinsHTML));
     
@@ -205,6 +206,7 @@ module.exports = new class Pager {
 
         let panel = $("#fav-skins");
     
+        panel.fadeIn(500);
         panel.children().remove();
         panel.append($(skinsHTML + emptySkinsHTML));
     
@@ -231,6 +233,7 @@ module.exports = new class Pager {
         let emptySkinsHTML = emptySkinPanel(false).repeat(Math.max(PAGE_LIMIT - skins.length, 0));
         let panel = $("#pub-skins");
     
+        panel.fadeIn(500);
         panel.children().remove();
         panel.append($(skinsHTML + emptySkinsHTML));
 

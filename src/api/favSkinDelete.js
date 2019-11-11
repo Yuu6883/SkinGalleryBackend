@@ -10,9 +10,10 @@ const endpoint = {
         if (!this.provision.confirmSkinID(req.params.skinID))
             return void res.sendStatus(400);
         
-        res.json({ success:
-            await this.users.removeFav(req.vanisUser, req.params.skinID)
-        });
+        let success = await this.users.removeFav(req.vanisUser, req.params.skinID);
+        success && this.skins.restartUpdatePublic();
+        
+        res.json({ success });
     },
     method: "delete",
     path: "/fav/:skinID"

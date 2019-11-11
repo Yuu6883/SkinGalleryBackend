@@ -154,6 +154,26 @@ class SkinCollection {
         return true;
     }
 
+    /** 
+     * @param {String[]} ids 
+     * @returns {ClientSkin[]}
+     */
+    async findAll(ids) {
+        return await this.model.aggregate([{
+            $match:   { 
+                $and: [ 
+                    { public: true },
+                    { status: "approved" },
+                    { skinID: { $in: ids } },
+                ]
+            }
+        },
+        {   
+            $project: { _id: 0, ownerID: 1, skinName: 1, skinID: 1,
+                        createdAt: 1, favorites: 1, tags: 1 }
+        }]).exec();
+    }
+
     /**
      * @param {{ skinID: string, name: string, isPublic: boolean }} param0
      */

@@ -9,10 +9,13 @@ const endpoint = {
 
         if (!this.provision.confirmSkinID(req.params.skinID))
             return void res.sendStatus(400);
-        
-        res.json({ success:
-            await this.users.addFav(req.vanisUser, req.params.skinID)
-        });
+
+        if (req.vanisUser.favorites.length >= 200)
+            return void res.json({ success: false, error: "You can't star more than 200 skins" });
+
+        let result = await this.users.addFav(req.vanisUser, req.params.skinID);
+        result.success && this.skins.restartUpdatePublic();
+        res.json(result);
     },
     method: "put",
     path: "/fav/:skinID"

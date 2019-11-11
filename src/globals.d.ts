@@ -65,6 +65,7 @@ interface SkinEntry {
 }
 
 interface ClientSkin {
+    ownerID:   string;
     skinID:    string;
     status:    SkinStatus;
     skinName:  boolean;

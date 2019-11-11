@@ -63,8 +63,25 @@ module.exports = new class API extends EventEmitter {
         return this.mySkins.find(s => s.hash == hash);
     }
 
+    set pubTotal(value) {
+        $("#pub-stats").text(`Total: ${value}`);
+    }
+
+    set favTotal(value) {
+        $("#fav-stats").text(`${value}/200`);
+    }
+
+    set myTotal(value) {
+        $("#my-stats").text(`${value}/60`);
+    }
+
     init() {
-        this.on("loginSuccess",  () => localStorage.autoLogin = "ha")
+        this.on("loginSuccess",  async () => {
+                localStorage.autoLogin = "ha";
+                this.listFavSkin();
+                let result = await this.getPublic({});
+                this.pubTotal = result.total;                
+            })
             .on("loginFail",     () => delete localStorage.autoLogin)
             .on("logoutSuccess", () => delete localStorage.autoLogin)
             .on("logoutFail",    () => delete localStorage.autoLogin);
@@ -150,29 +167,28 @@ module.exports = new class API extends EventEmitter {
             success: 
             /** @param {ClientSkin[]} res */
             async res => {
-                if (owner === "@me") {
-                    this.emit("myskin", res);
-                    let temp = [];
-                    for (let s of res) {
-                        let old = this.mySkins.find(skin => skin.skinID == s.skinID);
-                        if (old) {
-                            old.status = s.status;
-                            old.public = s.public;
-                            old.tags   = s.tags;
-                            old.favorites = s.favorites;
-                            continue;
-                        }
-                        // console.log(`Calculating image hash for ${s.skinID}`);
-
-                        s.hash = await this.getSkinHash(s.skinID, s.status != "approved");
-                        // console.log(`Hash: ${s.hash}`);
-
-                        // if (!s.hash) 
-                        //     console.error(`Failed to calculate image hash for ${s.skinID}`);
-                        temp.push(s);
+                this.emit("myskin", res);
+                let temp = [];
+                for (let s of res) {
+                    let old = this.mySkins.find(skin => skin.skinID == s.skinID);
+                    if (old) {
+                        old.status = s.status;
+                        old.public = s.public;
+                        old.tags   = s.tags;
+                        old.favorites = s.favorites;
+                        continue;
                     }
-                    this.mySkins = temp;
+                    // console.log(`Calculating image hash for ${s.skinID}`);
+
+                    s.hash = await this.getSkinHash(s.skinID, s.status != "approved");
+                    // console.log(`Hash: ${s.hash}`);
+
+                    // if (!s.hash) 
+                    //     console.error(`Failed to calculate image hash for ${s.skinID}`);
+                    temp.push(s);
                 }
+                this.myTotal = temp.length;
+                this.mySkins = temp;
             },
             error: console.error
         });
@@ -208,16 +224,26 @@ module.exports = new class API extends EventEmitter {
         });
     }
 
-    /** @param {ClientSkin} skinObject */
-    addFavSkin(skinObject) {
+    /** @param {String} skinID */
+    addFavSkin(skinID) {
+
+        if (this.favorites.length >= 200) {
+            this.emit("error", "You can't star more than 200 skins");
+            return;
+        }
+
         $.ajax({
             method: "PUT",
-            url: `/api/fav/${skinObject.skinID}`,
+            url: `/api/fav/${skinID}`,
             dataType: "json",
             success: res => {
+                console.log(res);
                 if (res.success) {
-                    this.favorites.push(skinObject);
-                    this.emit("favUpdate");
+                    this.favorites.push(res.skin);
+                    this.favTotal = this.favorites.length;
+                    this.emit("favAdded");
+                } else {
+                    this.emit("error", res.error);
                 }
             },
             error: console.error
@@ -234,8 +260,8 @@ module.exports = new class API extends EventEmitter {
                 if (res.success) {
                     let index = this.favorites.findIndex(s => s.skinID == skinID);
                     if (index > 0) this.favorites.splice(index, 1);
-
-                    this.emit("favUpdate", name);
+                    this.favTotal = this.favorites.length;
+                    this.emit("favDelete", name);
                 }
             },
             error: console.error
@@ -249,7 +275,7 @@ module.exports = new class API extends EventEmitter {
             success: res => {
                 if (Array.isArray(res)) {
                     this.favorites = res;
-                    this.emit("favUpdate");
+                    this.favTotal = this.favorites.length;
                 }
             },
             error: console.error

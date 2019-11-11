@@ -263,11 +263,56 @@ module.exports = new class Prompt {
      */
     starSkin(skinID, name) {
         this.alert.fire({
-            title: "This function is not available yet ):",
-            text: "You will be able to star this skin",
+            title: `Starring skin: ${name}`,
             imageUrl: `${window.origin}/s/${skinID}`,
             imageClass: "skin-preview",
-            confirmButtonText: "Ok boomer",
+            confirmButtonText: "Star",
+            showCancelButton: true
+        }).then(result => {
+            if (result.value) {
+                API.addFavSkin(skinID);
+            }
+        });
+    }
+
+    /**
+     * @param {String} skinID
+     * @param {String} name
+     */
+    unstarSkin(skinID, name, already = false) {
+        this.alert.fire({
+            title: `Unstar skin: ${name}`,
+            text: already ? "You already starred this skin" : "",
+            imageUrl: `${window.origin}/s/${skinID}`,
+            imageClass: "skin-preview",
+            confirmButtonClass: "btn danger",
+            confirmButtonText: "Unstar",
+            showCancelButton: true
+        }).then(result => {
+            if (result.value) {
+                API.deleteFavSkin(skinID);
+            }
+        });
+    }
+
+    favAddSuccess() {
+        this.alert.fire({
+            title: "Skin Starred",
+            text: "Yeet",
+            type: "success",
+            timer: 1500,
+            showConfirmButton: false,
+            showCancelButton: false
+        });
+    }
+
+    favDeleteSuccess() {
+        this.alert.fire({
+            title: "Skin Unstarred",
+            text: "RIP",
+            type: "success",
+            timer: 1500,
+            showConfirmButton: false,
             showCancelButton: false
         });
     }

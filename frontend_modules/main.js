@@ -12,6 +12,8 @@ $(window).on("load", () => {
     const Pager = require("./pager");
     const Starfield = require("./starfield");
 
+    window.API = API;
+
     let halloween = false;
     let today = new Date();
     let month = today.getMonth() + 1; // Autism
@@ -84,9 +86,26 @@ $(window).on("load", () => {
               .then(() => API.listSkin(true));
     });
 
-    $("#my-tab" ).click(() => delete Pager.page && API.listSkin());
-    $("#pub-tab").click(() => delete Pager.page && API.getPublic({})
+    API.on("favAdded", () => {
+        Pager.viewFavSkins(API.favorites);
+        Prompt.favAddSuccess();
+    });
+
+    API.on("favDelete", () => {
+        Pager.viewFavSkins(API.favorites);
+        Prompt.favDeleteSuccess();
+    });
+
+    API.on("error", e => {
+        Prompt.alert.fire("Error", e ? (e.stack || e.message 
+            || String(e)) : "Unknown error", "error");
+    });
+
+    $("#my-tab" ).click(() => API.listSkin());
+    $("#pub-tab").click(() => API.getPublic({ force: true })
         .then(result => Pager.viewPublicSkins(result)));
+
+    $("#fav-tab").click(() => Pager.viewFavSkins(API.favorites));
 
     API.init();
 

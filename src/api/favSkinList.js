@@ -9,7 +9,15 @@ const endpoint = {
             return void res.sendStatus(403);
 
         if (req.params.userID == '@me') {
-            return void res.json(req.vanisUser.favorites);
+            let skinDocs = await this.skins.findAll(req.vanisUser.favorites);
+
+            // Some skin disappeared, might because rejected / deleted, so update user favorites
+            if (!req.vanisUser.favorites.every(s => skinDocs.some(d => d.skinID == s))) {
+                req.vanisUser.favorites = skinDocs.map(d => d.skinID);
+                await req.vanisUser.save();
+            }
+
+            return void res.json(skinDocs);
         } else {
             if (!hasPermission("LIST_OTHER_FAV", req.vanisPermissions))
                 return void res.sendStatus(404);

@@ -56,16 +56,36 @@ class UserCollection {
      */
     async addFav(userDoc, skinID) {
 
-        if (userDoc.favorites.includes(skinID)) return false;
+        if (userDoc.favorites.includes(skinID)) 
+            return {
+                success: false,
+                error: "You already favorited this skin"
+            };
+
         let skinDoc = await this.app.skins.findBySkinID(skinID);
 
-        if (!skinDoc || skinDoc.status != "approved" || 
-            !skinDoc.public) return false;
+        if (!skinDoc || skinDoc.status != "approved" || !skinDoc.public)
+            return {
+                success: false,
+                error: "No hacking allowed"
+            }
 
         skinDoc.favorites++;
         userDoc.favorites.push(skinID);
         await Promise.all([skinDoc.save(), userDoc.save()]);
-        return true;
+
+        return {
+            success: true,
+            skin: {
+                tags: skinDoc.tags,
+                skinID: skinDoc.skinID,
+                status: skinDoc.status,
+                ownerID: skinDoc.ownerID,
+                skinName: skinDoc.skinName,
+                favorites: skinDoc.favorites,
+                createdAt: skinDoc.createdAt,
+            }
+        };
     }
 
     /**

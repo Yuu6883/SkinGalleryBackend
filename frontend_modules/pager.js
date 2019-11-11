@@ -20,15 +20,15 @@ const createView = ({ curr, total, min=0, onpage }) => {
     const next = $(`<li><a class="page-${curr < total - 1 ? "btn" : "disable"}" id="next-page">` +
                    `<span uk-pagination-next    ></span></a></li>`);
 
-    prev.click(() => curr > 0         && onpage(curr - 1));
-    next.click(() => curr < total - 1 && onpage(curr + 1));
+    prev.click(() => curr > 0         && setImmediate(() => onpage(curr - 1)));
+    next.click(() => curr < total - 1 && setImmediate(() => onpage(curr + 1)));
 
     let pages = [];
 
     if (total <= 9) {
         for (let i = 0; i < total; i++) {
             let page = createPage(curr + 1, i + 1, total);
-            page.click(() => curr == i || onpage(i));
+            page.click(() => curr == i || setImmediate(() => onpage(i)));
             pages.push(page);
         }
     } else {
@@ -40,7 +40,10 @@ const createView = ({ curr, total, min=0, onpage }) => {
         // Vacant value, push "..."
         indices.reduce((prev, val) => {
             let page = createPage(curr + 1, (val == prev + 1) ? val + 1 : "...", total);
-            page.click(() => curr != val && val == prev + 1 && onpage(val));
+
+            page.click(() => curr != val && val == prev + 1 && 
+                setImmediate(() => onpage(val)));
+
             pages.push(page);
             return val;
         }, -1);
@@ -165,26 +168,18 @@ module.exports = new class Pager {
     }
 
     /** @param {ClientSkin[]} skins */
-    async viewMySkins(skins, page, direction = "up") {
+    async viewMySkins(skins, page = this.page) {
         
-        this.page = page = page == undefined ? this.page : page;
+        this.page = page = Math.min(page, Math.ceil(skins.length / 12));
+
         let skinsInView = skins.slice(PAGE_LIMIT * page, PAGE_LIMIT * (page + 1));
         let skinsHTML = skinsInView.map(createMySkinPanel).join("");
         let emptySkinsHTML = emptySkinPanel(true).repeat(PAGE_LIMIT - skinsInView.length);
 
         let panel = $("#my-skins");
-
-        await new Promise(resolve => {
-            panel.hide("slide", { direction: 
-                direction == "left" ? "right" : "left" }, 500, resolve);
-        });
     
         panel.children().remove();
         panel.append($(skinsHTML + emptySkinsHTML));
-        
-        requestAnimationFrame(() => {
-            panel.show("slide", { direction }, 500);
-        });
     
         this.addSkinUpload();
         this.addSkinEdit();
@@ -193,55 +188,75 @@ module.exports = new class Pager {
     
         this.clearView();
         let view = createView({ curr: page, total: Math.ceil(skins.length / 12), min: 5,
-            onpage: p => {
-                this.viewMySkins(skins, p, p > page ? "right" : "left");
-            }
+            onpage: p => this.viewMySkins(skins, p)
+        });
+
+        this.element.append(view);
+    }
+
+    /** @param {ClientSkin[]} skins */
+    async viewFavSkins(skins, page = this.page) {
+        
+        this.page = page = Math.min(page, Math.ceil(skins.length / 12));
+
+        let skinsInView = skins.slice(PAGE_LIMIT * page, PAGE_LIMIT * (page + 1));
+        let skinsHTML = skinsInView.map(createPubSkinPanel).join("");
+        let emptySkinsHTML = emptySkinPanel().repeat(PAGE_LIMIT - skinsInView.length);
+
+        let panel = $("#fav-skins");
+    
+        panel.children().remove();
+        panel.append($(skinsHTML + emptySkinsHTML));
+    
+        this.addStar();
+        this.addCopyLink();
+    
+        this.clearView();
+        let view = createView({ curr: page, total: Math.ceil(skins.length / 12),
+            onpage: p => this.viewFavSkins(skins, p)
         });
 
         this.element.append(view);
     }
 
     /**
-     * @param {{total:Number,page:number,skins:ClientSkin[],dir:"up"|"left"|"right"}} param0
+     * @param {{total:Number,page:number,skins:ClientSkin[]}} param0
      */
-    async viewPublicSkins({ total=0, page=0, skins, dir="up" }) {
+    async viewPublicSkins({ total = 0, page = this.page, skins }) {
 
         skins = skins || [];
-        this.page = page = page == undefined ? this.page : page;
+        this.page = page = Math.min(page, Math.ceil(total / 12));
+
         let skinsHTML = skins.map(createPubSkinPanel).join("");
         let emptySkinsHTML = emptySkinPanel(false).repeat(Math.max(PAGE_LIMIT - skins.length, 0));
         let panel = $("#pub-skins");
-
-        await new Promise(resolve => {
-            panel.hide("slide", { direction:
-                dir == "left" ? "right" : "left" }, 500, resolve);
-        });
     
         panel.children().remove();
         panel.append($(skinsHTML + emptySkinsHTML));
-        
-        requestAnimationFrame(() => {
-            panel.show("slide", { direction: dir }, 500);
-        });
 
         this.addCopyLink();
-        this.addStar();
+        this.addStar(true);
 
         this.clearView();
         let view = createView({ curr: page, total: Math.ceil(total / 12),
             onpage: async p => {
                 let result = await API.getPublic({ page: p, force: true });
                 this.viewPublicSkins({ skins:result.skins, page: p, 
-                    total:result.total, dir: p > page ? "right" : "left" });
+                                       total:result.total });
             }
         });
 
         this.element.append(view);
     }
 
-    addStar() {
+    addStar(already = false) {
         $(".skin-stars").click(function() {
-            Prompt.starSkin($(this).attr("skin-id"), $(this).attr("skin-name"));
+            let id = $(this).attr("skin-id");
+
+            if (API.favorites.some(s => s.skinID == id))
+                Prompt.unstarSkin(id, $(this).attr("skin-name"), already);
+            else
+                Prompt.starSkin(id, $(this).attr("skin-name"));
         });
     }
 

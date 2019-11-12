@@ -39,14 +39,17 @@ let renderQueue = [];
  * @param {SkinDocument[]} skinDocs
  * @returns {Promise<Buffer>}
  */
-const render = (userDoc, skinDocs) => new Promise(async resolve => {
+const render = (userDoc, skinDocs, recursive = false) => new Promise(async resolve => {
 
     if (!LOGO_IMG) await logoPromise;
     if (!IMG_404)  await notfoundPromise;
 
-    renderQueue.push({ userDoc, skinDocs, resolve });
-    if (renderQueue.length > 1) return;
-    renderQueue.unshift();
+    if (!recursive) {
+        renderQueue.push({ userDoc, skinDocs, resolve });
+
+        if (renderQueue.length > 1) return;
+        renderQueue.shift();
+    }
 
     let getPath = doc => `${doc.status == "approved" ? 
         SKIN_STATIC : PENDING_SKIN_STATIC}/${doc.skinID}.png`;
@@ -152,7 +155,7 @@ const render = (userDoc, skinDocs) => new Promise(async resolve => {
     if (renderQueue.length) {
         let task = renderQueue.shift();
         setImmediate(() => 
-            render(task.userDoc, task.skinDocs)
+            render(task.userDoc, task.skinDocs, true)
                 .then(task.resolve));
     }
 });

@@ -3,7 +3,7 @@ module.exports = {
         name: "BOT",
         script: `./processes/bot.js`,
         restart_delay: 2500,
-        max_memory_restart: "100M",
+        max_memory_restart: "200M",
         env: { "NODE_ENV": "development" },
         kill_timeout : 2500,
         wait_ready: true

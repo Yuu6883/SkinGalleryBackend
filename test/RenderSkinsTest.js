@@ -1,5 +1,5 @@
 const Runner = require("./runner");
-const listSkin = require("../src/modules/ListSkin");
+const RenderSkins = require("../src/modules/RenderSkin");
 const fs = require("fs");
 
 Runner(true).then(async app => {
@@ -22,10 +22,10 @@ Runner(true).then(async app => {
     }
 
     let start = Date.now();
-    let buffer = await listSkin(userDoc, skinDocs);
+    let buffer = await RenderSkins(userDoc, skinDocs);
     console.log(`Draw time: ${Date.now() - start}ms`);
 
-    fs.writeFileSync(`${__dirname}/dist/ListSkin.png`, buffer);
+    fs.writeFileSync(`${__dirname}/dist/RenderSkin.png`, buffer);
     
     await app.disconnectFromMongoDB();
     process.exit(0);

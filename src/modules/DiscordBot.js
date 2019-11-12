@@ -10,7 +10,7 @@ const SkinCollection = require("../models/Skins");
 const UserCollection = require("../models/Users");
 const DiscordLogger = require("./DiscordLogger");
 const Provision = require("../models/Provision");
-const ListSkin = require("./ListSkin");
+const RenderSkins = require("./RenderSkin");
 
 const { Attachment, RichEmbed, Client } = DiscordJS;
 const { SKIN_STATIC, PENDING_SKIN_STATIC, DELETED_SKIN_STATIC } = require("../constant");
@@ -264,6 +264,15 @@ class SkinsDiscordBot extends Client {
             let userID = message.content.replace(/\D/g, "").trim();
             this.list(userID, message);
         }
+        if (message.content == `${this.prefix}render`) {
+            let userID = message.author.id;
+            this.render(userID, message);
+        }
+
+        if (message.content.startsWith(`${this.prefix}render `)) {
+            let userID = message.content.replace(/\D/g, "").trim();
+            this.render(userID, message);
+        }
 
         if (message.content.toLowerCase().startsWith(`${this.prefix}ownerof `)) {
             if (message.mentions.users && message.mentions.users.size > 0)
@@ -483,7 +492,9 @@ class SkinsDiscordBot extends Client {
      * @param {string} userID 
      * @param {DiscordJS.Message} message 
      */
-    async list(userID, message) {
+    async render(userID, message) {
+        message.channel.startTyping();
+
         let userDoc = await this.dbusers.find(userID);
 
         if (!userDoc)
@@ -495,11 +506,45 @@ class SkinsDiscordBot extends Client {
             return await message.reply(`<@${userID}> doesn't have a skin`);
 
         try {
-            let buffer = await ListSkin(userDoc, skins);
+            let buffer = await RenderSkins(userDoc, skins);
             await message.reply(new Attachment(buffer, `list_${Date.now()}.png`));
         } catch (e) {
             this.logger.onError(e);
-            await message.reply("Something went wrong")
+            await message.reply("Something went wrong while rendering. " +
+                                "Flush log to see what happened lol dummy");
+        } finally {
+            message.channel.stopTyping(true);
+        }
+    }
+
+    /**
+     * @param {string} userID 
+     * @param {DiscordJS.Message} message 
+     */
+    async list(userID, message) {
+
+        if (this.config.env != "production")
+            return void message.reply("Use this command in production environment");
+
+        let userDoc = await this.dbusers.find(userID);
+
+        if (!userDoc)
+            return await message.reply(`Can't find userID **${userID}**`);
+
+        let skins = await this.dbskins.findByOwnerID(userID);
+        let urls = skins.map(doc => `${this.config.webDomain}/` +
+            `${doc.status=="approved"?"s":"p"}/${doc.skinID}`);
+
+        if (!skins.length)
+            return await message.reply(`<@${userID}> doesn't have a skin`);
+
+        await message.channel.send(`<@${userID}> has **${skins.length}** skins:`);
+        while (urls.length) {
+            let url = urls.splice(0, 1)[0];
+            let embed = new RichEmbed()
+                .setTitle(url)
+                .setThumbnail(url).setURL(url);
+            await message.channel.send(embed);
         }
     }
 

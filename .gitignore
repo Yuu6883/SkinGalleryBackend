@@ -1,7 +1,8 @@
 # CLI logs
 cli/logs
-# Test logs
+# Test logs & results
 test/logs
+test/dist/*
 # Process logs
 processes/logs/*
 

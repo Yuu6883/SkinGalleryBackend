@@ -10,6 +10,7 @@ const SkinCollection = require("../models/Skins");
 const UserCollection = require("../models/Users");
 const DiscordLogger = require("./DiscordLogger");
 const Provision = require("../models/Provision");
+const ListSkin = require("./ListSkin");
 
 const { Attachment, RichEmbed, Client } = DiscordJS;
 const { SKIN_STATIC, PENDING_SKIN_STATIC, DELETED_SKIN_STATIC } = require("../constant");
@@ -213,11 +214,6 @@ class SkinsDiscordBot extends Client {
             message.channel.send("Site updated");
         }
 
-        if (message.content == `${this.prefix}list`) {
-            let userID = message.author.id;
-            this.list(userID, message);
-        }
-
         if (message.content == `${this.prefix}clean`) {
             await this.pendingChannel.bulkDelete(100);
             message.channel.send("Pending channel cleaned");
@@ -257,6 +253,11 @@ class SkinsDiscordBot extends Client {
         if (message.content.startsWith(`${this.prefix}unban `)) {
             let userID = message.content.replace(/\D/g, "").trim();
             this.unban(userID, message);
+        }
+
+        if (message.content == `${this.prefix}list`) {
+            let userID = message.author.id;
+            this.list(userID, message);
         }
 
         if (message.content.startsWith(`${this.prefix}list `)) {
@@ -397,6 +398,15 @@ class SkinsDiscordBot extends Client {
         } else {
             let embed = this.copyEmbed(approvedMessage.embeds[0]);
             embed.title = embed.title.replace(/approv/i, "reject");
+            
+            if (this.config.env == "production")
+                embed.setURL(`${this.config.webDomain}/p/${skinID}`)
+                     .setThumbnail(`${this.config.webDomain}/p/${skinID}`)
+                     .setImage("");
+
+            embed.setFooter(`Manually rejected by <@${message.author}>`)
+                 .setTimestamp();
+
             this.rejectedChannel.send(embed);
 
             approvedMessage.deletable && approvedMessage.delete();
@@ -480,19 +490,16 @@ class SkinsDiscordBot extends Client {
             return await message.reply(`Can't find userID **${userID}**`);
 
         let skins = await this.dbskins.findByOwnerID(userID);
-        let urls = skins.map(doc => `${this.config.webDomain}/` +
-            `${doc.status=="approved"?"s":"p"}/${doc.skinID}`);
 
         if (!skins.length)
             return await message.reply(`<@${userID}> doesn't have a skin`);
 
-        await message.channel.send(`<@${userID}> has **${skins.length}** skins:`);
-        while (urls.length) {
-            let url = urls.splice(0, 1)[0];
-            let embed = new RichEmbed()
-                .setTitle(url)
-                .setThumbnail(url).setURL(url);
-            await message.channel.send(embed);
+        try {
+            let buffer = await ListSkin(userDoc, skins);
+            await message.reply(new Attachment(buffer, `list_${Date.now()}.png`));
+        } catch (e) {
+            this.logger.onError(e);
+            await message.reply("Something went wrong")
         }
     }
 

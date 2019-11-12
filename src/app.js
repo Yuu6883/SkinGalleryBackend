@@ -46,14 +46,7 @@ class SkinsApp {
 
     async init() {
         this.logger.debug("App init");
-        await mongoose.connect(this.config.dbPath, {
-            useCreateIndex: true,
-            useNewUrlParser: true,
-            useFindAndModify: true,
-            useUnifiedTopology: true,
-        });
-
-        this.logger.debug("Connected to database");
+        await this.connectToMongoDB();
 
         let placeholder1 = new Promise(() => {});
         let placeholder2 = new Promise(() => {});
@@ -267,10 +260,25 @@ class SkinsApp {
             this.skins.startUpdatePublic()]);
     }
 
+    async connectToMongoDB() {
+        await mongoose.connect(this.config.dbPath, {
+            useCreateIndex: true,
+            useNewUrlParser: true,
+            useFindAndModify: true,
+            useUnifiedTopology: true,
+        });
+        this.logger.debug("Connected to database");
+    }
+
+    async disconnectFromMongoDB() {  
+        await mongoose.disconnect();
+        this.logger.debug("Disconnected from database");
+    }
+
     async stop() {
         await this.webserver.stop();
         await this.cloudflare.applyPurge();
-        await mongoose.disconnect();
+        await this.disconnectFromMongoDB();
         this.logger.inform("App stopped");
     }
 }

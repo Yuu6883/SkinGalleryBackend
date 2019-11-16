@@ -91,6 +91,16 @@ class SkinsDiscordBot extends Client {
     /** @param {DiscordJS.Message} message */
     async runCommand(message) {
         
+        if (message.content.startsWith(`${this.prefix}delete `)) {
+            let skinID = message.content.split(" ")
+                .slice(1).join("")
+                .replace(this.config.webDomain || "http://localhost", "")
+                .replace("/s/", "").replace("/p/", "")
+                .replace(".png", "").trim();
+
+            this.delete(skinID, message);
+        }
+
         if (message.content.startsWith(`${this.prefix}mod`)) {
 
             let arr = message.mentions.users.array();
@@ -222,17 +232,7 @@ class SkinsDiscordBot extends Client {
 
     /** @param {DiscordJS.Message} message */
     async runModCommand(message) {
-
-        if (message.content.startsWith(`${this.prefix}delete `)) {
-            let skinID = message.content.split(" ")
-                .slice(1).join("")
-                .replace(this.config.webDomain || "http://localhost", "")
-                .replace("/s/", "").replace("/p/", "")
-                .replace(".png", "").trim();
-
-            this.delete(skinID, message);
-        }
-
+        
         if (message.content.startsWith(`${this.prefix}reject `)) {
             let skinID = message.content.split(" ")
                 .slice(1).join("")

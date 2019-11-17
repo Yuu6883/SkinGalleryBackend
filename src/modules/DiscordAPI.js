@@ -33,7 +33,7 @@ class DiscordAPI {
         const response = await fetch(url, {
             method: "POST",
             headers: { Authorization: this.appAuthorization }
-        });
+        }).catch(_ => ({ json: async _ => ({ error: "Fetch failed" }) }));
         return await response.json();
     }
 
@@ -45,7 +45,7 @@ class DiscordAPI {
         const response = await fetch(this.userEndpoint, {
             method: "GET",
             headers: { Authorization : `Bearer ${discordAccessToken}` }
-        });
+        }).catch(_ => ({ json: async _ => ({ error: "Fetch failed" }) }));
         return await response.json();
     }
 
@@ -57,7 +57,7 @@ class DiscordAPI {
         const response = await fetch(`${this.oAuth2Url}revoke?token=${discordAccessToken}`, {
             method: "POST",
             headers: { Authorization: this.appAuthorization }
-        });
+        }).catch(_ => ({ json: async _ => ({ error: "Fetch failed" }) }));
         return await response.json();
     }
 }

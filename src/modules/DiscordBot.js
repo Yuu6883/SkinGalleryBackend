@@ -232,7 +232,7 @@ class SkinsDiscordBot extends Client {
 
     /** @param {DiscordJS.Message} message */
     async runModCommand(message) {
-        
+
         if (message.content.startsWith(`${this.prefix}reject `)) {
             let skinID = message.content.split(" ")
                 .slice(1).join("")
@@ -388,7 +388,7 @@ class SkinsDiscordBot extends Client {
 
         let skinDoc = await this.dbskins.findBySkinID(skinID);
 
-        if (skinDoc === null)
+        if (!skinDoc)
             return message.reply(`Can't find skin ID \`${skinID}\``);
 
         if (skinDoc.status != "approved")

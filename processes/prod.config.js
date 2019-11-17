@@ -20,7 +20,7 @@ module.exports = {
         name: "SERVER",
         script: "./processes/server.js",
         restart_delay: 2500,
-        max_memory_restart: "250M",
+        max_memory_restart: "300M",
         exec_mode: "cluster",
         instances: Math.min((require("os").cpus().length - 1) || 1, 4),
         env: { "NODE_ENV": "production" },

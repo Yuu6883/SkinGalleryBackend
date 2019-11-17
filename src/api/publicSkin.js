@@ -28,15 +28,15 @@ const endpoint = {
                 buffer = this.skins.publicCache.sortByTime;
                 break;
 
-            case "fav":
-            case "-fav":
-                buffer = this.skins.publicCache.sortByFav;
-                break;
+            // case "fav":
+            // case "-fav":
+            //     buffer = this.skins.publicCache.sortByFav;
+            //     break;
 
-            case "name":
-            case "-name":
-                buffer = this.skins.publicCache.sortByName;
-                break;
+            // case "name":
+            // case "-name":
+            //     buffer = this.skins.publicCache.sortByName;
+            //     break;
 
             default:
                 return void res.sendStatus(400);

@@ -36,21 +36,21 @@ class SkinCache {
             this.rellocCache(BYTES_PER_SKIN * skinDocs.length);
         this.cacheLength = skinDocs.length;
         
-        this.writeToCache(this.cache.sortByFav, skinDocs.sort((a, b) =>
-            b.favorites - a.favorites
-        ));
+        // this.writeToCache(this.cache.sortByFav, skinDocs.sort((a, b) =>
+        //     b.favorites - a.favorites
+        // ));
 
         this.writeToCache(this.cache.sortByTime, skinDocs.sort((a, b) =>
             b.createdAt - a.createdAt
         ));
 
-        this.writeToCache(this.cache.sortByName, skinDocs.sort((a, b) =>
-            b.skinName.localeCompare(a.skinName)
-        ));
+        // this.writeToCache(this.cache.sortByName, skinDocs.sort((a, b) =>
+        //     b.skinName.localeCompare(a.skinName)
+        // ));
     }
 
-    get sortByFav()  { return this.cache.sortByFav  }
-    get sortByName() { return this.cache.sortByName }
+    // get sortByFav()  { return this.cache.sortByFav  }
+    // get sortByName() { return this.cache.sortByName }
     get sortByTime() { return this.cache.sortByTime }
 
     /** 
@@ -218,8 +218,8 @@ class SkinCache {
 
     /** @param {Number} number */
     rellocCache(length) {
-        this.cache.sortByFav  = Buffer.allocUnsafe(length);
-        this.cache.sortByName = Buffer.allocUnsafe(length);
+        // this.cache.sortByFav  = Buffer.allocUnsafe(length);
+        // this.cache.sortByName = Buffer.allocUnsafe(length);
         this.cache.sortByTime = Buffer.allocUnsafe(length);
     }
 }

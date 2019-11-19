@@ -195,7 +195,7 @@ class SkinCollection {
     }
 
     async getPending() {
-        return await SkinModel.find({ status: "pending" });
+        return await SkinModel.find({ status: "pending" }).limit(25);
     }
 
     /**

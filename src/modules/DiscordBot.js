@@ -576,10 +576,11 @@ class SkinsDiscordBot extends Client {
         if (this.reviewCycle) return false;
 
         const wrapper = async () => {
-            await this.updateReview();
+            await this.updateReview().catch(_ => {});
             this.reviewCycle = setTimeout(wrapper, this.config.reviewInterval);
         }
-        wrapper();
+        
+        this.reviewCycle = setTimeout(wrapper, 0);
 
         return true;
     }

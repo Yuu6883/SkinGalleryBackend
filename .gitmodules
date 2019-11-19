@@ -1,0 +1,3 @@
+[submodule "frontend_modules"]
+	path = frontend_modules
+	url = https://github.com/Yuu6883/SkinGalleryFrontend.git

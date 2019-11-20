@@ -838,6 +838,8 @@ class SkinsDiscordBot extends Client {
                 { url: `${this.config.webDomain}`, type: "WATCHING" });
         }
 
+        pendingSkins = pendingSkins.slice(-25);
+
         // Don't laugh
         for (let i in pendingSkins) {
             let skinDoc = pendingSkins[i];

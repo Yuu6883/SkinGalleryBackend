@@ -21,7 +21,6 @@ new DiscordBot({}, config).init().then(bot => {
             for (let method of ["pend", "reject", "approve"]) {
 
                 bus.on(method, async packet => {
-                    bot.logger.debug(`Received ${method}Skin call`);
                     try {
                         let { discordID, result, skinID, skinName } = packet.data;
                         await bot[`${method}Skin`](discordID, result, skinID, skinName);

@@ -26,7 +26,8 @@ const endpoint = {
         let uid = this.bot.moveToTrash(skinPath, skinDoc.status);
         uid += skinDoc.status;
 
-        this.bot.deleteReview(skinDoc.messageID, skinDoc.status, `${this.config.webDomain}/d/${uid}`);
+        this.bot.deleteReview(skinDoc.skinID, skinDoc.ownerID, skinDoc.skinName,
+             skinDoc.status, `${this.config.webDomain}/d/${uid}`);
 
         let success = await this.skins.deleteByID(req.params.skinID);
         

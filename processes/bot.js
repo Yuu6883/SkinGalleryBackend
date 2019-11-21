@@ -4,73 +4,44 @@ if (process.env.NODE_APP_INSTANCE == undefined) {
 }
 
 const DiscordBot = require("../src/modules/DiscordBot");
-const { SOCKET_PATH, BOT_SOCKET } = require("../src/constant");
-const fs = require("fs");
-const ipc = require("node-ipc");
 
 let config = require("../cli/config");
-/** @type {DiscordBot} */
-let bot;
 
-if (!fs.existsSync(SOCKET_PATH))
-    fs.mkdirSync(SOCKET_PATH);
+const pm2 = require("pm2");
+
+new DiscordBot({}, config).init().then(bot => {
+
+    pm2.connect(err => {
+        if (err) throw err;
     
-ipc.config.id = "BOT";
-ipc.config.retry = 2000;
-ipc.config.silent = true;
-
-ipc.serve(BOT_SOCKET, () => {
+        pm2.launchBus((err, bus) => {
+            if (err) throw err;
     
-    ipc.server.on("connect", () => {
-        bot && bot.logger.debug("App connected");
-    });
+            // Initialize listener for three events
+            for (let method of ["pend", "reject", "approve"]) {
 
-    ipc.server.on("socket.disconnected", () => {
-        bot && bot.logger.inform("App disconnected");
-    });
-
-    // Initialize listener for three events
-    for (let method of ["pend", "reject", "approve"]) {
-
-        ipc.server.on(method, async (data, socket) => {
-            if (!bot) return ipc.server.emit(socket, method, 
-                { id: ipc.config.id, message: { error: "Discord bot process not ready" }});
-    
-            // bot.logger.debug(`Received ${method}Skin call`);
-            
-            try {
-                let { discordID, result, skinID, skinName } = data.message;
-                let message = await bot[`${method}Skin`](discordID, result, skinID, skinName);
-                ipc.server.emit(socket, method, { id: ipc.config.id, message });
-            } catch (e) {
-                bot && bot.logger.onError(`Error while ${method} skin`, e);
-                ipc.server.emit(socket, method, { id: ipc.config.id, 
-                    message: { error: e.message, stack: e.stack }});
+                bus.on(method, async packet => {
+                    bot.logger.debug(`Received ${method}Skin call`);
+                    try {
+                        let { discordID, result, skinID, skinName } = packet.data;
+                        await bot[`${method}Skin`](discordID, result, skinID, skinName);
+                    } catch (e) {
+                        bot.logger.onError(`Error while ${method} skin`, e);
+                    }
+                });
             }
+
+            bus.on("delete", async packet => {
+                try {
+                    let { skinID, ownerID, skinName, status, newURL } = packet.data;
+                    await bot.deleteReview(skinID, ownerID, skinName, status, newURL);
+                } catch (e) {
+                    bot.logger.onError(`Error while deleting skin`, e);
+                }
+            });
         });
-    }
-
-    ipc.server.on("delete", async (data, socket) => {
-        if (!bot) return ipc.server.emit(socket, "delete", 
-            { id: ipc.config.id, message: { error: "Discord bot process not ready" }});
-
-        try {
-            let { messageID, status, newURL } = data.message;
-            let message = await bot.deleteReview(messageID, status, newURL);
-            ipc.server.emit(socket, "delete", { id: ipc.config.id, message });
-        } catch (e) {
-            bot && bot.logger.onError(`Error while deleting skin`, e);
-            ipc.server.emit(socket, "delete", { id: ipc.config.id, 
-                message: { error: e.message, stack: e.stack }});
-        }
-
+        
+        // Make sure bot online first
+        process.send && process.send("ready");
     });
-});
-
-ipc.server.start();
-
-new DiscordBot({}, config).init().then(b => {
-    bot = b;
-    // Make sure bot online first
-    process.send && process.send("ready");
 });

@@ -67,91 +67,56 @@ class SkinsApp {
             // Running in pm2
         } else {
 
-            const ipc = require("node-ipc");
-            ipc.config.id = `SERVER_${process.env.NODE_APP_INSTANCE||0}`;
-            ipc.config.retry = 3 * 1000;
-            ipc.config.logDepth = 2;
-            ipc.config.sync = true;
-            ipc.config.silent = true;
+            const pm2 = require("pm2");
+            
+            await new Promise((resolve, reject) => 
+                pm2.connect(err => err ? reject(err) : resolve()));
 
-            let botQueue = [];
+            /** @type {import("events").EventEmitter} */
+            const bus = await new Promise((resolve, reject) =>
+                pm2.launchBus((err, bus) => err ? reject(err) : resolve(bus)));
+            
             /** @type {{src:string,resolve:()=>void}[]} */
             let nsfwQueue = [];
-
-            let botTimeout;
             let nsfwTimeout;
-
-            const clearBot  = () => botTimeout  && (clearTimeout(botTimeout),  
-                botTimeout  = null);
 
             const clearNSFW = () => nsfwTimeout && (clearTimeout(nsfwTimeout), 
                 nsfwTimeout = null);
 
             const NSFW_ERROR = { error: "NSFW process timeout" };
 
-            ipc.connectTo("NSFW", NSFW_SOCKET, () => {
+            const execNext = async () => {
+                if (!nsfwQueue.length) return;
+                let task = nsfwQueue.shift();
+                task.resolve(await this.nsfwBot.classify(task.src, true));
+            }
 
-                ipc.of.NSFW.on("connect", () => {
-                    this.logger.debug("Connected to NSFW process");
-                });
+            const handler = packet => {
+                clearNSFW();
+                let task = nsfwQueue.shift();
+                task && task.resolve(packet.data);
+                execNext();
+            }
 
-                ipc.of.NSFW.on("disconnect", async () => {
-                    clearNSFW();
-                    for (let task of nsfwQueue) {
-                        task.resolve(NSFW_ERROR);
-                    }
-                    nsfwQueue = [];
-
-                    if (nsfwQueue.length) {
-                        this.logger.inform(`Disconnected from NSFW process\n` + 
-                                           `Aborting ${nsfwQueue.length} classify task(s)`);
-                    } else {
-                        this.logger.debug(`Disconnected from NSFW process`);
-                    }
-                });
-            });
-
-            ipc.connectTo("BOT", BOT_SOCKET, () => {
-                ipc.of.BOT.on("connect", () => {
-                    this.logger.debug("Connected to BOT process");
-                });
-                ipc.of.BOT.on("disconnect", () => {
-                    this.logger.debug("Disconnected from BOT process");
-                });
-            });
+            bus.on("classified", handler);
 
             // Fake nsfwBot, just a wrapper to call pm2 trigger on the actual process
             this.nsfwBot = {
                 /** @param {String} src */
                 classify: (src, recursive = false) => new Promise(resolve => {
 
-                    if (!recursive) nsfwQueue.push({ src, resolve });
+                    nsfwQueue.push({ src, resolve });
 
                     if (nsfwQueue.length > 1 && !recursive) return;
 
-                    ipc.of.NSFW.emit("classify", {
-                        id: ipc.config.id,
-                        message: src
+                    process.send({
+                        type: "classify",
+                        data: src
                     });
 
-                    const execNext = async () => {
-                        if (!nsfwQueue.length) return;
-                        let task = nsfwQueue.shift();
-                        task.resolve(await this.nsfwBot.classify(task.src, true));
-                    }
-
-                    const handler = data => {
-                        clearNSFW();
-                        if (!recursive) nsfwQueue.shift();
-                        execNext();
-                        resolve(data.message);
-                    }
-
-                    ipc.of.NSFW.once("classified", handler);
-
                     nsfwTimeout = setTimeout(() => {
+                        nsfwQueue.shift(); // Get rid of current task
                         clearNSFW();
-                        ipc.of.NSFW.off("classified", handler);
                         execNext();
                         this.logger.onError(`NSFW process timeout ${nsfwQueue.length}`);
 
@@ -161,81 +126,31 @@ class SkinsApp {
             }
 
             /**
-             * @param {"pending"|"approve"|"reject"} method 
+             * @param {"pend"|"approve"|"reject"} method 
              * @param {String} discordID 
              * @param {NSFWPrediction} result 
              * @param {String} skinID 
              * @param {String} skinName 
              * @returns {NSFWPrediction}
              */
-            const sendClassifyResult = (method, discordID, result, skinID, 
-                                        skinName, recursive = false) => new Promise(resolve => {
-
-                if (!recursive) botQueue.push({ method, discordID, result,
-                    skinID, skinName, resolve });
-
-                if (botQueue.length > 1 && !recursive) return;
-
-                ipc.of.BOT.emit(method, {
-                    id: ipc.config.id,
-                    message: { discordID, result, skinID, skinName }
+            const sendClassifyResult = (method, discordID, 
+                result, skinID, skinName) => new Promise(resolve => {
+                process.send({
+                    type: method,
+                    data: { discordID, result, skinID, skinName }
                 });
-
-                const execNext = async () => {
-                    if (!botQueue.length) return;
-                    let task = botQueue.shift();
-                    let { method, discordID, result, skinID, skinName } = task;
-
-                    task.resolve(await sendClassifyResult(method, discordID, 
-                                result, skinID, skinName, true));
-                }
-
-                const handler = data => {
-                    clearBot();
-                    if (!recursive) botQueue.shift();
-                    execNext();
-                    resolve(data.message);
-                }
-
-                ipc.of.BOT.once(method, handler);
-
-                botTimeout = setTimeout(() => {
-                    clearBot();
-                    ipc.of.BOT.off(method, handler);
-                    execNext();
-                    this.logger.onError("BOT process timeout");
-
-                    resolve("NULL");
-                }, 10000);
-
             });
 
             this.bot = {
                 pendSkin:    function() { return sendClassifyResult("pend",    ...arguments)},
                 rejectSkin:  function() { return sendClassifyResult("reject",  ...arguments)},
                 approveSkin: function() { return sendClassifyResult("approve", ...arguments)},
-                deleteReview: (messageID, status, newURL) => new Promise(resolve => {
-                    
-                    ipc.of.BOT.emit("delete", {
-                        id: ipc.config.id,
-                        message: { messageID, status, newURL }
+                deleteReview: (skinID, ownerID, skinName, status, newURL) => {
+                    process.send({
+                        type: "delete",
+                        data: { skinID, ownerID, skinName, status, newURL }
                     });
-
-                    let timeout;
-                    const handler = data => {
-                        resolve(data.message);
-                        timeout && clearTimeout(timeout);
-                    }
-
-                    ipc.of.BOT.once("delete", handler);
-
-                    timeout = setTimeout(() => {
-                        ipc.of.BOT.off("delete", handler);
-                        this.logger.onError("BOT process timeout on delete review");
-
-                        resolve(false);
-                    }, 10000);
-                }),
+                },
                 /** 
                  * @param {String} path 
                  * @param {SkinStatus} status 

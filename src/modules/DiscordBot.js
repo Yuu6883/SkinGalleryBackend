@@ -39,6 +39,11 @@ class SkinsDiscordBot extends Client {
             this.debugChannel = this.findChannelByID(this.config.debugChannelID);
             this.logger.logChannel = this.debugChannel;
         });
+
+        /** @type {Object<string,number>} */
+        this.rependCount = {};
+        /** @type {Object<string,DiscordJS.Message>} */
+        this.pendingCache = {};
     }
 
     async init() {
@@ -72,6 +77,7 @@ class SkinsDiscordBot extends Client {
 
         await this.updateMods();
         this.startReviewCycle();
+        this.pendingChannel.bulkDelete(100, true).catch(console.error);
 
         this.on("message", message => this.onMessage(message));
         this.on("error",   error   => this.logger.onError(error));
@@ -366,7 +372,8 @@ class SkinsDiscordBot extends Client {
         let uid = this.moveToTrash(skinPath, skinDoc.status);
         uid += skinDoc.status;
 
-        await this.deleteReview(skinDoc.messageID, skinDoc.status, `${this.config.webDomain}/d/${uid}`);
+        await this.deleteReview(skinDoc.skinID, skinDoc.ownerID, 
+            skinDoc.skinName, skinDoc.status, `${this.config.webDomain}/d/${uid}`);
         
         let success = await this.dbskins.deleteByID(skinID);
 
@@ -400,26 +407,19 @@ class SkinsDiscordBot extends Client {
         if (this.config.env == "production")
             await this.cloudflare.purgeCache(`${this.config.webDomain}/s/${skinDoc.skinID}`);
 
-        let approvedMessage = await this.approvedChannel.fetchMessage(skinDoc.messageID).catch(_ => {});
+        let embed = new RichEmbed()
+            .setTitle(`Skin ${skinDoc.skinName}`)
+            .setDescription(`Submitted by <@${skinDoc.ownerID}>`);
 
-        if (!approvedMessage) {
-            this.logger.warn(`Can't find status message to delete while rejecting skin`);
-        } else {
-            let embed = this.copyEmbed(approvedMessage.embeds[0]);
-            embed.title = embed.title.replace(/approv/i, "reject");
-            
-            if (this.config.env == "production")
-                embed.setURL(`${this.config.webDomain}/p/${skinID}`)
-                     .setThumbnail(`${this.config.webDomain}/p/${skinID}`)
-                     .setImage("");
+        if (this.config.env == "production")
+            embed.setURL(`${this.config.webDomain}/p/${skinID}`)
+                    .setThumbnail(`${this.config.webDomain}/p/${skinID}`)
+                    .setImage("");
 
-            embed.setFooter(`Manually rejected by <@${message.author}>`)
-                 .setTimestamp();
+        embed.setFooter(`Manually rejected by <@${message.author.id}>`)
+            .setTimestamp();
 
-            this.rejectedChannel.send(embed);
-
-            approvedMessage.deletable && approvedMessage.delete();
-        }
+        this.rejectedChannel.send(embed);
 
         await this.rejectApprovedSkin(skinDoc);
 
@@ -572,11 +572,10 @@ class SkinsDiscordBot extends Client {
     }
 
     startReviewCycle() {
-
         if (this.reviewCycle) return false;
 
         const wrapper = async () => {
-            await this.updateReview().catch(_ => {});
+            await this.updateReview().catch(e => this.logger.onError(e));
             this.reviewCycle = setTimeout(wrapper, this.config.reviewInterval);
         }
         
@@ -611,11 +610,6 @@ class SkinsDiscordBot extends Client {
         pending = pending.filter(s => Date.now() - s.createdAt > 10000);
 
         for (let skinDoc of pending) {
-
-            this.getReviewMessage(skinDoc).then(msg => {
-                msg && msg.deletable && msg.delete().catch(_ => {});
-            });
-
             await this.approvePending(skinDoc);
         }
 
@@ -638,49 +632,6 @@ class SkinsDiscordBot extends Client {
     /** @param {string} id */
     findChannelByID(id) {
         return this.channels.find(c => c.id == id);
-    }
-
-    /** @param {SkinDocument} skinDoc */
-    async getReviewMessage(skinDoc) {
-
-        /** @type {DiscordJS.Message} */
-        let message;
-        
-        if (skinDoc.messageID) 
-            message = await this.pendingChannel.fetchMessage(skinDoc.messageID).catch(() => {});
-
-        let skinOwner = this.findUserByID(skinDoc.ownerID);
-
-        // Bruh moment (user not in same server with the person)
-        if (!skinOwner) {
-            // this.logger.onError(`Can't find skin owner of ID ${skinDoc.ownerID}`);
-        }
-
-        // Somehow the message is gone by magik
-        if (!message) {
-
-            let embed = new RichEmbed()
-                .setTitle(`Skin ${skinDoc.skinID} (recovered)`)
-                .setDescription(`\`${skinDoc.skinName.replace("`", "\\`")}\` submitted by <@${skinDoc.ownerID}>`) 
-                .setFooter(`${this.config.approveThreshold} ${this.config.approveEmoji} to approve | ` + 
-                           `${this.config.rejectThreshold } ${this.config.rejectEmoji } to reject`)
-                .setTimestamp();
-
-            let url = `${this.config.webDomain}/p/${skinDoc.skinID}`;
-            
-            if (this.config.env == "production")
-                embed.setURL(url).setImage(url);
-
-            message = await this.pendingChannel.send(embed);
-
-            skinDoc.messageID = message.id;
-            await skinDoc.save();
-
-            await message.react(this.config.approveEmoji);
-            await message.react(this.config.rejectEmoji);
-        }
-
-        return message;
     }
 
     debug(bool) {
@@ -709,8 +660,7 @@ class SkinsDiscordBot extends Client {
         let embed = new RichEmbed()
             .setColor(color)
             .setTitle(`Skin ${skinID}`)
-            .setDescription(`\`${skinName.replace(/`/g, "\\`")}\` submitted by <@${ownerID}>`) 
-                            // `\n\`\`\`prolog\n${table(nsfwResult)}\`\`\``)
+            .setDescription(`\`${skinName.replace(/`/g, "\\`")}\` submitted by <@${ownerID}>`)
             .setFooter(`${this.config.approveThreshold} ${this.config.approveEmoji} to approve | ` + 
                        `${this.config.rejectThreshold } ${this.config.rejectEmoji } to reject`)
             .setTimestamp();
@@ -738,7 +688,8 @@ class SkinsDiscordBot extends Client {
         await message.react(this.config.approveEmoji);
         await message.react(this.config.rejectEmoji);
 
-        return message.id;
+        this.pendingCache[skinID] = message;
+        return message;
     }
 
     /**
@@ -840,29 +791,38 @@ class SkinsDiscordBot extends Client {
 
         pendingSkins = pendingSkins.slice(-25);
 
-        // Don't laugh
-        for (let i in pendingSkins) {
-            let skinDoc = pendingSkins[i];
+        for (let skinDoc of pendingSkins) {
 
-            let statusMessage = await this.getReviewMessage(skinDoc);
+            let message = this.pendingCache[skinDoc.skinID];
 
-            let approvedReactions = statusMessage.reactions.get(this.config.approveEmoji);
-            let rejectReactions   = statusMessage.reactions.get(this.config.rejectEmoji);
+            // Db might update before the message is sent, so wait a bit to repend
+            if (!message) {
+                this.rependCount[skinDoc.skinID] = (this.rependCount[skinDoc.skinID] + 1) || 1;
+
+                if (this.rependCount[skinDoc.skinID] >= 3) {
+                    message = await this.pendSkin(skinDoc.ownerID,
+                        { error: "Recovered" }, skinDoc.skinID, skinDoc.skinName);
+                } else continue;
+            }
+
+            let approvedReactions = message.reactions.get(this.config.approveEmoji);
+            let rejectReactions   = message.reactions.get(this.config.rejectEmoji);
 
             let approveCount = await this.filterModReaction(approvedReactions);
             let rejectCount  = await this.filterModReaction(rejectReactions);
 
             if (approveCount >= this.config.approveThreshold) {
 
-                await this.approvePending(skinDoc, approvedReactions);
+                await this.approvePending(skinDoc, approvedReactions).catch(console.error);
 
             } else if (rejectCount >= this.config.rejectThreshold) {
 
-                await this.rejectPending(skinDoc, rejectReactions);
+                await this.rejectPending(skinDoc, rejectReactions).catch(console.error);
 
             } else continue;
 
-            statusMessage.deletable && (await statusMessage.delete().catch(() => {}));
+            delete this.pendingCache[skinDoc];
+            await message.delete().catch(console.error);
         }
     }
 
@@ -871,6 +831,7 @@ class SkinsDiscordBot extends Client {
      * @param {DiscordJS.MessageReaction} approvedReactions
      */
     async approvePending(skinDoc, approvedReactions) {
+
         skinDoc.status = "approved";
         skinDoc.createdAt = 0;
         await skinDoc.save();
@@ -897,9 +858,7 @@ class SkinsDiscordBot extends Client {
                 embed.attachFile(new Attachment(`${SKIN_STATIC}/${skinDoc.skinID}.png`, skinDoc.skinName + ".png"));
             }
 
-            let message = await this.approvedChannel.send(embed);
-            skinDoc.messageID = message.id;
-            await skinDoc.save();
+            await this.approvedChannel.send(embed);
 
             let user = this.findUserByID(skinDoc.ownerID);
 
@@ -924,8 +883,9 @@ class SkinsDiscordBot extends Client {
                     let dm = await user.createDM();
                     await dm.send(skinEmbed);
                 } catch(_) {
-                    await this.notifChannel.send(`<@${skinDoc.ownerID}>`, skinEmbed).catch(_ => {});
+                    await this.notifChannel.send(`<@${skinDoc.ownerID}>`, skinEmbed).catch(console.error);
                 }
+
             }
 
         } else await this.pendingChannel.send(`Error: can't find skin ${skinDoc.skinName}(${skinDoc.skinID})`);
@@ -957,15 +917,12 @@ class SkinsDiscordBot extends Client {
             let url = `${this.config.webDomain}/p/${skinDoc.skinID}`;
             embed.setURL(url).setImage(url);
         } else {
-            embed.attachFile(new Attachment(`${DELETED_SKIN_STATIC}/${skinDoc.skinID}`, 
+            embed.attachFile(new Attachment(`${PENDING_SKIN_STATIC}/${skinDoc.skinID}.png`, 
                                             "SPOILER_" + skinDoc.skinName + ".png"));
         }
 
         /** @type {DiscordJS.Message} */
         let message = await this.rejectedChannel.send(embed);
-
-        skinDoc.messageID = message.id;
-        await skinDoc.save();
 
         let user = this.findUserByID(skinDoc.ownerID);
 
@@ -974,9 +931,11 @@ class SkinsDiscordBot extends Client {
             let skinEmbed = new RichEmbed()
                 .setTitle("Your skin was rejected!")
                 .setColor("RED")
-                .setImage(message.embeds[0].image.proxyURL)
                 .setDescription(`You may ask moderators why this skin was rejected.`)
                 .setTimestamp();
+
+            if (this.config.env == "production")
+                skinEmbed.setImage(message.embeds[0].image.proxyURL);
 
             try {
                 let dm = await user.createDM();
@@ -988,26 +947,27 @@ class SkinsDiscordBot extends Client {
     }
 
     /** 
-     * @param {string} messageID
+     * @param {String} skinID
+     * @param {String} ownerID
+     * @param {String} skinName
      * @param {SkinStatus} status
      * @param {string} newURL
      */
-    async deleteReview(messageID, status, newURL) {
-        if (!messageID) return (this.logger.warn("DeleteReview: undefined messageID"), false);
-        /** @type {DiscordJS.Message} */
-        let message = await this[`${status}Channel`].fetchMessage(messageID).catch(() => {});
+    async deleteReview(skinID, ownerID, skinName, status, newURL) {
+        
+        if (status !== "pending" || !this.pendingCache[skinID]) {
+            let embed = new RichEmbed()
+                .setTitle(`Skin ${skinName} deleted`)
+                .setDescription(`Submitted by <@${ownerID}>\nStatus: **${status}**`)
+                .setURL(newURL).setThumbnail(newURL)
+                .setTimestamp();
 
-        if (!message) {
-            for (let possibleStatus of ["approved","rejected","pending","deleted"]) {
-                if (status == possibleStatus) continue;
-                message = await this[`${possibleStatus}Channel`]
-                    .fetchMessage(messageID).catch(() => {});
-                if (message) break;
-            }
+            await this.deletedChannel.send(embed);
+            return;
         }
-
-        if (!message) return (this.logger.warn("DeleteReview: can NOT find review message"), false);
-
+        
+        let message = this.pendingCache[skinID];
+        delete this.pendingCache[skinID];
         let embed = this.copyEmbed(message.embeds[0]);
 
         if (newURL) {
@@ -1021,7 +981,7 @@ class SkinsDiscordBot extends Client {
 
         await this.deletedChannel.send(embed);
 
-        message.deletable && (await message.delete());
+        message && message.deletable && (await message.delete());
         return true;
     }
 
@@ -1030,13 +990,16 @@ class SkinsDiscordBot extends Client {
 
         let copy = new RichEmbed();
 
-        embed.author && (copy.setAuthor(embed.author.name, embed.author.iconURL))
-        embed.color  && (copy.setColor(embed.color));
-        embed.title  && (copy.setTitle(embed.title));
-        embed.description && (copy.setDescription(embed.description));
-        embed.thumbnail   && (copy.setThumbnail(embed.thumbnail.url));
-        embed.footer && (copy.setFooter(embed.footer.text));
-        embed.image  && (copy.setImage(embed.image.url));
+        if (embed) {
+            embed.author && (copy.setAuthor(embed.author.name, embed.author.iconURL))
+            embed.color  && (copy.setColor(embed.color));
+            embed.title  && (copy.setTitle(embed.title));
+            embed.description && (copy.setDescription(embed.description));
+            embed.thumbnail   && (copy.setThumbnail(embed.thumbnail.url));
+            embed.footer && (copy.setFooter(embed.footer.text));
+            embed.image  && (copy.setImage(embed.image.url));
+        }
+
         copy.setTimestamp();
 
         return copy;

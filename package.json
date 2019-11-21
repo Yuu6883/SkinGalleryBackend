@@ -4,7 +4,7 @@
     "description": "Vanis.io skin system",
     "license": "Apache-2.0",
     "scripts": {
-        "dev":  "pm2 start processes/dev.config.js",
+        "dev": "pm2 start processes/dev.config.js && pm2 flush && pm2 log",
         "prod": "pm2 start processes/prod.config.js",
         "bundle": "browserify frontend_modules/main.js -o frontend_modules/web/assets/js/bundle.js",
         "obf": "javascript-obfuscator web/assets/js/bundle.js -o frontend_modules/web/assets/js/bundle.js",
@@ -30,7 +30,6 @@
         "mongoose": "^5.6.9",
         "nocache": "^2.1.0",
         "node-fetch": "^2.6.0",
-        "node-ipc": "^9.1.1",
         "pm2": "^4.1.2",
         "sweetalert2": "^8.17.1"
     }

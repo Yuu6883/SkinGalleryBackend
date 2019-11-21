@@ -7,7 +7,6 @@ const SkinSchema = new mongoose.Schema({
     skinID:         { type: String,  required: true  },
     ownerID:        { type: String,  required: true  },
     skinName:       { type: String,  required: true  },
-    messageID:      { type: String,  required: false },
     status:         { type: String,  default: "pending", enum: [ "pending", "rejected", "approved" ] },
     public:         { type: Boolean, default: false },
     favorites:      { type: Number,  default: 0 },
@@ -123,10 +122,9 @@ class SkinCollection {
      * @param {string} ownerID
      * @param {string} skinName
      * @param {SkinStatus} status
-     * @param {string} messageID
      * @returns {SkinDocument}
      */
-    async create(ownerID, skinID, skinName, status = "pending", publicSkin = true, messageID) {
+    async create(ownerID, skinID, skinName, status = "pending", publicSkin = true) {
         
         if (await this.countByOwnerID(ownerID) >= this.app.config.skinLimit) {
             return null;
@@ -137,8 +135,7 @@ class SkinCollection {
             ownerID,
             skinName,
             status,
-            public: publicSkin,
-            messageID
+            public: publicSkin
         });
     }
 

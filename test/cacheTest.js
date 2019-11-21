@@ -6,7 +6,6 @@ runner(true).then(async app => {
         skinID: "test00",
         ownerID: app.config.admins[0],
         skinName: "test321",
-        messageID: "msg123",
         tags: ["agar", "other"],
         favorites: 123,
         createdAt: Math.round((Date.now() - app.skins.TIME_0) / 1000)

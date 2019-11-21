@@ -26,8 +26,7 @@ const endpoint = {
 
             let skinID = await this.provision.generateSkinID();
             let imageBase64Data = req.body.replace("data:image/png;base64,", "");
-
-            let messageID;
+            
             let cucked = false;
 
             // CUCKED
@@ -42,20 +41,20 @@ const endpoint = {
             fs.writeFileSync(skinPath, imageBase64Data, "base64");
 
             if (nsfwStatus === "pending") {
-                messageID = await this.bot.pendSkin(req.vanisUser.discordID, 
+                this.bot.pendSkin(req.vanisUser.discordID, 
                     result, skinID, cucked ? (req.params.skinName + " (new user)") : req.params.skinName);
             }
 
             if (nsfwStatus === "approved") {
-                messageID = await this.bot.approveSkin(req.vanisUser.discordID, result, skinID, req.params.skinName);
+                this.bot.approveSkin(req.vanisUser.discordID, result, skinID, req.params.skinName);
             }
 
             if (nsfwStatus === "rejected") {
-                messageID = await this.bot.rejectSkin(req.vanisUser.discordID, result, skinID, req.params.skinName);
+                this.bot.rejectSkin(req.vanisUser.discordID, result, skinID, req.params.skinName);
             }
 
             let skinDoc = await this.skins.create(req.vanisUser.discordID, skinID, 
-                                    req.params.skinName, nsfwStatus, !!req.query.public, messageID);
+                                    req.params.skinName, nsfwStatus, !!req.query.public);
 
             if (!skinDoc) {
                 // Autism strikes

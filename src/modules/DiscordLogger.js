@@ -48,7 +48,7 @@ class DiscordLogger extends Logger {
             PRINT:  true,
             ERROR:  true,
             FATAL:  true,
-            DEBUG:  false
+            DEBUG:  process.platform == "win32" // quick hack
         }
 
         /** @type {LogEvent} */

@@ -1,5 +1,5 @@
 const { Canvas, loadImage } = require("canvas");
-const { SKIN_STATIC, PENDING_SKIN_STATIC } = require("../constant");
+const { SKIN_STATIC, PENDING_SKIN_STATIC, WEB_STATIC_SOURCE } = require("../constant");
 
 const SKIN_PER_ROW = 6;
 
@@ -25,7 +25,7 @@ let LOGO_IMG;
 /** @type {import("canvas").Image} */
 let IMG_404;
 
-let logoPromise = loadImage(`${SKIN_STATIC}/../web/assets/img/logo-grey.png`)
+let logoPromise = loadImage(`${WEB_STATIC_SOURCE}/assets/img/logo-grey.png`)
     .then(img => LOGO_IMG = img);
 
 let notfoundPromise = loadImage(`${SKIN_STATIC}/404.png`)

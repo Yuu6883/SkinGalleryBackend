@@ -867,13 +867,17 @@ class SkinsDiscordBot extends Client {
                 let skinEmbed = new RichEmbed()
                     .setTitle("Your skin was approved!")
                     .setColor("GREEN")
-                    .setDescription(`Skin URL: **\`${this.config.webDomain}/s/${skinDoc.skinID}\`**`)
                     .setFooter("Thanks for using this app")
                     .setTimestamp();
 
                 if (this.config.env === "production") {
+
                     let url = `${this.config.webDomain}/s/${skinDoc.skinID}`;
-                    skinEmbed.setThumbnail(url).setURL(url);
+                    skinEmbed
+                        .setThumbnail(url)
+                        .setURL(url)
+                        .setDescription(`Skin URL: **\`${this.config.webDomain}/s/${skinDoc.skinID}\`**`);
+                    
                 } else {
                     // dev
                     skinEmbed.attachFile(new Attachment(`${SKIN_STATIC}/${skinDoc.skinID}.png`, skinDoc.skinName + ".png"));
@@ -883,6 +887,12 @@ class SkinsDiscordBot extends Client {
                     let dm = await user.createDM();
                     await dm.send(skinEmbed);
                 } catch(_) {
+                    if (!skinDoc.public) {
+                        skinEmbed
+                            .setDescription("This skin is private, please check out the website.")
+                            .setURL(this.config.webDomain)
+                            .setThumbnail("");                                
+                    }
                     await this.notifChannel.send(`<@${skinDoc.ownerID}>`, skinEmbed).catch(console.error);
                 }
 

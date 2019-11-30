@@ -15,7 +15,7 @@ const endpoint = {
         if (!this.provision.confirmPNG(req.body))
             return void res.sendStatus(400);
 
-        if ((await this.skins.countByOwnerID(req.vanisUser.discordID)) >= req.vanisUser.limit || this.config.skinLimit) {
+        if ((await this.skins.countByOwnerID(req.vanisUser.discordID)) >= (req.vanisUser.limit || this.config.skinLimit)) {
             this.logger.warn(`User ${req.vanisUser.discordID} tried to create more than ${this.config.skinLimit} skins`);
             return void res.json({ error: `You have maximum of ${this.config.skinLimit} slots for skins` });
         }

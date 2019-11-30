@@ -126,10 +126,6 @@ class SkinCollection {
      */
     async create(ownerID, skinID, skinName, status = "pending", publicSkin = true) {
         
-        if (await this.countByOwnerID(ownerID) >= this.app.config.skinLimit) {
-            return null;
-        }
-
         return SkinModel.create({
             skinID,
             ownerID,

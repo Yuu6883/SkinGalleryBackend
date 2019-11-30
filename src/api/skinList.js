@@ -25,7 +25,7 @@ const endpoint = {
 
         res.json((await this.skins.findByOwnerID(discordID))
             .sort((a, b) => a.skinName.localeCompare(b.skinName))
-            .slice(0, this.config.skinLimit));
+            .slice(0, req.vanisUser.limit || this.config.skinLimit));
     },
     method: "get",
     path: "/skins/:userID"

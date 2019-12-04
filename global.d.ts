@@ -68,7 +68,7 @@ interface ClientSkin {
     ownerID:   string;
     skinID:    string;
     status:    SkinStatus;
-    skinName:  boolean;
+    skinName:  string;
     public:    boolean;
     createdAt: number;
     favorites: number;

@@ -560,7 +560,7 @@ class SkinsDiscordBot extends Client {
         if (!userDoc) return await message
             .reply(`Can't owner of skinID **${skinID}** **HACKER**`);
 
-        await message.reply(`Owner of \`${skinID}\` is <@${userDoc.discordID}>`);
+        await message.reply(`Owner of \`${skinID}\` is ${userDoc.discordID} (<@${userDoc.discordID}>)`);
     }
 
     updateSite() {

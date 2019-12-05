@@ -7,7 +7,7 @@
         "dev": "pm2 start processes/dev.config.js && pm2 flush && pm2 log",
         "prod": "pm2 start processes/prod.config.js",
         "bundle": "browserify frontend_modules/main.js -o frontend_modules/web/assets/js/bundle.js",
-        "obf": "javascript-obfuscator web/assets/js/bundle.js -o frontend_modules/web/assets/js/bundle.js",
+        "obf": "javascript-obfuscator frontend_modules/web/assets/js/bundle.js -o frontend_modules/web/assets/js/bundle.js",
         "skinTest": "node src/test/skinDocTest.js"
     },
     "repository": {

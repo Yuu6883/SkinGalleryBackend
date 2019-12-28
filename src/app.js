@@ -12,7 +12,7 @@ const SkinCollection = require("./models/Skins");
 const UserCollection = require("./models/Users");
 const Provision = require("./models/Provision");
 
-const { BOT_SOCKET, NSFW_SOCKET, DELETED_SKIN_STATIC } = require("./constant");
+const { DELETED_SKIN_STATIC } = require("./constant");
 
 class SkinsApp {
     /**

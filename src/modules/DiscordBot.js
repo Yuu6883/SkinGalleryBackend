@@ -507,7 +507,7 @@ class SkinsDiscordBot extends Client {
 
         try {
             let buffer = await RenderSkins(userDoc, skins);
-            await message.reply(new Attachment(buffer, `list_${Date.now()}.png`));
+            await message.reply(new Attachment(buffer, `SPOILER_${Date.now()}.png`));
         } catch (e) {
             this.logger.onError(e);
             await message.reply("Something went wrong while rendering. " +

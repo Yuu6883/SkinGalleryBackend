@@ -1,0 +1,32 @@
+const fetch = require("node-fetch");
+const { RichEmbed } = require("discord.js");
+const END_POINT = "https://vanis.io/api/top/";
+
+/** 
+ * @param {import("discord.js").Message} message 
+ * @param {Number} top
+ */
+module.exports = async function (message, top) {
+
+    try {
+        let res = await fetch(END_POINT + top);
+        let json = await res.json();
+        let result = "";
+
+        for (let rank in json) {
+            let item = json[rank];
+            result += `${~~rank + 1}. **${item.discord_name}**: ${item.xp} xp\n`;
+        }
+
+        let embed = new RichEmbed()
+            .setTitle(`Vanis.io xp top ${top}`)
+            .setDescription(result);
+
+        await message.channel.send(embed);
+
+    } catch (e) {
+        console.error(e);
+        message.channel.send("Something went wrong.");
+    }
+
+}

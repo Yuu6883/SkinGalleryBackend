@@ -4,7 +4,7 @@
     "description": "Vanis.io skin system",
     "license": "Apache-2.0",
     "scripts": {
-        "dev": "pm2 start processes/dev.config.js && pm2 flush && pm2 log",
+        "dev": "pm2 start processes/dev.config.js && pm2 log",
         "prod": "pm2 start processes/prod.config.js",
         "bundle": "browserify frontend_modules/main.js -o frontend_modules/web/assets/js/bundle.js",
         "obf": "javascript-obfuscator frontend_modules/web/assets/js/bundle.js -o frontend_modules/web/assets/js/bundle.js",

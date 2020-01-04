@@ -97,15 +97,6 @@ class SkinsDiscordBot extends Client {
 
     /** @param {DiscordJS.Message} message */
     async runCommand(message) {
-
-        if (message.content.startsWith(`${this.prefix}top`)) {
-            let top = message.content.split(" ")[1];
-            if (message.content.trim() == `${this.prefix}top`) top = 10;
-            if (top != ~~top || ~~top <= 0)
-                return message.reply(`Invalid option: ${top}`);
-
-            VanisLB(message, top);
-        }
         
         if (message.content.startsWith(`${this.prefix}delete `)) {
             let skinID = message.content.split(" ")
@@ -248,6 +239,15 @@ class SkinsDiscordBot extends Client {
 
     /** @param {DiscordJS.Message} message */
     async runModCommand(message) {
+
+        if (message.content.startsWith(`${this.prefix}top`)) {
+            let top = message.content.split(" ")[1];
+            if (message.content.trim() == `${this.prefix}top`) top = 10;
+            if (top != ~~top || ~~top <= 0)
+                return message.reply(`Invalid option: ${top}`);
+
+            VanisLB(message, top);
+        }
 
         if (message.content.startsWith(`${this.prefix}reject `)) {
             let skinID = message.content.split(" ")

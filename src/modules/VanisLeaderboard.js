@@ -22,7 +22,7 @@ module.exports = async function (message, top) {
                     .setDescription(result);
                 await message.channel.send(embed);
                 result = string;
-            } else if (rank === json.length - 1) {
+            } else if (rank == json.length - 1) {
                 result += string;
                 let embed = new RichEmbed()
                     .setTitle(`Vanis.io No Life Losers Top ${top}`)

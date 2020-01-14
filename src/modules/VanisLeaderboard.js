@@ -15,14 +15,23 @@ module.exports = async function (message, top) {
 
         for (let rank in json) {
             let item = json[rank];
-            result += `${~~rank + 1}. **${item.discord_name}**: ${item.xp} xp\n`;
+            let string = `${~~rank + 1}. **${item.discord_name}**: ${item.xp} xp\n`;
+            if (result.length + string.length > 2000) {
+                let embed = new RichEmbed()
+                    .setTitle(`Vanis.io No Life Losers Top ${top}`)
+                    .setDescription(result);
+                await message.channel.send(embed);
+                result = string;
+            } else if (rank === json.length - 1) {
+                result += string;
+                let embed = new RichEmbed()
+                    .setTitle(`Vanis.io No Life Losers Top ${top}`)
+                    .setDescription(result);
+                await message.channel.send(embed);
+            } else {
+                result += string;
+            }
         }
-
-        let embed = new RichEmbed()
-            .setTitle(`Vanis.io xp top ${top}`)
-            .setDescription(result);
-
-        await message.channel.send(embed);
 
     } catch (e) {
         console.error(e);

@@ -956,11 +956,11 @@ class SkinsDiscordBot extends Client {
 
             if (this.config.env == "production")
                 skinEmbed.setImage(message.embeds[0].image.proxyURL);
-
             try {
                 let dm = await user.createDM();
                 await dm.send(skinEmbed);
             } catch(_) {
+                skinEmbed.setImage("");
                 await this.notifChannel.send(`<@${skinDoc.ownerID}>`, skinEmbed).catch(this.logger.onError);
             }
         }

@@ -147,7 +147,7 @@ class UserCollection {
         if (!user.moderator) return false;
         user.moderator = false;
         await user.save();
-        return false;
+        return true;
     }
 
     /**

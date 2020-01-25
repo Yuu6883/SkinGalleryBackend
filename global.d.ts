@@ -50,6 +50,7 @@ interface UserEntry {
     bannedUntil:    Date;
     favorites:      string[];
     limit:          number;
+    modScore:       number;
 }
 declare type UserDocument = import("mongoose").Document & UserEntry;
 

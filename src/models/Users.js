@@ -9,13 +9,14 @@ const UserSchema = new mongoose.Schema({
     cacheInfo:      { type: Map,    of: String },
     vanisToken:     { type: String, required: false },
     bannedUntil:    { type: Date,   required: false },
-    moderator:      { type: Boolean, default: false },
+    moderator:      { type: Boolean,  default: false },
     favorites:      { type: [String], default: []   },
-    limit:          { type: Number,  default: 60 }
+    limit:          { type: Number,   default: 60 },
+    modScore:       { type: Number,   default: 0  }
 });
 
-UserSchema.index({ discordID: 1 },    { unique: true });
-UserSchema.index({ vanisToken: 1 },   { unique: true, sparse: true });
+UserSchema.index({ discordID: 1 },  { unique: true });
+UserSchema.index({ vanisToken: 1 }, { unique: true, sparse: true });
 
 UserSchema.post("init", doc => {
     doc.limit = doc.limit || 60;
@@ -107,6 +108,17 @@ class UserCollection {
 
     async getMods() {
         return await UserModel.find({ moderator: true });
+    }
+
+    /**
+     * @param {string} userID 
+     */
+    async increModScore(userID) {
+        let user = await this.find(userID);
+        if (!user || !user.moderator) return;
+        user.modScore++;
+        await user.save();
+        return user;
     }
 
     /**

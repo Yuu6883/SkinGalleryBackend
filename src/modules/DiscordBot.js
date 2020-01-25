@@ -235,6 +235,10 @@ class SkinsDiscordBot extends Client {
             await this.pendingChannel.bulkDelete(100);
             message.channel.send("Pending channel cleaned");
         }
+
+        if (message.content == `${this.prefix}rank`) {
+            await this.rankMods(message);
+        }
     }
 
     /** @param {DiscordJS.Message} message */
@@ -559,6 +563,24 @@ class SkinsDiscordBot extends Client {
     }
 
     /**
+     * @param {DiscordJS.Message} message
+     */
+    async rankMods(message) {
+        let mods = await this.dbusers.getMods();
+        let content = "";
+        mods.sort((mod1, mod2) => mod2.modScore - mod1.modScore);
+        mods.forEach((mod, index) => {
+            content += `${index + 1}. <@${mod.discordID}>'score: **${mod.modScore}**\n`;
+        });
+        let embed = new RichEmbed()
+            .setTitle("Skin Mod Scoreboard")
+            .setAuthor(this.user.username, this.user.avatarURL)
+            .setDescription(content)
+            .setTimestamp();
+        message.channel.send(embed);
+    }
+
+    /**
      * @param {string} skinID 
      * @param {DiscordJS.Message} message 
      */
@@ -850,10 +872,12 @@ class SkinsDiscordBot extends Client {
 
         if (success) {
 
+            let users = approvedReactions.users.filter(u => u !== this.user);
             let extra = approvedReactions ? `This skin was approved by: \n**` + 
-                                            approvedReactions.users.filter(u => u !== this.user)
-                                                                .map(u => `<@${u.id}>`).join(" ") + "**\n" :
+                                                users.map(u => `<@${u.id}>`).join(" ") + "**\n" :
                                             `Batch approved`;
+
+            users.forEach(user => this.dbusers.increModScore(user.id));
 
             let embed = new RichEmbed()
                 .setTitle(`Skin ${skinDoc.skinID} Approved`)
@@ -918,10 +942,12 @@ class SkinsDiscordBot extends Client {
     async rejectPending(skinDoc, rejectReactions) {
         skinDoc.status = "rejected";
         await skinDoc.save();
+        let users = rejectReactions.users.filter(u => u !== this.user);
         let extra = rejectReactions ? `This skin was rejected by: \n**` + 
-                                        rejectReactions.users.filter(u => u !== this.user)
-                                                    .map(u => `<@${u.id}>`).join(" ") + "**\n" :
+                                        users.map(u => `<@${u.id}>`).join(" ") + "**\n" :
                                       "";
+
+        users.forEach(user => this.dbusers.increModScore(user.id));
 
         if (!extra) {
             this.logger.warn(`Skin must be rejected with reactions`);

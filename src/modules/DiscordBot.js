@@ -235,10 +235,6 @@ class SkinsDiscordBot extends Client {
             await this.pendingChannel.bulkDelete(100);
             message.channel.send("Pending channel cleaned");
         }
-
-        if (message.content == `${this.prefix}rank`) {
-            await this.rankMods(message);
-        }
     }
 
     /** @param {DiscordJS.Message} message */
@@ -309,6 +305,10 @@ class SkinsDiscordBot extends Client {
                 return await message.reply(`Invalid skinID: **${skinID}**`);
             
             this.ownerOf(skinID, message);
+        }
+
+        if (message.content == `${this.prefix}rank`) {
+            await this.rankMods(message);
         }
     }
 

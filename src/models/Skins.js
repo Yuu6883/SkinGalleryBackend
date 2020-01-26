@@ -91,7 +91,8 @@ class SkinCollection {
      * @param {string} ownerID
      * @returns {ClientSkin[]}
      */
-    async findByOwnerID(ownerID) {
+    async findByOwnerID(ownerID, mutable = false) {
+        if (mutable) return await SkinModel.find({ ownerID });
         const projection = { skinID: true, status: true, skinName: true, tags: true, 
             public: true, createdAt: true, favorites: true, _id: false };
         return await SkinModel.find({ ownerID }, projection);

@@ -25,7 +25,12 @@ const endpoint = {
         }
 
         try {
-            let result = await this.nsfwBot.classify(req.body);
+
+            /** @type {NSFWPrediction} */
+            let result;
+            if (!this.config.disableAutoApprove) {
+                result = await this.nsfwBot.classify(req.body);
+            }
             let nsfwStatus = NSFWStatus(result);
 
             let skinID = await this.provision.generateSkinID();

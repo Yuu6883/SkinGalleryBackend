@@ -30,12 +30,13 @@ interface AppConfig {
     skinDeletedChannelID:  string;
     notifChannelID:        string;
     debugChannelID:        string;
-    approveEmoji: string;
-    rejectEmoji:  string;
-    approveThreshold: number;
-    rejectThreshold:  number;
-    reviewInterval:   number;
-    limitPending:     boolean;
+    approveEmoji:       string;
+    rejectEmoji:        string;
+    approveThreshold:   number;
+    rejectThreshold:    number;
+    reviewInterval:     number;
+    limitPending:       boolean;
+    disableAutoApprove: boolean;
     admins: string[];
     prefix: string;
 }

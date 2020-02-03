@@ -52,7 +52,7 @@ class NSFWBot {
 
     /**
      * @param {String|Buffer} src
-     * @returns {NSFWPrediction}
+     * @returns {Promise<NSFWPrediction>}
      */
     async classify(src) {
         let img = await loadImage(src);

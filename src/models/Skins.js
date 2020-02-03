@@ -121,6 +121,13 @@ class SkinCollection {
 
     /**
      * @param {string} ownerID
+     */
+    async pendingCountByOwnerID(ownerID) {
+        return await SkinModel.countDocuments({ ownerID, status: "pending" });
+    }
+
+    /**
+     * @param {string} ownerID
      * @param {string} skinName
      * @param {SkinStatus} status
      * @returns {SkinDocument}

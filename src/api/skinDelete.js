@@ -20,6 +20,10 @@ const endpoint = {
             skinDoc.ownerID !== req.vanisUser.discordID)
             return void res.sendStatus(404);
 
+        if (skinDoc.status === "pending") {
+            return res.json({ error: "You can't delete a skin until it's approved or rejected" });
+        }
+
         let skinPath = skinDoc.status === "approved" ? SKIN_STATIC : PENDING_SKIN_STATIC;
         skinPath += `/${skinDoc.skinID}.png`;
 

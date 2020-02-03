@@ -20,6 +20,10 @@ const endpoint = {
             return void res.json({ error: `You have maximum of ${this.config.skinLimit} slots for skins` });
         }
 
+        if (this.config.limitPending && (await this.skins.pendingCountByOwnerID(req.vanisUser.discordID)) >= 1) {
+            return void res.json({ error: `You can have at most 1 pending skin` });
+        }
+
         try {
             let result = await this.nsfwBot.classify(req.body);
             let nsfwStatus = NSFWStatus(result);

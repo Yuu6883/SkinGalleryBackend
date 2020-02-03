@@ -35,6 +35,7 @@ interface AppConfig {
     approveThreshold: number;
     rejectThreshold:  number;
     reviewInterval:   number;
+    limitPending:     boolean;
     admins: string[];
     prefix: string;
 }

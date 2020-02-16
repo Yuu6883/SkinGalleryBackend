@@ -569,7 +569,7 @@ class SkinsDiscordBot extends Client {
         let mods = await this.dbusers.getMods();
         let content = "";
         mods.sort((mod1, mod2) => mod2.modScore - mod1.modScore);
-        mods.forEach((mod, index) => {
+        mods.slice(0, 10).forEach((mod, index) => {
             content += `${index + 1}. <@${mod.discordID}>'score: **${mod.modScore}**\n`;
         });
         let embed = new RichEmbed()

@@ -250,13 +250,13 @@ class SkinsDiscordBot extends Client {
         }
 
         if (message.content.startsWith(`${this.prefix}reject `)) {
-            let skinID = message.content.split(" ")
-                .slice(1).join("")
-                .replace(this.config.webDomain || "http://localhost", "")
-                .replace("/s/", "").replace("/p/", "")
-                .replace(".png", "").trim();
+            let skinIDs = message.content.split(/ /g)
+                .slice(1).map(id => id
+                    .replace(this.config.webDomain || "http://localhost", "")
+                    .replace("/s/", "").replace("/p/", "")
+                    .replace(".png", "").trim());
 
-            this.reject(skinID, message);
+            skinIDs.forEach(skinID => this.reject(skinID, message));
         }
 
         if (message.content.startsWith(`${this.prefix}ban `)) {

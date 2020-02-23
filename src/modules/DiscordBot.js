@@ -296,17 +296,20 @@ class SkinsDiscordBot extends Client {
 
         const limitRegex = /-l (\d+)/g;
         if (message.content == `${this.prefix}list`) {
+            let reversed = !!message.content.match(/\b-r\b/);
             let match = limitRegex.exec(message.content);
             let limit = match ? ~~match[1] : 10;
             let userID = message.author.id;
-            this.list(userID, message, limit);
+            this.list(userID, message, limit, reversed);
         }
 
         if (message.content.startsWith(`${this.prefix}list `)) {
+            let reversed = !!message.content.match(/\b-r\b/);
             let match = /-l (\d+)/g.exec(message.content);
             let limit = match ? ~~match[1] : 10;
-            let userID = message.content.replace(limitRegex, "").replace(/\D/g, "").trim();
-            this.list(userID, message, limit);
+            let userID = message.content.replace(limitRegex, "")
+                .replace(/\b-r\b/, "").replace(/\D/g, "").trim();
+            this.list(userID, message, limit, reversed);
         }
 
         if (message.content == `${this.prefix}render`) {
@@ -596,7 +599,7 @@ class SkinsDiscordBot extends Client {
      * @param {string} userID 
      * @param {DiscordJS.Message} message 
      */
-    async list(userID, message, limit = 10) {
+    async list(userID, message, limit = 10, reversed = false) {
 
         if (this.config.env != "production")
             return void message.reply("Use this command in production environment");
@@ -613,13 +616,15 @@ class SkinsDiscordBot extends Client {
         if (!skins.length)
             return await message.reply(`<@${userID}> doesn't have a skin`);
 
-        await message.channel.send(`<@${userID}> has **${skins.length}** skins: (showing: ${Math.max(urls.length, limit)})`);
-        while (urls.length && limit--) {
-            let url = urls.shift();
+        await message.channel.send(`<@${userID}> has **${skins.length}** skins: (showing: **${Math.min(urls.length, limit)}**)`);
+        while (urls.length && limit > 0) {
+            let url = reversed ? urls.shift() : urls.pop();
             let embed = new RichEmbed()
+                .setColor([207, 0, 189])
                 .setTitle(url)
                 .setThumbnail(url).setURL(url);
             message.channel.send(embed);
+            limit--;
         }
     }
 

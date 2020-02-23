@@ -341,18 +341,20 @@ class SkinsDiscordBot extends Client {
 
     /** @param {DiscordJS.Message} message */
     async runMiniModCommand(message) {
+        this.logger.debug("Running minimod commad: " + message.content);
         if (message.content.startsWith(`${this.prefix}report`)) {
-            this.reportSkin(message);
+            await this.reportSkin(message);
         }
     }
 
     /** @param {DiscordJS.Message} message */
     async reportSkin(message) {
         const skinIDorURLRegex = /\b(https?:\/\/skins.vanis.io\/s\/)?(?<id>[a-z0-9]{6})\b/g
-        let match = skinIDorURLRegex.exec(message);
+        let content = message.content;
+        let match = skinIDorURLRegex.exec(content);
         let reported = [];
 
-        while (match) {
+        while (match !== null) {
             let id = match.groups.id;
             let doc = await this.dbskins.findBySkinID(id);
             if (doc && doc.status === "approved") {
@@ -360,8 +362,8 @@ class SkinsDiscordBot extends Client {
                 this.pendSkin(doc.ownerID, { description: `Reported by **${message.author.username}#${message.author.discriminator}**` },
                     id, doc.skinName);
             }
-            message.content.replace(skinIDorURLRegex, "");
-            match = skinIDorURLRegex.exec(message.content);
+            content.replace(skinIDorURLRegex, "");
+            match = skinIDorURLRegex.exec(content);
         }
         
         if (reported.length) {

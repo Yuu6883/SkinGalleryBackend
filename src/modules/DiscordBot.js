@@ -295,20 +295,12 @@ class SkinsDiscordBot extends Client {
         }
 
         const limitRegex = /-l (\d+)/g;
-        if (message.content == `${this.prefix}list`) {
-            let reversed = !!message.content.match(/\b-r\b/);
-            let match = limitRegex.exec(message.content);
-            let limit = match ? ~~match[1] : 10;
-            let userID = message.author.id;
-            this.list(userID, message, limit, reversed);
-        }
-
         if (message.content.startsWith(`${this.prefix}list `)) {
             let reversed = !!message.content.match(/\b-r\b/);
             let match = /-l (\d+)/g.exec(message.content);
             let limit = match ? ~~match[1] : 10;
             let userID = message.content.replace(limitRegex, "")
-                .replace(/\b-r\b/, "").replace(/\D/g, "").trim();
+                .replace(/\b-r\b/, "").replace(/\D/g, "").trim() || message.author.id;
             this.list(userID, message, limit, reversed);
         }
 

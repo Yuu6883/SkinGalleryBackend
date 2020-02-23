@@ -88,7 +88,9 @@ class SkinsDiscordBot extends Client {
 
     /** @param {DiscordJS.Message} message */
     async onMessage(message) {
-        if (this.isAdmin(message.author.id) && message.content.startsWith(this.prefix)) {
+        if (message.author.bot) return;
+        if (!message.content.startsWith(this.prefix)) return;
+        if (this.isAdmin(message.author.id)) {
             this.runAdminCommand(message);
             this.runModCommand(message);
         } else if (await this.isMod(message.author.id)) {

@@ -91,8 +91,11 @@ class SkinsDiscordBot extends Client {
         if (this.isAdmin(message.author.id) && message.content.startsWith(this.prefix)) {
             this.runCommand(message);
             this.runModCommand(message);
-        } else if (await this.isMod(message.author.id))
+        } else if (await this.isMod(message.author.id)) {
             this.runModCommand(message);
+        } else if (await this.dbusers.isMiniMod(message.author.id)) {
+            this.runMiniModCommand(message);
+        }
     }
 
     /** @param {DiscordJS.Message} message */
@@ -175,7 +178,7 @@ class SkinsDiscordBot extends Client {
 
                 let isMod = await this.isMod(user.id);
                 let isMiniMod = await this.dbusers.isMiniMod(user.id);
-                await message.channel.send(name + " is " + (isMod ? "**mod**" : (isMiniMod ? "minimod lol" : "pleb")));
+                await message.channel.send(name + " is a " + (isMod ? "**mod**" : (isMiniMod ? "minimod lol" : "pleb")));
             }
         }
         
@@ -297,7 +300,7 @@ class SkinsDiscordBot extends Client {
         const limitRegex = /-l (\d+)/g;
         if (message.content.startsWith(`${this.prefix}list `)) {
             let reversed = !!message.content.match(/\b-r\b/);
-            let match = /-l (\d+)/g.exec(message.content);
+            let match = /-l ([1-9]\d*)/g.exec(message.content);
             let limit = match ? ~~match[1] : 10;
             let userID = message.content.replace(limitRegex, "")
                 .replace(/\b-r\b/, "").replace(/\D/g, "").trim() || message.author.id;

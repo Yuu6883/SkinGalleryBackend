@@ -3,6 +3,7 @@ const { inspect } = require("util");
 const mongoose = require("mongoose");
 const DiscordJS = require("discord.js");
 const { execSync } = require("child_process");
+const Path = require("path");
 
 const Table = require("./StringTable");
 const Cloudflare = require("./Cloudflare");
@@ -45,6 +46,8 @@ class SkinsDiscordBot extends Client {
         this.rependCount = {};
         /** @type {Object<string,DiscordJS.Message>} */
         this.pendingCache = {};
+        /** @type {Set<string>} */
+        this.reportedSet = new Set();
     }
 
     async init() {
@@ -302,7 +305,7 @@ class SkinsDiscordBot extends Client {
         }
 
         const limitRegex = /-l (\d+)/g;
-        if (message.content.startsWith(`${this.prefix}list `)) {
+        if (message.content.startsWith(`${this.prefix}list`)) {
             let reversed = !!message.content.match(/\b-r\b/);
             let match = /-l ([1-9]\d*)/g.exec(message.content);
             let limit = match ? ~~match[1] : 10;
@@ -354,8 +357,8 @@ class SkinsDiscordBot extends Client {
 
     /** @param {DiscordJS.Message} message */
     async reportSkin(message) {
-        const skinIDorURLRegex = /\b(https?:\/\/skins.vanis.io\/s\/)?(?<id>[a-z0-9]{6})\b/g
-        let content = message.content;
+        const skinIDorURLRegex = /\b(https?:\/\/(skins.vanis.io|localhost)\/s\/)?(?<id>[a-z0-9]{6})\b/;
+        let content = message.content.split(/\b/g).slice(1).join(" ");
         let match = skinIDorURLRegex.exec(content);
         let reported = [];
 
@@ -365,7 +368,8 @@ class SkinsDiscordBot extends Client {
             if (doc && doc.status === "approved") {
                 reported.push(id);
                 this.pendSkin(doc.ownerID, { description: `Reported by **${message.author.username}#${message.author.discriminator}**` },
-                    id, doc.skinName);
+                    id, doc.skinName, true);
+                this.reportedSet.add(id);
             }
             content = content.replace(skinIDorURLRegex, "");
             match = skinIDorURLRegex.exec(content);
@@ -748,7 +752,7 @@ class SkinsDiscordBot extends Client {
      * @param {string} skinID
      * @param {string} skinName 
      */
-    async pendSkin(ownerID, nsfwResult, skinID, skinName) {
+    async pendSkin(ownerID, nsfwResult, skinID, skinName = "", fromReport = false) {
 
         // No color defaults to pink (ERROR)
         nsfwResult.average_color = nsfwResult.average_color || "rgb(207,0,189)";
@@ -772,15 +776,17 @@ class SkinsDiscordBot extends Client {
         if (nsfwResult.description) embed.description += nsfwResult.description;
 
         if (this.config.env == "development") {
-
+            // dev
             if (nsfwResult.data) {
                 embed.attachFile(new Attachment(nsfwResult.data, `SPOILER_${skinName}.png`));
             } else {
-                embed.attachFile(new Attachment(`${PENDING_SKIN_STATIC}/${skinID}.png`, `SPOILER_${skinName}.png`));
+                embed.attachFile(new Attachment(`${fromReport ? SKIN_STATIC : PENDING_SKIN_STATIC}/${skinID}.png`, 
+                    `SPOILER_${skinName}.png`));
             }
+            embed.setImage(`attachment://SPOILER_${skinName}.png`);
 
         } else if (this.config.env == "production") {
-            let url = `${this.config.webDomain}/p/${skinID}`;
+            let url = `${this.config.webDomain}/${fromReport ? "s" : "p"}/${skinID}`;
             embed.setImage(url).setURL(url);
         }
 
@@ -860,6 +866,7 @@ class SkinsDiscordBot extends Client {
                 embed.attachFile(new Attachment(nsfwResult.data, `SPOILER_${skinName}.png`));
             else 
                 embed.attachFile(new Attachment(`${DELETED_SKIN_STATIC}/${skinID}.png`, `SPOILER_${skinName}.png`));
+            embed.setImage(`attachment://SPOILER_${skinName}.png`);
         }
             
         /** @type {DiscordJS.Message} */
@@ -892,6 +899,11 @@ class SkinsDiscordBot extends Client {
         }
 
         pendingSkins = pendingSkins.slice(-25);
+        
+        for (let skinID of this.reportedSet) {
+            let skinDoc = await this.dbskins.findBySkinID(skinID);
+            skinDoc.status === "approved" && pendingSkins.push(skinDoc);
+        }
 
         for (let skinDoc of pendingSkins) {
 
@@ -904,6 +916,7 @@ class SkinsDiscordBot extends Client {
                 if (this.rependCount[skinDoc.skinID] >= 3) {
                     message = await this.pendSkin(skinDoc.ownerID,
                         { error: "Recovered" }, skinDoc.skinID, skinDoc.skinName);
+                    delete this.rependCount[skinDoc.skinID];
                 } else continue;
             }
 
@@ -915,15 +928,18 @@ class SkinsDiscordBot extends Client {
 
             if (approveCount >= this.config.approveThreshold) {
 
-                await this.approvePending(skinDoc, approvedReactions).catch(console.error);
+                if (!this.reportedSet.has(skinDoc.skinID)) {
+                    await this.approvePending(skinDoc, approvedReactions).catch(console.error);
+                }
 
             } else if (rejectCount >= this.config.rejectThreshold) {
 
-                await this.rejectPending(skinDoc, rejectReactions).catch(console.error);
+                await this.rejectPending(skinDoc, rejectReactions, this.reportedSet.has(skinDoc.skinID)).catch(console.error);
 
             } else continue;
 
-            delete this.pendingCache[skinDoc];
+            delete this.pendingCache[skinDoc.skinID];
+            this.reportedSet.delete(skinDoc.skinID);
             await message.delete().catch(console.error);
         }
     }
@@ -960,6 +976,7 @@ class SkinsDiscordBot extends Client {
             } else {
                 // dev
                 embed.attachFile(new Attachment(`${SKIN_STATIC}/${skinDoc.skinID}.png`, skinDoc.skinName + ".png"));
+                embed.setImage(`attachment://${skinDoc.skinName}.png`);
             }
 
             await this.approvedChannel.send(embed);
@@ -985,6 +1002,7 @@ class SkinsDiscordBot extends Client {
                 } else {
                     // dev
                     skinEmbed.attachFile(new Attachment(`${SKIN_STATIC}/${skinDoc.skinID}.png`, skinDoc.skinName + ".png"));
+                    skinEmbed.setImage(`attachment://${skinDoc.skinName}.png`);
                 }
 
                 try {
@@ -1009,13 +1027,15 @@ class SkinsDiscordBot extends Client {
      * @param {SkinDocument} skinDoc 
      * @param {DiscordJS.MessageReaction} rejectReactions
      */
-    async rejectPending(skinDoc, rejectReactions) {
+    async rejectPending(skinDoc, rejectReactions, fromReport = false) {
         skinDoc.status = "rejected";
         await skinDoc.save();
         let users = rejectReactions.users.filter(u => u !== this.user);
         let extra = rejectReactions ? `This skin was rejected by: \n**` + 
                                         users.map(u => `<@${u.id}>`).join(" ") + "**\n" :
                                       "";
+
+        if (fromReport) this.moveToPending(skinDoc.skinID);
 
         users.forEach(user => this.dbusers.increModScore(user.id));
 
@@ -1026,15 +1046,18 @@ class SkinsDiscordBot extends Client {
         let embed = new RichEmbed()
                 .setTitle(`Skin ${skinDoc.skinID} Rejected`)
                 .setColor("RED")
-                .setDescription(`\`${skinDoc.skinName.replace(/`/g, "\\`")}\` submitted by <@${skinDoc.ownerID}> ${extra}`)
+                .setDescription(`\`${skinDoc.skinName.replace(/`/g, "\\`")}\` submitted by <@${skinDoc.ownerID}> ${extra} \n` +
+                    fromReport ? "The skin was reported" : "")
                 .setTimestamp();
 
         if (this.config.env == "production") {
             let url = `${this.config.webDomain}/p/${skinDoc.skinID}`;
             embed.setURL(url).setImage(url);
         } else {
+            // dev
             embed.attachFile(new Attachment(`${PENDING_SKIN_STATIC}/${skinDoc.skinID}.png`, 
                                             "SPOILER_" + skinDoc.skinName + ".png"));
+            embed.setImage(`attachment://SPOILER_${skinDoc.skinName}.png`);
         }
 
         /** @type {DiscordJS.Message} */
@@ -1045,13 +1068,18 @@ class SkinsDiscordBot extends Client {
         if (user) {
 
             let skinEmbed = new RichEmbed()
-                .setTitle("Your skin was rejected!")
+                .setTitle(`Your skin was ${fromReport ? "reported and " : ""}rejected!`)
                 .setColor("RED")
                 .setDescription(`You may ask moderators why this skin was rejected.`)
                 .setTimestamp();
 
             if (this.config.env == "production")
                 skinEmbed.setImage(message.embeds[0].image.proxyURL);
+            else {
+                skinEmbed.attachFile(new Attachment(`${PENDING_SKIN_STATIC}/${skinDoc.skinID}.png`, 
+                                            "SPOILER_" + skinDoc.skinName + ".png"));
+                skinEmbed.setImage(`attachment://SPOILER_${skinDoc.skinName}.png`);
+            }
             try {
                 let dm = await user.createDM();
                 await dm.send(skinEmbed);
@@ -1123,9 +1151,10 @@ class SkinsDiscordBot extends Client {
 
     /** @param {string} skinID */
     moveToApprove(skinID) {
-        let sourcePath = `${PENDING_SKIN_STATIC}/${skinID}.png`;
-        let distPath = `${SKIN_STATIC}/${skinID}.png`;
+        let sourcePath = Path.join(PENDING_SKIN_STATIC, `${skinID}.png`);
+        let distPath = Path.join(SKIN_STATIC, `${skinID}.png`);
 
+        if (fs.existsSync(distPath)) return true;
         if (!fs.existsSync(sourcePath)) {
             this.logger.onError(`Can NOT find skin at ${sourcePath} while approving`);
             return false;
@@ -1137,9 +1166,10 @@ class SkinsDiscordBot extends Client {
 
     /** @param {string} skinID */
     moveToPending(skinID) {
-        let sourcePath = `${SKIN_STATIC}/${skinID}.png`;
-        let distPath   = `${PENDING_SKIN_STATIC}/${skinID}.png`;
+        let sourcePath = Path.join(SKIN_STATIC, `${skinID}.png`);
+        let distPath = Path.join(PENDING_SKIN_STATIC, `${skinID}.png`);
 
+        if (fs.existsSync(distPath)) return true;
         if (!fs.existsSync(sourcePath)) {
             this.logger.onError(`Can NOT find skin at ${sourcePath} while rejecting`);
             return false;

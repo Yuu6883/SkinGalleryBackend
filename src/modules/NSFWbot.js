@@ -94,7 +94,7 @@ class NSFWBot {
             return prev;
         }, {});
 
-        result.avarage_color = `rgb(${mean[0]},${mean[1]},${mean[2]})`;
+        result.average_color = `rgb(${mean[0]},${mean[1]},${mean[2]})`;
 
         return result;
     }

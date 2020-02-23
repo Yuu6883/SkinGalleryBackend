@@ -37,8 +37,9 @@ interface AppConfig {
     reviewInterval:     number;
     limitPending:       boolean;
     disableAutoApprove: boolean;
-    admins: string[];
-    prefix: string;
+    admins:   string[];
+    exitPerm: string[];
+    prefix:   string;
 }
 
 interface UserEntry {
@@ -49,6 +50,7 @@ interface UserEntry {
     cacheTimestamp: number;
     cacheInfo:      Map<string, string>;
     moderator:      boolean;
+    minimod:        boolean;
     bannedUntil:    Date;
     favorites:      string[];
     limit:          number;
@@ -114,7 +116,8 @@ interface NSFWPrediction {
     neutral: number;
     porn: number;
     sexy: number;
-    avarage_color: string;
+    average_color: string;
+    description:   string;
     color_STD: string;
 }
 

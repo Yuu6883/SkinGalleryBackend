@@ -10,6 +10,7 @@ const UserSchema = new mongoose.Schema({
     vanisToken:     { type: String, required: false },
     bannedUntil:    { type: Date,   required: false },
     moderator:      { type: Boolean,  default: false },
+    minimod:        { type: Boolean,  default: false },
     favorites:      { type: [String], default: []   },
     limit:          { type: Number,   default: 60 },
     modScore:       { type: Number,   default: 0  }
@@ -145,7 +146,27 @@ class UserCollection {
     async removeMod(discordID) {
         const user = await this.findOrCreate(discordID);
         if (!user.moderator) return false;
+        if (!user.minimod)   return false;
         user.moderator = false;
+        user.minimod   = false;
+        await user.save();
+        return true;
+    }
+
+    /**
+     * @param {string} discordID
+     */
+    async isMiniMod(discordID) {
+        return (await this.findOrCreate(discordID)).minimod;
+    }
+
+    /**
+     * @param {string} discordID
+     */
+    async addMiniMod(discordID) {
+        const user = await this.findOrCreate(discordID);
+        if (user.minimod) return false;
+        user.minimod = true;
         await user.save();
         return true;
     }

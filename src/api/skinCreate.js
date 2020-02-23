@@ -27,7 +27,7 @@ const endpoint = {
         try {
 
             /** @type {NSFWPrediction} */
-            let result;
+            let result = {};
             if (!this.config.disableAutoApprove) {
                 result = await this.nsfwBot.classify(req.body);
             }

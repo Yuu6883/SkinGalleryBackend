@@ -126,7 +126,25 @@ class SkinsDiscordBot extends Client {
             }
         }
 
-        if (message.content.startsWith(`${this.prefix}demod`)) {
+        if (message.content.startsWith(`${this.prefix}minimod`)) {
+
+            let arr = message.mentions.users.array();
+            for (let i in arr) {
+
+                let user = arr[i];
+                let name = `${user.username}#${user.discriminator}`;
+
+                this.logger.inform(`Adding minimod for ${name} (${user.id})`);
+
+                if (await this.dbusers.addMiniMod(user.id)) {
+                    await message.channel.send(`**${name}** is now a minimod`);
+                } else {
+                    await message.channel.send(`**${name}** is already a minimod`);
+                }
+            }
+        }
+
+        if (message.content.startsWith(`${this.prefix}demote`)) {
 
             let arr = message.mentions.users.array();
             for (let i in arr) {
@@ -156,7 +174,8 @@ class SkinsDiscordBot extends Client {
                 let name = `${user.username}#${user.discriminator}`;
 
                 let isMod = await this.isMod(user.id);
-                await message.channel.send(name + " is " + (isMod ? "**mod**" : "pleb"));
+                let isMiniMod = await this.dbusers.isMiniMod(user.id);
+                await message.channel.send(name + " is " + (isMod ? "**mod**" : (isMiniMod ? "minimod lol" : "pleb")));
             }
         }
         
@@ -171,8 +190,10 @@ class SkinsDiscordBot extends Client {
         }
 
         if (message.content.startsWith(`${this.prefix}size`)) {
-            let result = execSync(`du -h ${__dirname}/../../skins`).toString().split("\t")[0];
-            message.channel.send(`Skin folder size: **${result}**`);
+            let s_size = execSync(`du -h ${__dirname}/../../skins`).toString().split("\t")[0];
+            let p_size = execSync(`du -h ${__dirname}/../../pending_skins`).toString().split("\t")[0];
+            let d_size = execSync(`du -h ${__dirname}/../../deleted_skins`).toString().split("\t")[0];
+            message.channel.send(`Skin folder size: \`/s:${s_size} /p:${p_size} /d:${d_size} \``);
         }
 
         if (message.content.startsWith(`${this.prefix}eval `)) {
@@ -197,11 +218,6 @@ class SkinsDiscordBot extends Client {
 
         if (message.content == `${this.prefix}logs`) {
             await message.channel.send(`Log number: \`${this.logger.logs.length}\``);
-        }
-        
-        if (message.content == `${this.prefix}exit`) {
-            this.logger.inform("Exiting via discord command");
-            process.emit("SIGINT");
         }
 
         if (message.content.startsWith(`${this.prefix}debug `)) {
@@ -240,6 +256,12 @@ class SkinsDiscordBot extends Client {
     /** @param {DiscordJS.Message} message */
     async runModCommand(message) {
 
+        if (message.content == `${this.prefix}exit`) {
+            if (!this.config.exitPerm.includes(message.author.id)) return;
+            this.logger.inform("Exiting via discord command");
+            process.emit("SIGINT");
+        }
+
         if (message.content.startsWith(`${this.prefix}top`)) {
             let top = message.content.split(" ")[1];
             if (message.content.trim() == `${this.prefix}top`) top = 10;
@@ -271,15 +293,21 @@ class SkinsDiscordBot extends Client {
             this.unban(userID, message);
         }
 
+        const limitRegex = /-l (\d+)/g;
         if (message.content == `${this.prefix}list`) {
+            let match = limitRegex.exec(message.content);
+            let limit = match ? ~~match[1] : 10;
             let userID = message.author.id;
-            this.list(userID, message);
+            this.list(userID, message, limit);
         }
 
         if (message.content.startsWith(`${this.prefix}list `)) {
-            let userID = message.content.replace(/\D/g, "").trim();
-            this.list(userID, message);
+            let match = /-l (\d+)/g.exec(message.content);
+            let limit = match ? ~~match[1] : 10;
+            let userID = message.content.replace(limitRegex, "").replace(/\D/g, "").trim();
+            this.list(userID, message, limit);
         }
+
         if (message.content == `${this.prefix}render`) {
             let userID = message.author.id;
             this.render(userID, message);
@@ -309,6 +337,38 @@ class SkinsDiscordBot extends Client {
 
         if (message.content == `${this.prefix}rank`) {
             await this.rankMods(message);
+        }
+    }
+
+    /** @param {DiscordJS.Message} message */
+    async runMiniModCommand(message) {
+        if (message.content.startsWith(`${this.prefix}report`)) {
+            this.reportSkin(message);
+        }
+    }
+
+    /** @param {DiscordJS.Message} message */
+    async reportSkin(message) {
+        const skinIDorURLRegex = /\b(https?:\/\/skins.vanis.io\/s\/)?(?<id>[a-z0-9]{6})\b/g
+        let match = skinIDorURLRegex.exec(message);
+        let reported = [];
+
+        while (match) {
+            let id = match.groups.id;
+            let doc = await this.dbskins.findBySkinID(id);
+            if (doc && doc.status === "approved") {
+                reported.push(id);
+                this.pendSkin(doc.ownerID, { description: `Reported by **${message.author.username}#${message.author.discriminator}**` },
+                    id, doc.skinName);
+            }
+            message.content.replace(skinIDorURLRegex, "");
+            match = skinIDorURLRegex.exec(message.content);
+        }
+        
+        if (reported.length) {
+            message.reply(`Skin(s) reported: \`${reported.join(", ")}\``);
+        } else {
+            message.reply("Include skin ID/URL in your message to report them");
         }
     }
 
@@ -535,7 +595,7 @@ class SkinsDiscordBot extends Client {
      * @param {string} userID 
      * @param {DiscordJS.Message} message 
      */
-    async list(userID, message) {
+    async list(userID, message, limit = 10) {
 
         if (this.config.env != "production")
             return void message.reply("Use this command in production environment");
@@ -552,13 +612,13 @@ class SkinsDiscordBot extends Client {
         if (!skins.length)
             return await message.reply(`<@${userID}> doesn't have a skin`);
 
-        await message.channel.send(`<@${userID}> has **${skins.length}** skins:`);
-        while (urls.length) {
-            let url = urls.splice(0, 1)[0];
+        await message.channel.send(`<@${userID}> has **${skins.length}** skins: (showing: ${Math.max(urls.length, limit)})`);
+        while (urls.length && limit--) {
+            let url = urls.shift();
             let embed = new RichEmbed()
                 .setTitle(url)
                 .setThumbnail(url).setURL(url);
-            await message.channel.send(embed);
+            message.channel.send(embed);
         }
     }
 
@@ -682,12 +742,12 @@ class SkinsDiscordBot extends Client {
      */
     async pendSkin(ownerID, nsfwResult, skinID, skinName) {
 
-        // No color defaults to red (ERROR)
-        nsfwResult.avarage_color = nsfwResult.avarage_color || "rgb(255,0,0)";
+        // No color defaults to pink (ERROR)
+        nsfwResult.average_color = nsfwResult.average_color || "rgb(207,0,189)";
 
-        let color = nsfwResult.avarage_color.replace(/\D/g, " ").match(/\S+/g).map(c => ~~c);
-        nsfwResult.color = nsfwResult.avarage_color;
-        delete nsfwResult.avarage_color;
+        let color = nsfwResult.average_color.replace(/\D/g, " ").match(/\S+/g).map(c => ~~c);
+        nsfwResult.color = nsfwResult.average_color;
+        delete nsfwResult.average_color;
 
         let embed = new RichEmbed()
             .setColor(color)
@@ -700,6 +760,8 @@ class SkinsDiscordBot extends Client {
         if (this.logger.config.DEBUG) {
             embed.description += `\n\`\`\`prolog\n${Table(nsfwResult)}\`\`\``;
         }
+
+        if (nsfwResult.description) embed.description += nsfwResult.description;
 
         if (this.config.env == "development") {
 
@@ -733,10 +795,10 @@ class SkinsDiscordBot extends Client {
     async approveSkin(ownerID, nsfwResult, skinID, skinName) {
         
         // No color defaults to red (ERROR)
-        nsfwResult.avarage_color = nsfwResult.avarage_color || "rgb(255,0,0)";
-        let color = nsfwResult.avarage_color.replace(/\D/g, " ").match(/\S+/g).map(c => ~~c);
-        nsfwResult.color = nsfwResult.avarage_color;
-        delete nsfwResult.avarage_color;
+        nsfwResult.average_color = nsfwResult.average_color || "rgb(255,0,0)";
+        let color = nsfwResult.average_color.replace(/\D/g, " ").match(/\S+/g).map(c => ~~c);
+        nsfwResult.color = nsfwResult.average_color;
+        delete nsfwResult.average_color;
 
         let embed = new RichEmbed()
             .setAuthor(this.user.username, this.user.displayAvatarURL)
@@ -768,7 +830,7 @@ class SkinsDiscordBot extends Client {
      */
     async rejectSkin(ownerID, nsfwResult, skinID, skinName) {
 
-        let color = nsfwResult.avarage_color.replace(/\D/g, " ").match(/\S+/g).map(c => ~~c);
+        let color = nsfwResult.average_color.replace(/\D/g, " ").match(/\S+/g).map(c => ~~c);
 
         let embed = new RichEmbed()
             .setAuthor(this.user.username, this.user.displayAvatarURL)

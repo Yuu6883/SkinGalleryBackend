@@ -145,8 +145,7 @@ class UserCollection {
      */
     async removeMod(discordID) {
         const user = await this.findOrCreate(discordID);
-        if (!user.moderator) return false;
-        if (!user.minimod)   return false;
+        if (!user.moderator && !user.minimod) return false;
         user.moderator = false;
         user.minimod   = false;
         await user.save();

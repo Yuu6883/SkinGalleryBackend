@@ -347,7 +347,6 @@ class SkinsDiscordBot extends Client {
     async runMiniModCommand(message) {
         this.logger.debug("Running MINIMOD command: " + message.content);
 
-        return;
         if (message.content.startsWith(`${this.prefix}report`)) {
             await this.reportSkin(message);
         }
@@ -368,7 +367,7 @@ class SkinsDiscordBot extends Client {
                 this.pendSkin(doc.ownerID, { description: `Reported by **${message.author.username}#${message.author.discriminator}**` },
                     id, doc.skinName);
             }
-            content.replace(skinIDorURLRegex, "");
+            content = content.replace(skinIDorURLRegex, "");
             match = skinIDorURLRegex.exec(content);
         }
         

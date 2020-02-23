@@ -258,6 +258,7 @@ class SkinsDiscordBot extends Client {
 
         if (message.content == `${this.prefix}exit`) {
             if (!this.config.exitPerm.includes(message.author.id)) return;
+            await message.channel.send("Yeet");
             this.logger.inform("Exiting via discord command");
             process.emit("SIGINT");
         }

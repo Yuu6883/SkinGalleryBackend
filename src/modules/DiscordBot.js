@@ -89,7 +89,7 @@ class SkinsDiscordBot extends Client {
     /** @param {DiscordJS.Message} message */
     async onMessage(message) {
         if (this.isAdmin(message.author.id) && message.content.startsWith(this.prefix)) {
-            this.runCommand(message);
+            this.runAdminCommand(message);
             this.runModCommand(message);
         } else if (await this.isMod(message.author.id)) {
             this.runModCommand(message);
@@ -99,7 +99,8 @@ class SkinsDiscordBot extends Client {
     }
 
     /** @param {DiscordJS.Message} message */
-    async runCommand(message) {
+    async runAdminCommand(message) {
+        this.logger.debug("Running ADMIN command: " + message.content);
         
         if (message.content.startsWith(`${this.prefix}delete `)) {
             let skinID = message.content.split(" ")
@@ -258,6 +259,7 @@ class SkinsDiscordBot extends Client {
 
     /** @param {DiscordJS.Message} message */
     async runModCommand(message) {
+        this.logger.debug("Running MOD command: " + message.content);
 
         if (message.content == `${this.prefix}exit`) {
             if (!this.config.exitPerm.includes(message.author.id)) return;
@@ -341,7 +343,9 @@ class SkinsDiscordBot extends Client {
 
     /** @param {DiscordJS.Message} message */
     async runMiniModCommand(message) {
-        this.logger.debug("Running minimod commad: " + message.content);
+        this.logger.debug("Running MINIMOD command: " + message.content);
+
+        return;
         if (message.content.startsWith(`${this.prefix}report`)) {
             await this.reportSkin(message);
         }

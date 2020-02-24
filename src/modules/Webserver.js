@@ -45,14 +45,14 @@ class Webserver {
             if (vanisUser == null) {
                 req.vanisPermissions = AUTH_LEVELS.NONE;
                 res.clearCookie(VANIS_TOKEN_COOKIE);
-            } else if (vanisUser.moderator)
+            } else if (vanisUser.moderator || this.config.admins.includes(vanisUser.discordID))
                 req.vanisPermissions = AUTH_LEVELS.MOD;
             else if (vanisUser.bannedUntil > new Date())
                 req.vanisPermissions = AUTH_LEVELS.USER_BANNED;
             else
                 req.vanisPermissions = AUTH_LEVELS.USER;
 
-            if (req.vanisPermissions != AUTH_LEVELS.MOD) {
+            if (req.vanisPermissions !== AUTH_LEVELS.MOD) {
                 let origin = this.getOrigin(req);
                 if (origin.startsWith("https://vanis.io")) {
                     return void res.sendStatus(403);

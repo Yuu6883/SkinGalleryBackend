@@ -49,6 +49,14 @@ class Webserver {
                 req.vanisPermissions = AUTH_LEVELS.USER_BANNED;
             else
                 req.vanisPermissions = AUTH_LEVELS.USER;
+
+            if (req.vanisPermissions != AUTH_LEVELS.MOD) {
+                let origin = this.getOrigin(req);
+                if (origin.startsWith("https://vanis.io")) {
+                    return void res.sendStatus(403);
+                }
+            }
+
             next();
         });
 
@@ -76,6 +84,21 @@ class Webserver {
         return apiRouter;
     }
 
+    /** @param {import("express").Request} req */
+    getOrigin(req) {
+        let origin = req.get("origin") || req.get("referer") || ("https://" + req.get("host"));
+
+        if (origin && origin[origin.length - 1] == "/") 
+            origin = origin.slice(0, -1);
+        return origin;
+    }
+
+    /** @param {string} o */
+    checkOrigin(o) { 
+        return !(this.allowedOrigins.length && !/^http(s?):\/\/localhost/.test(origin) &&
+            !this.allowedOrigins.some(o => origin.startsWith(o) && !o.startsWith("https://discordapp.com/oauth2/"))); 
+    };
+
     async init() {
         const app = express();
         app.disable("x-powered-by");
@@ -85,14 +108,9 @@ class Webserver {
         
         // Prevent cross-origin requests
         app.use((req, res, next) => {
-            let origin = req.get("origin") || req.get("referer") || ("https://" + req.get("host"));
+            let origin = this.getOrigin(req);
 
-            if (origin && origin[origin.length - 1] == "/") 
-                origin = origin.slice(0, -1);
-
-            if (this.allowedOrigins.length && !/^http(s?):\/\/localhost/.test(origin) &&
-                !this.allowedOrigins.some(o => origin.startsWith(o)) &&
-                !origin.startsWith("https://discordapp.com/oauth2/")) {
+            if (!this.checkOrigin(o)) {
                 // this.logger.warn(`Blocked request from unknown origin: ${origin}`);
                 if (this.blocked[origin]) this.blocked[origin]++;
                 else this.blocked[origin] = 1;

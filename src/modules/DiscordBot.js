@@ -881,14 +881,13 @@ class SkinsDiscordBot extends Client {
      */
     async rejectSkin(ownerID, nsfwResult, skinID, skinName) {
 
-        let color = nsfwResult.average_color.replace(/\D/g, " ").match(/\S+/g).map(c => ~~c);
+        let color =  nsfwResult.average_color ? nsfwResult.average_color.replace(/\D/g, " ").match(/\S+/g).map(c => ~~c) : "RED";
 
         let embed = new RichEmbed()
             .setAuthor(this.user.username, this.user.displayAvatarURL)
             .setColor(color)
             .setTitle(`Skin ${skinID} Rejected`)
-            .setDescription(`\`${skinName.replace(/`/g, "\\`")}\` submitted by <@${ownerID}>`)
-            .setFooter(`Automatically rejected`)
+            .setDescription(`\`${skinName.replace(/`/g, "\\`")}\` submitted by <@${ownerID}>\n${nsfwResult.description || ""}`)
             .setTimestamp();
         
         if (this.logger.config.DEBUG) {
@@ -902,12 +901,12 @@ class SkinsDiscordBot extends Client {
             if (nsfwResult.data)
                 embed.attachFile(new Attachment(nsfwResult.data, `SPOILER_${skinName}.png`));
             else 
-                embed.attachFile(new Attachment(`${DELETED_SKIN_STATIC}/${skinID}.png`, `SPOILER_${skinName}.png`));
+                embed.attachFile(new Attachment(`${PENDING_SKIN_STATIC}/${skinID}.png`, `SPOILER_${skinName}.png`));
             embed.setImage(`attachment://SPOILER_${skinName}.png`);
         }
             
         /** @type {DiscordJS.Message} */
-        let message = await this.rejectedChannel.send(embed);
+        let message = await this.rejectedChannel.send(embed).catch(_ => ({}));
         return message.id;
     }
 

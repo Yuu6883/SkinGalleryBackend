@@ -1,5 +1,6 @@
 const fs = require("fs");
 const mongoose = require("mongoose");
+const Path = require("path");
 
 // Modules
 const Logger = require("./modules/Logger");
@@ -12,7 +13,7 @@ const SkinCollection = require("./models/Skins");
 const UserCollection = require("./models/Users");
 const Provision = require("./models/Provision");
 
-const { DELETED_SKIN_STATIC } = require("./constant");
+const { SKIN_STATIC, PENDING_SKIN_STATIC, DELETED_SKIN_STATIC } = require("./constant");
 
 class SkinsApp {
     /**
@@ -164,6 +165,20 @@ class SkinsApp {
                         this.logger.warn(`Can NOT find skin at ${path} to move to trash`);
                         return "404";
                     }
+                },
+                /** @param {string} skinID */
+                moveToPending(skinID) {
+                    let sourcePath = Path.join(SKIN_STATIC, `${skinID}.png`);
+                    let distPath = Path.join(PENDING_SKIN_STATIC, `${skinID}.png`);
+
+                    if (fs.existsSync(distPath)) return true;
+                    if (!fs.existsSync(sourcePath)) {
+                        this.logger.onError(`Can NOT find skin at ${sourcePath} while rejecting`);
+                        return false;
+                    }
+
+                    fs.renameSync(sourcePath, distPath);
+                    return true;
                 }
             }
         }
@@ -193,7 +208,7 @@ class SkinsApp {
     async stop() {
         if (this.bot && this.bot.stop)
             await this.bot.stop();
-            
+
         this.skins.stopUpdatePublic();
         await this.webserver.stop();
         await this.cloudflare.applyPurge();

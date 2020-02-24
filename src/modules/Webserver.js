@@ -95,10 +95,10 @@ class Webserver {
         return origin;
     }
 
-    /** @param {string} o */
-    checkOrigin(o) { 
+    /** @param {string} origin */
+    checkOrigin(origin) { 
         return !(this.allowedOrigins.length && !/^http(s?):\/\/localhost/.test(origin) &&
-            !this.allowedOrigins.some(o => origin.startsWith(o) && !o.startsWith("https://discordapp.com/oauth2/"))); 
+            !this.allowedOrigins.some(o => origin.startsWith(o) && !origin.startsWith("https://discordapp.com/oauth2/"))); 
     };
 
     async init() {

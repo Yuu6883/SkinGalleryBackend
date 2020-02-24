@@ -112,7 +112,7 @@ class Webserver {
         app.use((req, res, next) => {
             let origin = this.getOrigin(req);
 
-            if (!this.checkOrigin(o)) {
+            if (!this.checkOrigin(origin)) {
                 // this.logger.warn(`Blocked request from unknown origin: ${origin}`);
                 if (this.blocked[origin]) this.blocked[origin]++;
                 else this.blocked[origin] = 1;

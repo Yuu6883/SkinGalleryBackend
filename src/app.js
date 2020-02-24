@@ -191,6 +191,10 @@ class SkinsApp {
     }
 
     async stop() {
+        if (this.bot && this.bot.stop)
+            await this.bot.stop();
+            
+        this.skins.stopUpdatePublic();
         await this.webserver.stop();
         await this.cloudflare.applyPurge();
         await this.disconnectFromMongoDB();

@@ -61,6 +61,7 @@ class SkinsDiscordBot extends Client {
 
         this.logger.debug("Connected to database");
 
+        await this.loadModScore();
         await this.login(this.config.discordBotToken);
         this.logger.inform(`${this.user.username}#${this.user.discriminator} logged in`);
 
@@ -194,8 +195,10 @@ class SkinsDiscordBot extends Client {
         }
 
         if (message.content.startsWith(`${this.prefix}count`)) {
-            let result = execSync(`ls ${__dirname}/../../skins | wc -l`).toString();
-            message.channel.send(`Total skin count: **${result}**`);
+            let s_count = execSync(`ls ${__dirname}/../../skins | wc -l`).toString();
+            let p_count = execSync(`ls ${__dirname}/../../pending_skins | wc -l`).toString();
+            let d_count = execSync(`ls ${__dirname}/../../deleted_skins | wc -l`).toString();
+            message.channel.send(`Skin count: \`/s:${s_count} /p:${p_count} /d:${d_count}\``);
         }
 
         if (message.content.startsWith(`${this.prefix}size`)) {
@@ -259,6 +262,11 @@ class SkinsDiscordBot extends Client {
         if (message.content == `${this.prefix}clean`) {
             await this.pendingChannel.bulkDelete(100);
             message.channel.send("Pending channel cleaned");
+        }
+
+        if (message.content == `${this.prefix}dump`) {
+            this.dumpModScore();
+            message.channel.send("Done");
         }
     }
 
@@ -341,7 +349,7 @@ class SkinsDiscordBot extends Client {
             this.ownerOf(skinID, message);
         }
 
-        if (message.content == `${this.prefix}rank`) {
+        if (message.content.startsWith(`${this.prefix}rank`)) {
             await this.rankMods(message);
         }
     }
@@ -353,6 +361,26 @@ class SkinsDiscordBot extends Client {
         if (message.content.startsWith(`${this.prefix}report`)) {
             await this.reportSkin(message);
         }
+    }
+
+    async dumpModScore() {
+        let mods = await this.dbusers.getMods();
+        /** @type {Object<string, number>} */
+        let scores = {};
+        mods.forEach(mod => scores[mod.discordID] = mod.modScore);
+        fs.writeFileSync(Path.join(Path.resolve(__dirname, "..", "..", "mod_scores"), `${Date.now()}.json`), JSON.stringify(scores, null, 4));
+        this.modScore = scores;
+    }
+
+    async loadModScore() {
+        let files = fs.readdirSync(Path.resolve(__dirname, "..", "..", "mod_scores"));
+        files.sort((a, b) => ~~a.slice(0, -5) - ~~b.slice(0, -5));
+        if (!files.length) {
+            this.modScore = {};
+            return;
+        }
+        this.modScore = JSON.parse(fs.readFileSync(Path.resolve(__dirname, "..", "..", "mod_scores", files[0]), "utf-8"));
+        this.modScoreDate = new Date(parseInt(files[0].slice(0, -5)));
     }
 
     /** @param {DiscordJS.Message} message */
@@ -638,18 +666,27 @@ class SkinsDiscordBot extends Client {
      * @param {DiscordJS.Message} message
      */
     async rankMods(message) {
+        let isTotal = /total|-t/i.test(message.content);
         let mods = await this.dbusers.getMods();
         let content = "";
+
+        if (!isTotal) {
+            mods.forEach(mod => {
+                mod.modScore -= this.modScore[mod.discordID] || 0;
+            });
+        }
+
         mods.sort((mod1, mod2) => mod2.modScore - mod1.modScore);
         mods.slice(0, 10).forEach((mod, index) => {
             content += `${index + 1}. <@${mod.discordID}>'score: **${mod.modScore}**\n`;
         });
+
         let embed = new RichEmbed()
-            .setTitle("Skin Mod Scoreboard")
+            .setTitle(`Skin Mod Scoreboard (${isTotal ? "total score" : 
+                `since ${this.modScoreDate.getFullYear()}-${this.modScoreDate.getMonth() + 1}-${this.modScoreDate.getDate()}`})`)
             .setAuthor(this.user.username, this.user.avatarURL)
-            .setDescription(content)
-            .setTimestamp();
-        message.channel.send(embed);
+            .setDescription(content);
+        message.channel.send(embed).catch(_ => {});
     }
 
     /**

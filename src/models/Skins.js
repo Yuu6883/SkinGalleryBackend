@@ -43,8 +43,6 @@ class SkinCollection {
     constructor(app) {
         this.app = app;
         this.publicRefreshTimestamp = 0;
-        /** @type {SkinDocument[]} */
-        this.publicSkins = [];
         this.TIME_0 = TIME_0;
 
         if (this.app.config.env == "development")
@@ -75,9 +73,7 @@ class SkinCollection {
     }
 
     async updatePublic() {
-        this.publicSkins = await SkinModel
-            .find({ status: "approved", public: true });
-        this.publicCache.createCache(this.publicSkins);
+        this.publicCache.createCache(await SkinModel.find({ status: "approved", public: true }));
     }
 
     /**

@@ -22,6 +22,4 @@ const apps = [{
     max_restarts: 10000
 }];
 
-if (config.disableAutoApprove) apps.splice(1, 1);
-
 module.exports = { apps };

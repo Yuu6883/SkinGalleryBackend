@@ -1084,7 +1084,7 @@ class SkinsDiscordBot extends Client {
                 .setTitle(`Skin ${skinDoc.skinID} Rejected`)
                 .setColor("RED")
                 .setDescription(`\`${skinDoc.skinName.replace(/`/g, "\\`")}\` submitted by <@${skinDoc.ownerID}> ${extra} \n` +
-                    fromReport ? "The skin was reported" : "")
+                    (fromReport ? "The skin was reported" : ""))
                 .setTimestamp();
 
         if (this.config.env == "production") {
@@ -1107,7 +1107,7 @@ class SkinsDiscordBot extends Client {
             let skinEmbed = new RichEmbed()
                 .setTitle(`Your skin was ${fromReport ? "reported and " : ""}rejected!`)
                 .setColor("RED")
-                .setDescription(`You may ask moderators why this skin was rejected.`)
+                .setDescription(`Your skin probably violated the rules listed [here](https://discordapp.com/channels/529689512436170772/601933367734435841/650391946887561236)`)
                 .setTimestamp();
 
             if (this.config.env == "production")

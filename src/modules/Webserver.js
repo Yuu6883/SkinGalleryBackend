@@ -7,6 +7,7 @@ const express = require("express");
 const expressCookies = require("cookie-parser");
 const nocache = require("nocache");
 const expressLogger = require("./ExpressLogger");
+const VANIS_DOMAIN = "https://vanis.io";
 
 class Webserver {
     /**
@@ -18,6 +19,7 @@ class Webserver {
         this.webserver = null;
         this.allowedOrigins =
             app.config.webDomain ? [app.config.webDomain] : [];
+        this.allowedOrigins.push(VANIS_DOMAIN);
 
         this.blocked = {};
     }

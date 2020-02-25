@@ -101,29 +101,31 @@ class SkinsApp {
 
             bus.on("classified", handler);
 
-            // Fake nsfwBot, just a wrapper to call pm2 trigger on the actual process
-            this.nsfwBot = {
-                /** @param {String} src */
-                classify: (src, recursive = false) => new Promise(resolve => {
+            if (!this.config.disableAutoApprove) {
+                // Fake nsfwBot, just a wrapper to call pm2 trigger on the actual process
+                this.nsfwBot = {
+                    /** @param {String} src */
+                    classify: (src, recursive = false) => new Promise(resolve => {
 
-                    nsfwQueue.push({ src, resolve });
+                        nsfwQueue.push({ src, resolve });
 
-                    if (nsfwQueue.length > 1 && !recursive) return;
+                        if (nsfwQueue.length > 1 && !recursive) return;
 
-                    process.send({
-                        type: "classify",
-                        data: src
-                    });
+                        process.send({
+                            type: "classify",
+                            data: src
+                        });
 
-                    nsfwTimeout = setTimeout(() => {
-                        nsfwQueue.shift(); // Get rid of current task
-                        clearNSFW();
-                        execNext();
-                        this.logger.onError(`NSFW process timeout ${nsfwQueue.length}`);
+                        nsfwTimeout = setTimeout(() => {
+                            nsfwQueue.shift(); // Get rid of current task
+                            clearNSFW();
+                            execNext();
+                            this.logger.onError(`NSFW process timeout ${nsfwQueue.length}`);
 
-                        resolve(NSFW_ERROR);
-                    }, 10000);
-                })
+                            resolve(NSFW_ERROR);
+                        }, 10000);
+                    })
+                }
             }
 
             /**
@@ -140,6 +142,7 @@ class SkinsApp {
                     type: method,
                     data: { discordID, result, skinID, skinName }
                 });
+                resolve();
             });
 
             this.bot = {

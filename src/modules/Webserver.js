@@ -97,9 +97,11 @@ class Webserver {
 
     /** @param {string} origin */
     checkOrigin(origin) { 
-        return !(this.allowedOrigins.length && !/^http(s?):\/\/localhost/.test(origin) &&
-            !this.allowedOrigins.some(o => origin.startsWith(o) && !origin.startsWith("https://discordapp.com/oauth2/"))); 
-    };
+        return !(this.allowedOrigins.length && 
+            !/^http(s?):\/\/localhost/.test(origin) &&
+            !this.allowedOrigins.some(o => origin.startsWith(o)) &&
+            !origin.startsWith("https://discordapp.com/oauth2/"));
+    }
 
     async init() {
         const app = express();

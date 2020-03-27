@@ -454,9 +454,9 @@ class SkinsDiscordBot extends Client {
     async purge(userID, message) {
         let skins = await this.dbskins.findByOwnerID(userID);
         if (skins.length) {
-            await message.reply(`Purging skin(s): \`${skins.map(s => s.skinID).join("\`, \`")}\``);
+            await message.channel.send(`Purging ${skins.length} skin(s)`);
             for (let s of skins) {
-                await this.delete(s.skinID, message);
+                await this.delete(s.skinID, message, true);
             }
             await this.dbskins.restartUpdatePublic();
         } else {
@@ -468,7 +468,7 @@ class SkinsDiscordBot extends Client {
      * @param {string} skinID 
      * @param {DiscordJS.Message} message 
      */
-    async delete(skinID, message) {
+    async delete(skinID, message, silent = false) {
         if (!/^\w{6}$/.test(skinID))
             return await message.reply(`Invalid skin ID: \`${skinID}\``);
 
@@ -493,8 +493,10 @@ class SkinsDiscordBot extends Client {
             await this.cloudflare.purgeCache(`${this.config.webDomain}/` + 
                 `${skinDoc.status == "approved" ? "s" : "p"}/${skinDoc.skinID}`);
         
-        await message.channel.send(success ? `Skin \`${skinID}\` deleted` :
+        if (!silent) {
+            await message.channel.send(success ? `Skin \`${skinID}\` deleted` :
             `Failed to delete skin \`${skinID}\``);
+        }
     }
 
     /**

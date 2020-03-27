@@ -528,7 +528,7 @@ class SkinsDiscordBot extends Client {
                     .setThumbnail(`${this.config.webDomain}/p/${skinID}`)
                     .setImage("");
 
-        embed.setFooter(`Manually rejected by <@${message.author.id}>`)
+        embed.setFooter(`Manually rejected by ${message.author.username}#${message.author.discriminator} (${message.author.id})`)
             .setTimestamp();
 
         this.rejectedChannel.send(embed);
@@ -934,11 +934,19 @@ class SkinsDiscordBot extends Client {
                 { url: `${this.config.webDomain}`, type: "WATCHING" });
         }
 
-        pendingSkins = pendingSkins.slice(-25);
+        // pendingSkins = pendingSkins.slice(-25);
         
         for (let skinID of this.reportedSet) {
             let skinDoc = await this.dbskins.findBySkinID(skinID);
             skinDoc.status === "approved" && pendingSkins.push(skinDoc);
+        }
+
+        for (let skinID in this.pendingCache) {
+            if (!pendingSkins.some(doc => doc.skinID == skinID)) {
+                // bugged message, delete it
+                try { this.pendingCache[skinID].delete() } catch (_){};
+                delete this.pendingCache[skinID];
+            }
         }
 
         for (let skinDoc of pendingSkins) {

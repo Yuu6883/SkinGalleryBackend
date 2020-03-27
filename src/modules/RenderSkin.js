@@ -60,6 +60,7 @@ const render = (userDoc, skinDocs, recursive = false) => new Promise(async resol
             name: doc.skinName,
             status: doc.status,
             fav:  doc.favorites,
+            id: doc.skinID
         })));
 
     let rows = Math.ceil(results.length / SKIN_PER_ROW);
@@ -92,7 +93,7 @@ const render = (userDoc, skinDocs, recursive = false) => new Promise(async resol
         let row = ~~(i / SKIN_PER_ROW);
         let col = i % SKIN_PER_ROW;
 
-        let { image, name, status, fav } = results[i] || {};
+        let { image, name, status, fav, id } = results[i] || {};
 
         // Draw card background
         ctx.fillStyle = CARD_COLOR;
@@ -135,6 +136,13 @@ const render = (userDoc, skinDocs, recursive = false) => new Promise(async resol
         ctx.textAlign = "left";
         ctx.font = "14px Sans";
         ctx.fillText(`Stars: ${fav}`, x + PADDING, 
+            y + 2 * PADDING + IMAGE_LENGTH + 3 * TEXT_HEIGHT / 4);
+
+            
+        // Star text
+        ctx.textAlign = "right";
+        ctx.font = "14px Sans";
+        ctx.fillText(`id: ${id}`, x + IMAGE_LENGTH, 
             y + 2 * PADDING + IMAGE_LENGTH + 3 * TEXT_HEIGHT / 4);
 
         // Draw status

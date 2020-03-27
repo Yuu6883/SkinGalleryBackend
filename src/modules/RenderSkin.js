@@ -142,7 +142,7 @@ const render = (userDoc, skinDocs, recursive = false) => new Promise(async resol
         // Star text
         ctx.textAlign = "right";
         ctx.font = "14px Sans";
-        ctx.fillText(`id: ${id}`, x + IMAGE_LENGTH, 
+        ctx.fillText(id, x + IMAGE_LENGTH, 
             y + 2 * PADDING + IMAGE_LENGTH + 3 * TEXT_HEIGHT / 4);
 
         // Draw status

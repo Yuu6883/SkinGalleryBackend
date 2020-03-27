@@ -942,7 +942,7 @@ class SkinsDiscordBot extends Client {
         }
 
         for (let skinID in this.pendingCache) {
-            if (!pendingSkins.some(doc => doc.skinID == skinID)) {
+            if (!pendingSkins.some(doc => doc.skinID == skinID) || !this.reportedSet.has(skinID)) {
                 // bugged message, delete it
                 try { this.pendingCache[skinID].delete() } catch (_){};
                 delete this.pendingCache[skinID];

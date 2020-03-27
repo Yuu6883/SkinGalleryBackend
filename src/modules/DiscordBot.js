@@ -107,6 +107,10 @@ class SkinsDiscordBot extends Client {
     /** @param {DiscordJS.Message} message */
     async runAdminCommand(message) {
         this.logger.debug("Running ADMIN command: " + message.content);
+
+        if (message.content.startsWith(`${this.prefix}change `)) {
+            this.changeID(message);
+        }
         
         if (message.content.startsWith(`${this.prefix}delete `)) {
             let skinID = message.content.split(" ")
@@ -408,6 +412,40 @@ class SkinsDiscordBot extends Client {
         } else {
             message.reply("Include skin ID/URL in your message to report them");
         }
+    }
+
+    /** 
+     * @param {DiscordJS.Message} message 
+     */
+    async changeID(message) {
+        let [_, fromID, toID] = message.content.split(/ /g).filter(s => s);
+        const skinIDRegex = /^[a-z0-9]{6}$/;
+        if (!skinIDRegex.test(fromID)) {
+            return await message.reply(`Invalid skinID to change: **${fromID}**`);
+        }
+        if (!skinIDRegex.test(toID)) {
+            return await message.reply(`Invalid skinID to change: **${fromID}**`);
+        }
+        let fromSkinDoc = await this.dbskins.findBySkinID(fromID);
+        if (!fromSkinDoc) {
+            return await message.reply(`Can not find skin **${fromID}** `);
+        }
+        if (fromSkinDoc.status != "approved") {
+            return await message.reply(`Skin **${fromID}** is not approved, can NOT change its ID`);
+        }
+        let toSkinDoc = await this.dbskins.findBySkinID(toID);
+        if (toSkinDoc) {
+            return await message.reply(`There's already skin of this ID: ${this.config.webDomain}/` + 
+                `${toSkinDoc.status == "approved" ? "s" : "p"}/${toID}`);
+        }
+        fromSkinDoc.skinID = toID;
+        await fromSkinDoc.save();
+        if (this.config.env == "production")
+            this.cloudflare.purgeCache(`${this.config.webDomain}/s/${fromID}`);
+
+        fs.renameSync(Path.resolve(SKIN_STATIC, `${fromID}.png`), 
+                      Path.resolve(SKIN_STATIC, `${toID}.png`));
+        await message.channel.send(`Done: ${this.config.webDomain}/s/${toID}`);
     }
 
     /** 

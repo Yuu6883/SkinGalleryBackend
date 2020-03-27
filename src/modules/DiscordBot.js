@@ -951,7 +951,7 @@ class SkinsDiscordBot extends Client {
 
         for (let skinDoc of pendingSkins) {
 
-            let message = this.pendingCache[skinDoc.skinID];
+            let message = this.pendingChannel.messages.get(this.pendingCache[skinDoc.skinID].id);
 
             // Db might update before the message is sent, so wait a bit to repend
             if (!message) {

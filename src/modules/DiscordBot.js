@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const DiscordJS = require("discord.js");
 const { execSync } = require("child_process");
 const Path = require("path");
+const fetch = require("node-fetch");
 
 const Table = require("./StringTable");
 const Cloudflare = require("./Cloudflare");
@@ -102,6 +103,7 @@ class SkinsDiscordBot extends Client {
         } else if (await this.dbusers.isMiniMod(message.author.id)) {
             this.runMiniModCommand(message);
         }
+        this.onPlebMessage(message);
     }
 
     /** @param {DiscordJS.Message} message */
@@ -367,13 +369,55 @@ class SkinsDiscordBot extends Client {
         }
     }
 
+    /** @param {DiscordJS.Message} message */
+    async onPlebMessage(message) {
+        if (message.content == `${this.prefix}random`) {
+            await this.sendRandomSkin(message);
+        }
+    }
+
+    /** @param {DiscordJS.Message} message */
+    async sendRandomSkin(message) {
+        try {
+            let res, skin = { skinID: "nope" };
+
+            // Make sure the skin exists?
+            while (!fs.existsSync(Path.resolve(SKIN_STATIC, skin.skinID))) {
+                res = await fetch(`${this.config.webDomain}/api/random`);
+                skin = await res.json();
+                skinID == "nope" || console.error(`Skin not on disk?? (${skin.skinID})`);
+            }
+
+            let embed = new RichEmbed()
+                .setAuthor(this.user.username, this.user.avatarURL)
+                .setTitle("Random Skin " + skin.skinID)
+                .setDescription(`\`${skin.skinName}\` submitted by <@${skin.ownerID}>`)
+                .setFooter(`Requested by ${message.author.username}#${message.author.discriminator}`)
+                .setTimestamp();
+
+            if (this.config.env == "production") {
+                embed.setThumbnail(`${this.config.webDomain}/s/${skin.skinID}`);
+            } else {
+                embed.attachFile(new Attachment(Path.resolve(SKIN_STATIC, `${skin.skinID}.png`), `${skin.skinID}.png`));
+                embed.setThumbnail(`attachment://${skin.skinID}.png`);
+            }
+
+            await message.channel.send(embed);
+        } catch (e) {
+            console.error(e);
+            await message.channel.send("Failed to get random skin").catch(_ => {});
+        }
+    }
+
     async dumpModScore() {
         let mods = await this.dbusers.getMods();
         /** @type {Object<string, number>} */
         let scores = {};
+        let date = Date.now();
         mods.forEach(mod => scores[mod.discordID] = mod.modScore);
-        fs.writeFileSync(Path.join(Path.resolve(__dirname, "..", "..", "mod_scores"), `${Date.now()}.json`), JSON.stringify(scores, null, 4));
+        fs.writeFileSync(Path.join(Path.resolve(__dirname, "..", "..", "mod_scores"), `${date}.json`), JSON.stringify(scores, null, 4));
         this.modScore = scores;
+        this.modScoreDate = date;
     }
 
     async loadModScore() {
@@ -941,7 +985,7 @@ class SkinsDiscordBot extends Client {
             if (nsfwResult.data)
                 embed.attachFile(new Attachment(nsfwResult.data, `SPOILER_${skinName}.png`));
             else 
-                embed.attachFile(new Attachment(`${PENDING_SKIN_STATIC}/${skinID}.png`, `SPOILER_${skinName}.png`));
+                embed.attachFile(new Attachment(Path.resolve(PENDING_SKIN_STATIC, `${skinID}.png`), `SPOILER_${skinName}.png`));
             embed.setImage(`attachment://SPOILER_${skinName}.png`);
         }
             

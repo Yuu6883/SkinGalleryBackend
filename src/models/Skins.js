@@ -195,6 +195,13 @@ class SkinCollection {
         return await SkinModel.find({ status: "pending" });
     }
 
+    getRandom() {
+        let randomIndex = ~~(Math.random() * this.publicCache.cacheLength);
+        let skin = this.publicCache.readCache(this.publicCache.sortByTime
+            .slice(randomIndex * this.publicCache.BYTES_PER_SKIN, (randomIndex + 1) * this.publicCache.BYTES_PER_SKIN))[0];
+        return skin;
+    }
+
     /**
      * @param {string} ownerID
      */

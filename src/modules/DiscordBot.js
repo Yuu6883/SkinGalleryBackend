@@ -382,7 +382,7 @@ class SkinsDiscordBot extends Client {
             let res, skin = { skinID: "nope" };
 
             // Make sure the skin exists?
-            while (!fs.existsSync(Path.resolve(SKIN_STATIC, skin.skinID))) {
+            while (!fs.existsSync(Path.resolve(SKIN_STATIC, `${skin.skinID}.png`))) {
                 res = await fetch(`${this.config.webDomain}/api/random`);
                 skin = await res.json();
                 skin.skinID == "nope" || console.error(`Skin not on disk?? (${skin.skinID})`);

@@ -17,7 +17,7 @@ interface AppConfig {
     userinfoCacheTime:  number;
 
     publicUpdateInterval: string;
-    publicPageLimit: string;
+    publicPageLimit: number;
     cfToken: string;
     cfZone:  string;
 

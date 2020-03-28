@@ -18,13 +18,17 @@ class SkinCache {
      */
     constructor(app) {
         this.app = app;
+
         /** @type {Number} */
         this.cacheLength = 0;
+        /** @type {Number} */
+        this.favLength = 0;
         
         /** @type {{sortByFav:Buffer,sortByName:Buffer,sortByTime:Buffer}} */
         this.cache = {};
         this.BYTES_PER_SKIN = BYTES_PER_SKIN;
-        this.rellocCache(0);
+        this.rellocCache('sortByFav', 0);
+        this.rellocCache('sortByTime', 0);
     }
 
     /** @param {SkinDocument[]} skinDocs */
@@ -33,23 +37,28 @@ class SkinCache {
         
         // Reallocate buffer if size changed
         if (this.cacheLength != skinDocs.length) 
-            this.rellocCache(BYTES_PER_SKIN * skinDocs.length);
+            this.rellocCache("sortByTime", BYTES_PER_SKIN * skinDocs.length);
         this.cacheLength = skinDocs.length;
-        
-        // this.writeToCache(this.cache.sortByFav, skinDocs.sort((a, b) =>
-        //     b.favorites - a.favorites
-        // ));
 
-        this.writeToCache(this.cache.sortByTime, skinDocs.sort((a, b) =>
-            b.createdAt - a.createdAt
-        ));
+        let favSkinDocs = skinDocs
+            .filter(v => v.favorites > 0)
+            .sort((a, b) => b.favorites - a.favorites);
+
+        if (this.favLength != favSkinDocs.length)
+            this.rellocCache("sortByFav", BYTES_PER_SKIN * favSkinDocs.length);
+
+        this.favLength = favSkinDocs.length;
+        this.writeToCache(this.cache.sortByFav, favSkinDocs);
+
+        this.writeToCache(this.cache.sortByTime, 
+            skinDocs.sort((a, b) => b.createdAt - a.createdAt));
 
         // this.writeToCache(this.cache.sortByName, skinDocs.sort((a, b) =>
         //     b.skinName.localeCompare(a.skinName)
         // ));
     }
 
-    // get sortByFav()  { return this.cache.sortByFav  }
+    get sortByFav()  { return this.cache.sortByFav  }
     // get sortByName() { return this.cache.sortByName }
     get sortByTime() { return this.cache.sortByTime }
 
@@ -215,11 +224,11 @@ class SkinCache {
         // console.log(`Writing [${unsigned[0].toString(2).padStart(32, "0")}] at ${offset + 4}`);
     }
 
-    /** @param {Number} number */
-    rellocCache(length) {
-        // this.cache.sortByFav  = Buffer.allocUnsafe(length);
-        // this.cache.sortByName = Buffer.allocUnsafe(length);
-        this.cache.sortByTime = Buffer.allocUnsafe(length);
+    /** 
+     * @param {'sortByFav'|'sortByName'|'sortByTime'} name
+     * @param {Number} number */
+    rellocCache(name, length) {
+        this.cache[name]  = Buffer.allocUnsafe(length);
     }
 }
 

@@ -46,7 +46,8 @@ const endpoint = {
             moderator: req.vanisUser.moderator,
             favorites: req.vanisUser.favorites,
             bannedUntil: req.vanisUser.bannedUntil && 
-                         req.vanisUser.bannedUntil.getTime()
+                         req.vanisUser.bannedUntil.getTime(),
+            limit: req.vanisUser.limit
         });
     },
     method: "post",

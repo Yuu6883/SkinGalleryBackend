@@ -108,11 +108,19 @@ class SkinCollection {
     async countBySkinID(skinID) {
         return await SkinModel.countDocuments({ skinID });
     }
+
     /**
      * @param {string} ownerID
      */
     async countByOwnerID(ownerID) {
         return await SkinModel.countDocuments({ ownerID });
+    }
+
+    /**
+     * @param {string} ownerID
+     */
+    async approvedCountByOwnerID(ownerID) {
+        return await SkinModel.countDocuments({ ownerID, status: "approved" });
     }
 
     /**

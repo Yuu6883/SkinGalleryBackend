@@ -20,8 +20,13 @@ const endpoint = {
             return void res.json({ error: `You have maximum of ${this.config.skinLimit} slots for skins` });
         }
 
-        if (this.config.limitPending && (await this.skins.pendingCountByOwnerID(req.vanisUser.discordID)) >= 1) {
-            return void res.json({ error: `You can have at most 1 pending skin` });
+        if (this.config.limitPending) {
+            let limit = await this.skins.approvedCountByOwnerID(req.vanisUser.discordID);
+            limit = Math.ceil(limit / 10);
+            let curr  = await this.skins.pendingCountByOwnerID(req.vanisUser.discordID);
+
+            if (curr >= limit)
+                return void res.json({ error: `You can have at most ${limit} pending skin` });
         }
 
         try {

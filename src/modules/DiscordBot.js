@@ -385,9 +385,9 @@ class SkinsDiscordBot extends Client {
 
             // Make sure the skin exists?
             while (!fs.existsSync(Path.resolve(SKIN_STATIC, `${skin.skinID}.png`))) {
+                skin.skinID == "nope" || console.error(`Skin not on disk?? (${skin.skinID})`);
                 res = await fetch(`${this.config.webDomain}/api/random`);
                 skin = await res.json();
-                skin.skinID == "nope" || console.error(`Skin not on disk?? (${skin.skinID})`);
             }
 
             let embed = new RichEmbed()
@@ -445,9 +445,9 @@ class SkinsDiscordBot extends Client {
             let doc = await this.dbskins.findBySkinID(id);
             if (doc && doc.status === "approved") {
                 reported.push(id);
-                this.pendSkin(doc.ownerID, { description: `Reported by **${message.author.username}#${message.author.discriminator}**` },
-                    id, doc.skinName, true);
                 this.reportedSet.add(id);
+                await this.pendSkin(doc.ownerID, { description: `Reported by **${message.author.username}#${message.author.discriminator}**` },
+                    id, doc.skinName, true);
             }
             content = content.replace(skinIDorURLRegex, "");
             match = skinIDorURLRegex.exec(content);
@@ -1024,7 +1024,7 @@ class SkinsDiscordBot extends Client {
         
         for (let skinID of this.reportedSet) {
             let skinDoc = await this.dbskins.findBySkinID(skinID);
-            skinDoc.status === "approved" && pendingSkins.push(skinDoc);
+            skinDoc.status == "approved" && pendingSkins.push(skinDoc);
         }
 
         for (let skinID in this.pendingCache) {

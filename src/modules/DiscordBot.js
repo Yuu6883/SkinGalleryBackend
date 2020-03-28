@@ -385,7 +385,7 @@ class SkinsDiscordBot extends Client {
             while (!fs.existsSync(Path.resolve(SKIN_STATIC, skin.skinID))) {
                 res = await fetch(`${this.config.webDomain}/api/random`);
                 skin = await res.json();
-                skinID == "nope" || console.error(`Skin not on disk?? (${skin.skinID})`);
+                skin.skinID == "nope" || console.error(`Skin not on disk?? (${skin.skinID})`);
             }
 
             let embed = new RichEmbed()

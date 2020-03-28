@@ -280,6 +280,10 @@ class SkinsDiscordBot extends Client {
     async runModCommand(message) {
         this.logger.debug("Running MOD command: " + message.content);
 
+        if (message.content == `${this.prefix}random`) {
+            await this.sendRandomSkin(message);
+        }
+
         if (message.content == `${this.prefix}exit`) {
             if (!this.config.exitPerm.includes(message.author.id)) return;
             await message.channel.send("Yeet");
@@ -371,9 +375,7 @@ class SkinsDiscordBot extends Client {
 
     /** @param {DiscordJS.Message} message */
     async onPlebMessage(message) {
-        if (message.content == `${this.prefix}random`) {
-            await this.sendRandomSkin(message);
-        }
+        
     }
 
     /** @param {DiscordJS.Message} message */

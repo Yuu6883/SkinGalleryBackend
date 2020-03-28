@@ -13,7 +13,7 @@ const TIME_0 = 1546243200000;
 const BYTES_PER_SKIN = SKIN_ID_BYTES + SKIN_NAME_BYTES + SKIN_TAG_BYTES +
     FAV_BYTES + TIME_BYTES + DISCORD_ID_BYTES;
 
-const TAGS = ["agar", "people", "nature", "other", "anime"];
+const TAGS = ["people", "nature", "other", "anime"];
 
 module.exports = {
     TIME_0,

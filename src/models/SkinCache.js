@@ -119,8 +119,7 @@ class SkinCache {
             let createdAt = buffer.readUInt32BE(index);
             index += TIME_BYTES;
 
-            let ownerID = new DataView(buffer.buffer, index)
-                .getBigUint64();
+            let ownerID = buffer.readBigUInt64BE(index);
             index += DISCORD_ID_BYTES;
 
             result.push({
@@ -142,16 +141,16 @@ class SkinCache {
      */
     readTags(buffer, offset) { 
         let tags = [];
-        let number1 = buffer.readUInt32BE(offset);
-        let number2 = buffer.readUInt32BE(offset + 4);
+        let number1 = buffer.readUInt32LE(offset);
+        let number2 = buffer.readUInt32LE(offset + 4);
         // Read first 32 bits
         for (let i = 0; i < 32; i++)
-            if (number1.toString(2)[i] == 1)
+            if ((number1 >>> (SKIN_TAG_LENGTH / 2 - i - 1)) & 1)
                 tags.push(TAGS[i]);
 
         // Read second 32 bits
         for (let i = 0; i < 32; i++)
-            if (number2.toString(2)[i] == 1)
+            if ((number2 >>> (SKIN_TAG_LENGTH / 2 - i - 1)) & 1)
                 tags.push(TAGS[32 + i]);
 
         return tags.filter(t => t);

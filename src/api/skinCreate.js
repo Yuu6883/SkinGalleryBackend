@@ -22,7 +22,7 @@ const endpoint = {
 
         if (this.config.limitPending) {
             let limit = await this.skins.approvedCountByOwnerID(req.vanisUser.discordID);
-            limit = Math.ceil(limit / 10);
+            limit = Math.ceil((limit + 1) / 10);
             let curr  = await this.skins.pendingCountByOwnerID(req.vanisUser.discordID);
 
             if (curr >= limit)

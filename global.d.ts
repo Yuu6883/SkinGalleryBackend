@@ -52,6 +52,7 @@ interface UserEntry {
     moderator:      boolean;
     minimod:        boolean;
     bannedUntil:    Date;
+    bannedReason:   string;
     favorites:      string[];
     limit:          number;
     modScore:       number;

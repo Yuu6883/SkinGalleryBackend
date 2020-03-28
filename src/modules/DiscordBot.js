@@ -310,14 +310,14 @@ class SkinsDiscordBot extends Client {
             skinIDs.forEach(skinID => this.reject(skinID, message));
         }
 
-        if (message.content.startsWith(`${this.prefix}ban `)) {
+        if (message.content.startsWith(`${this.prefix}ban`)) {
             let userID = message.content.split(" ").find(token => 
-                /^<@\d+>$/.test(token) || /^\d+$/.test(token));
+                /^<@!?\d+>$/.test(token) || /^\d+$/.test(token));
             userID && (userID = userID.replace(/\D/g, ""));
             this.ban(userID, message);
         }
 
-        if (message.content.startsWith(`${this.prefix}unban `)) {
+        if (message.content.startsWith(`${this.prefix}unban`)) {
             let userID = message.content.replace(/\D/g, "").trim();
             this.unban(userID, message);
         }
@@ -630,39 +630,51 @@ class SkinsDiscordBot extends Client {
      * @param {DiscordJS.Message} message 
      */
     async ban(userID, message) {
+
+        const TIME_REGEX = /(\d+[s|h|d|m|y])/i;
         if (userID) {
-            let banTime = message.content.split(" ").find(token => 
-                /^\d+(s|h|d|m|y)$/gi.test(token));
-
-            if (!banTime) {
-                return message.reply(`Use ${this.prefix}ban {**UserID**} ` +
-                    `{time[**s**|**h**|**d**|**m**|**y**]} to ban someone`);
-            }
-
-            const H = 60 * 60 * 1000;
-            let unit = {"s":1000,"h":H,"d":24*H,"m":30*24*H,"y":365*24*H}[banTime.slice(-1)];
-            let time = ~~banTime.slice(0,-1) * unit;
-
-            if (time <= 0)
-                return message.reply("You are retarded.");
-
-            let banned = await this.dbusers.ban(userID, time);
-
-            if (!banned)
-                return message.reply(`Can't find user ${userID}`);
-
-            if (await this.isMod(userID)) {
-                let u = this.findUserByID(userID);
-                await message.reply(`Stop abusing ${u ? u.username : `<@${userID}>`}.`);
-            } else {
-                await this.purge(userID, message);
-            }
-
-            message.reply(`User banned: \`${userID}\` for ${banTime} ${unit==1000?"**TROLLLOLOL**":""}`);
+            let banMatched = TIME_REGEX.exec(message.cleanContent);
             
-        } else {
-            return message.reply(`Use ${this.prefix}ban \`/\\D+/\` to ban someone from Vanis Skin`);
+            if (banMatched) {
+
+                let banTime = banMatched[0];
+
+                const H = 60 * 60 * 1000;
+                let unit = {"s":1000,"h":H,"d":24*H,"m":30*24*H,"y":365*24*H}[banTime.slice(-1)];
+                let time = ~~banTime.slice(0,-1) * unit;
+
+                if (time <= 0)
+                    return message.reply("You are retarded.");
+
+                let reason = message.content
+                    .replace(TIME_REGEX, "")
+                    .replace(`<@${userID}>`, "")
+                    .replace(`<@!${userID}>`, "")
+                    .replace(userID, "")
+                    .replace(`${this.prefix}ban`, "")
+                    .trim();
+
+                if (!reason) {
+                    return message.reply("Please provide reason to ban");
+                }
+
+                let banned = await this.dbusers.ban(userID, time, reason);
+
+                if (!banned)
+                    return message.reply(`Can't find user ${userID}`);
+
+                if (await this.isMod(userID)) {
+                    let u = this.findUserByID(userID);
+                    await message.reply(`Stop abusing ${u ? u.username : `<@${userID}>`}.`);
+                } else {
+                    await this.purge(userID, message);
+                }
+
+                return await message.reply(`User banned: \`${userID}\` for ${banTime} ${unit==1000?"**TROLLLOLOL**":""}. Reason: \`${reason}\``);
+            }
         }
+
+        return message.reply(`Use ${this.prefix}ban {**UserID**} {**BanTime**} {**BanReason**} to ban someone from Vanis Skin`);
     }
 
     /**

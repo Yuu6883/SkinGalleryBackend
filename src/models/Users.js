@@ -9,6 +9,7 @@ const UserSchema = new mongoose.Schema({
     cacheInfo:      { type: Map,    of: String },
     vanisToken:     { type: String, required: false },
     bannedUntil:    { type: Date,   required: false },
+    bannedReason:   { type: String, required: false },
     moderator:      { type: Boolean,  default: false },
     minimod:        { type: Boolean,  default: false },
     favorites:      { type: [String], default: []   },
@@ -187,10 +188,11 @@ class UserCollection {
     /**
      * @param {string} discordID 
      */
-    async ban(discordID, banTime = 3 * 24 * 60 * 60 * 1000) {
+    async ban(discordID, banTime = 3 * 24 * 60 * 60 * 1000, reason = "") {
         let userDoc = await this.find(discordID);
         if (!userDoc) return;
         userDoc.bannedUntil = new Date(Date.now() + banTime);
+        userDoc.bannedReason = reason;
         await userDoc.save();
         return true;
     }
@@ -202,6 +204,7 @@ class UserCollection {
         let userDoc = await this.find(discordID);
         if (!userDoc) return;
         userDoc.bannedUntil = new Date(0, 0, 0);
+        userDoc.bannedReason = "";
         await userDoc.save();
         return true;
     }

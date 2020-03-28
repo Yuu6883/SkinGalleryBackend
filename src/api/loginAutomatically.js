@@ -47,6 +47,7 @@ const endpoint = {
             favorites: req.vanisUser.favorites,
             bannedUntil: req.vanisUser.bannedUntil && 
                          req.vanisUser.bannedUntil.getTime(),
+            bannedReason: req.vanisUser.bannedReason,
             limit: req.vanisUser.limit
         });
     },

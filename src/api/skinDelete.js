@@ -44,7 +44,8 @@ const endpoint = {
         
     },
     method: "delete",
-    path: "/skins/:skinID"
+    path: "/skins/:skinID",
+    closeDuringMaintenance: true
 };
 
 module.exports = endpoint;

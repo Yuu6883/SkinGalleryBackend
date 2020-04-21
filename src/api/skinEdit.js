@@ -30,6 +30,7 @@ const endpoint = {
     },
     method: "put",
     path: "/skins/:skinID",
+    closeDuringMaintenance: true
 };
 
 module.exports = endpoint;

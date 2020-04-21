@@ -18,7 +18,8 @@ const endpoint = {
         res.json(result);
     },
     method: "put",
-    path: "/fav/:skinID"
+    path: "/fav/:skinID",
+    closeDuringMaintenance: true
 };
 
 module.exports = endpoint;

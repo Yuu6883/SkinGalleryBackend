@@ -9,7 +9,7 @@ interface AppConfig {
 
     webLocation: string | number;
     webDomain:   string;
-
+    maintenance: boolean;
     discordAppID:       string;
     discordAppSecret:   string;
     discordAppRedirect: string;
@@ -133,4 +133,5 @@ interface APIEndpointHandler {
     method: "get" | "post" | "patch" | "put" | "delete" | "head" | "options" | "use";
     path: string;
     pre: Array<import("express").Handler>;
+    closeDuringMaintenance: boolean;
 }

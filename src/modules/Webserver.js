@@ -69,6 +69,12 @@ class Webserver {
             if (!endpoint.handler || !endpoint.method || !endpoint.path)
                 return void this.logger.warn(`Ignoring endpoint file ${file}: module export not properly defined`);
 
+            if (endpoint.closeDuringMaintenance) {
+                apiRouter[endpoint.method](endpoint.path, (_, res) => 
+                    res.status(503).send("Server under maintenance"));
+                return void this.logger.warn(`Endpoint ${file} not applied because server under maintenance`);
+            }
+
             if (endpoint.pre && Array.isArray(endpoint.pre))
                 apiRouter.use(endpoint.path, ...endpoint.pre);
 

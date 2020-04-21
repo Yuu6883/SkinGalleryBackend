@@ -16,7 +16,8 @@ const endpoint = {
         res.json({ success });
     },
     method: "delete",
-    path: "/fav/:skinID"
+    path: "/fav/:skinID",
+    closeDuringMaintenance: true
 };
 
 module.exports = endpoint;

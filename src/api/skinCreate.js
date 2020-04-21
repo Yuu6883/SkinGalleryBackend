@@ -99,7 +99,8 @@ const endpoint = {
     },
     method: "post",
     path: "/skins/:skinName",
-    pre: [expressForms.text({ limit: "2mb", type: "*/*" })]
+    pre: [expressForms.text({ limit: "2mb", type: "*/*" })],
+    closeDuringMaintenance: true
 };
 
 module.exports = endpoint;

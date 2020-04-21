@@ -32,7 +32,8 @@ const endpoint = {
         res.json({ success });
     },
     method: "post",
-    path: "/reject/:skinID"
+    path: "/reject/:skinID",
+    closeDuringMaintenance: true
 };
 
 module.exports = endpoint;

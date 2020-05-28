@@ -25,8 +25,8 @@ class SkinsApp {
         // Modules
         this.logger = new Logger();
         this.logger._onLog = (_, level, message) => {
-            if (level == "ACCESS") return;
-            if (this.config.env == "production" && level == "DEBUG") return;
+            //if (level == "ACCESS") return;
+            //if (this.config.env == "production" && level == "DEBUG") return;
             console.log(`[${level}] ${message}`);
         }
 

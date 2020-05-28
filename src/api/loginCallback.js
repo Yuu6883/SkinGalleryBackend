@@ -9,7 +9,7 @@ const endpoint = {
 
         const discordAuthorization = await this.discordAPI.exchange(req.query.code, false);
         if (!discordAuthorization || discordAuthorization.error) {
-            this.logger.warn(`Initial Discord authorization failed: ${discordAuthorization.error} (${discordAuthorization.error_description}). Code was ${req.query.code}`);
+            this.logger.warn(`Initial Discord authorization failed: ${discordAuthorization.error} (${discordAuthorization.error_description}).`);
             return void res.clearCookie(VANIS_TOKEN_COOKIE).redirect("/");
         }
 

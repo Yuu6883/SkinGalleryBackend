@@ -24,7 +24,7 @@ class DiscordAPI {
     async exchange(code, refresh) {
         const type = refresh ? "refresh_token" : "authorization_code";
         const codeType = refresh ? "refresh_token" : "code";
-        
+
         let redir = process.platform == "win32" ?
                 "http://localhost/api/login/callback" : this.config.discordAppRedirect;
 
@@ -34,7 +34,10 @@ class DiscordAPI {
             method: "POST",
             headers: { Authorization: this.appAuthorization }
         }).catch(_ => ({ json: async _ => ({ error: "Fetch failed" }) }));
-        return await response.json();
+        const body = await response.json();
+        if (response.error)
+            this.logger.warn(`Error exchanging token grant (${response.error} ${response.error_description}), url: ${url}`);
+        return response;
     }
 
     /**

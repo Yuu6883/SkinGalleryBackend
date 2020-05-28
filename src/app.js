@@ -69,19 +69,19 @@ class SkinsApp {
         } else {
 
             const pm2 = require("pm2");
-            
-            await new Promise((resolve, reject) => 
+
+            await new Promise((resolve, reject) =>
                 pm2.connect(err => err ? reject(err) : resolve()));
 
             /** @type {import("events").EventEmitter} */
             const bus = await new Promise((resolve, reject) =>
                 pm2.launchBus((err, bus) => err ? reject(err) : resolve(bus)));
-            
+
             /** @type {{src:string,resolve:()=>void}[]} */
             let nsfwQueue = [];
             let nsfwTimeout;
 
-            const clearNSFW = () => nsfwTimeout && (clearTimeout(nsfwTimeout), 
+            const clearNSFW = () => nsfwTimeout && (clearTimeout(nsfwTimeout),
                 nsfwTimeout = null);
 
             const NSFW_ERROR = { error: "NSFW process timeout" };
@@ -129,15 +129,14 @@ class SkinsApp {
             }
 
             /**
-             * @param {"pend"|"approve"|"reject"} method 
-             * @param {String} discordID 
-             * @param {NSFWPrediction} result 
-             * @param {String} skinID 
-             * @param {String} skinName 
+             * @param {"pend"|"approve"|"reject"} method
+             * @param {String} discordID
+             * @param {NSFWPrediction} result
+             * @param {String} skinID
+             * @param {String} skinName
              * @returns {NSFWPrediction}
              */
-            const sendClassifyResult = (method, discordID, 
-                result, skinID, skinName) => new Promise(resolve => {
+            const sendClassifyResult = (method, discordID, result, skinID, skinName) => new Promise(resolve => {
                 process.send({
                     type: method,
                     data: { discordID, result, skinID, skinName }
@@ -155,9 +154,9 @@ class SkinsApp {
                         data: { skinID, ownerID, skinName, status, newURL }
                     });
                 },
-                /** 
-                 * @param {String} path 
-                 * @param {SkinStatus} status 
+                /**
+                 * @param {String} path
+                 * @param {SkinStatus} status
                  */
                 moveToTrash: (path, status) => {
                     if (fs.existsSync(path)) {
@@ -203,7 +202,7 @@ class SkinsApp {
         this.logger.debug("Connected to database");
     }
 
-    async disconnectFromMongoDB() {  
+    async disconnectFromMongoDB() {
         await mongoose.disconnect();
         this.logger.debug("Disconnected from database");
     }

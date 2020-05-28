@@ -6,7 +6,6 @@ const endpoint = {
         if (!hasPermission("VIEW_PUBLIC_SKIN", req.vanisPermissions))
             return void res.sendStatus(403);
 
-
         if (!this.skins.publicCache.cacheLength)
             return void res.send(Buffer.alloc(0));
 
@@ -17,7 +16,7 @@ const endpoint = {
         let buffer;
 
         let page = ~~req.query.page;
-        let maxPage = ~~((this.skins.publicCache.cacheLength - 1) / 
+        let maxPage = ~~((this.skins.publicCache.cacheLength - 1) /
                           this.config.publicPageLimit);
         let total = this.skins.publicCache.cacheLength;
 

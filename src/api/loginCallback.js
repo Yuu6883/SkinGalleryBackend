@@ -3,14 +3,13 @@ const { VANIS_TOKEN_COOKIE, VANIS_TOKEN_AGE } = require("../constant");
 /** @type {APIEndpointHandler} */
 const endpoint = {
     async handler(req, res) {
-
         // User clicked cancel, probably
         if (!req.query.code)
             return void res.clearCookie(VANIS_TOKEN_COOKIE).redirect("/");
-            
+
         const discordAuthorization = await this.discordAPI.exchange(req.query.code, false);
         if (!discordAuthorization || discordAuthorization.error) {
-            this.logger.warn(`Initial Discord authorization failed: ${discordAuthorization.error} (${discordAuthorization.error_description})`);
+            this.logger.warn(`Initial Discord authorization failed: ${discordAuthorization.error} (${discordAuthorization.error_description}). Code was ${req.query.code}`);
             return void res.clearCookie(VANIS_TOKEN_COOKIE).redirect("/");
         }
 

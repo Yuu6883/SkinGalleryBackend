@@ -25,21 +25,21 @@ interface AppConfig {
     nsfwLowThreshold:  number;
     nsfwHighThreshold: number;
     skinApprovedChannelID: string;
-    skinPendingChannelID:  string;
+    skinPendingChannelID: string;
     skinRejectedChannelID: string;
-    skinDeletedChannelID:  string;
-    notifChannelID:        string;
-    debugChannelID:        string;
-    approveEmoji:       string;
-    rejectEmoji:        string;
-    approveThreshold:   number;
-    rejectThreshold:    number;
-    reviewInterval:     number;
-    limitPending:       boolean;
+    skinDeletedChannelID: string;
+    notifChannelID: string;
+    debugChannelID: string;
+    approveEmoji: string;
+    rejectEmoji: string;
+    approveThreshold: number;
+    rejectThreshold: number;
+    reviewInterval: number;
+    limitPending: boolean;
     disableAutoApprove: boolean;
-    admins:   string[];
+    admins: string[];
     exitPerm: string[];
-    prefix:   string;
+    prefix: string;
 }
 
 interface UserEntry {
@@ -132,6 +132,6 @@ interface APIEndpointHandler {
     handler(this: import("./src/app"), req: APIRequest, res: APIResponse): void;
     method: "get" | "post" | "patch" | "put" | "delete" | "head" | "options" | "use";
     path: string;
-    pre: Array<import("express").Handler>;
-    closeDuringMaintenance: boolean;
+    pre?: Array<import("express").Handler>;
+    closeDuringMaintenance?: boolean;
 }

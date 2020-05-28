@@ -1,5 +1,6 @@
 const btoa = require("btoa");
 const fetch = require("node-fetch");
+const { URLSearchParams } = require("url");
 
 class DiscordAPI {
     /**
@@ -30,14 +31,19 @@ class DiscordAPI {
 
         const url = `${this.oAuth2Url}token?grant_type=${type}&${codeType}=${code}&redirect_uri=${redir}`;
 
+        const params = new URLSearchParams();
+        params.append("client_id", this.config.discordAppID);
+        params.append("client_secret", this.config.discordAppSecret);
+        params.append("grant_type", type);
+        params.append("redirect_uri", redir);
+        params.append("scope", "identify");
+
         const response = await fetch(url, {
             method: "POST",
-            headers: { Authorization: this.appAuthorization }
+            headers: { Authorization: this.appAuthorization },
+            body: params
         }).catch(_ => ({ json: async _ => ({ error: "Fetch failed" }) }));
-        const body = await response.json();
-        if (body.error)
-            this.logger.warn(`Error exchanging token grant (${response.error} ${response.error_description}), url: ${url}`);
-        return body;
+        return await response.json();
     }
 
     /**

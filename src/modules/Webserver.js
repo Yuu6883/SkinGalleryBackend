@@ -132,7 +132,7 @@ class Webserver {
                 if (this.blocked[origin]) this.blocked[origin]++;
                 else this.blocked[origin] = 1;
 
-                this.logger.onAccess(`Cross-origin request blocked`);
+                this.logger.onAccess(`Cross-origin request from ${origin} blocked`);
                 return void res.sendStatus(403);
             }
 

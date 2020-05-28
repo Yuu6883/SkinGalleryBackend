@@ -56,10 +56,12 @@ class Webserver {
                 req.vanisPermissions = AUTH_LEVELS.USER;
                 req.vanisPermission = "USER";
             }
+            this.logger.debug(`Request from token '${vanisToken}' identified as ${req.vanisPermission}`);
 
             if (req.vanisPermissions !== AUTH_LEVELS.MOD) {
                 let origin = this.getOrigin(req);
                 if (origin.startsWith("https://vanis.io")) {
+                    this.logger.onAccess(`Non-mod perms did not allow request from client`);
                     return void res.sendStatus(403);
                 }
             }
@@ -130,12 +132,12 @@ class Webserver {
                 if (this.blocked[origin]) this.blocked[origin]++;
                 else this.blocked[origin] = 1;
 
+                this.logger.onAccess(`Cross-origin request blocked`);
                 return void res.sendStatus(403);
             }
 
             res.ip = req.get("CF-Connecting-IP") || req.socket.remoteAddress;
 
-            this.logger.onAccess(`Request Origin: ${origin || "*"}`);
             res.set("Access-Control-Allow-Origin", origin || "*");
             res.set("Access-Control-Allow-Credentials", "true");
             next();

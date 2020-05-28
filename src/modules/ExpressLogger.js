@@ -10,7 +10,7 @@ function getTiming(stamp) {
  * @param {import("express").Request} req
  */
 function getCaller(req) {
-    return `${req.method.toUpperCase()} ${req.path} HTTP/${req.httpVersion} ${req.socket.remoteAddress} ${req.headers["user-agent"]} (perms ${req.vanisPermission || "none set"})`;
+    return `${req.method.toUpperCase()} ${req.path} HTTP/${req.httpVersion} ${req.socket.remoteAddress} ${req.headers["user-agent"]} ${req.headers["user-agent"] || "no origin"} (perms ${req.vanisPermission || "none set"})`;
 }
 
 /**
@@ -18,7 +18,7 @@ function getCaller(req) {
  * @param {import("express").Request} req
  */
 function logInitial(logger, req) {
-    // logger.debug(getCaller(req));
+    logger.debug(getCaller(req));
 }
 /**
  * @param {import("./Logger")} logger
@@ -26,17 +26,8 @@ function logInitial(logger, req) {
  * @param {import("express").Response} res
  * @param {[number, number]} stamp
  */
-function logFinal(logger, req, res, stamp) {
-    logger.onAccess(`${getCaller(req)} >> FINAL ${res.statusCode} ${getTiming(stamp)}ms`);
-}
-/**
- * @param {import("./Logger")} logger
- * @param {import("express").Request} req
- * @param {import("express").Response} res
- * @param {[number, number]} stamp
- */
-function logPremature(logger, req, res, stamp) {
-    logger.onAccess(`${getCaller(req)} >> PREMATURE ${res.statusCode} ${getTiming(stamp)}ms`);
+function logClose(logger, req, res, stamp) {
+    logger.onAccess(`${getCaller(req)} >> ${res.statusCode} ${getTiming(stamp)}ms`);
 }
 
 /**
@@ -51,8 +42,7 @@ module.exports = (logger) => {
     const fn = (req, res, next) => {
         const stampStart = process.hrtime();
         logInitial(logger, req);
-        req.on("close", () => logPremature(logger, req, res, stampStart));
-        res.on("finish", () => logFinal(logger, req, res, stampStart));
+        req.on("close", () => logClose(logger, req, res, stampStart));
         next();
     };
     return fn;

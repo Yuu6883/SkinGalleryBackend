@@ -29,7 +29,7 @@ class DiscordAPI {
         let redir = process.platform == "win32" ?
                 "http://localhost/api/login/callback" : this.config.discordAppRedirect;
 
-        const url = `${this.oAuth2Url}token?grant_type=${type}&${codeType}=${code}&redirect_uri=${redir}`;
+        const url = `${this.oAuth2Url}token`;
 
         const params = new URLSearchParams();
         params.append("client_id", this.config.discordAppID);
@@ -38,6 +38,7 @@ class DiscordAPI {
         params.append("redirect_uri", redir);
         params.append("scope", "identify");
 
+        this.logger.debug(`OAuth2 exchange with code ${code}, refresh: ${refresh}`);
         const response = await fetch(url, {
             method: "POST",
             headers: { Authorization: this.appAuthorization },

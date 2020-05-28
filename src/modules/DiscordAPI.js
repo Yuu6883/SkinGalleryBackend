@@ -35,9 +35,9 @@ class DiscordAPI {
             headers: { Authorization: this.appAuthorization }
         }).catch(_ => ({ json: async _ => ({ error: "Fetch failed" }) }));
         const body = await response.json();
-        if (response.error)
+        if (body.error)
             this.logger.warn(`Error exchanging token grant (${response.error} ${response.error_description}), url: ${url}`);
-        return response;
+        return body;
     }
 
     /**

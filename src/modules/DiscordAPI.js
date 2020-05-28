@@ -35,6 +35,7 @@ class DiscordAPI {
         params.append("client_id", this.config.discordAppID);
         params.append("client_secret", this.config.discordAppSecret);
         params.append("grant_type", type);
+        params.append(codeType, code);
         params.append("redirect_uri", redir);
         params.append("scope", "identify");
 

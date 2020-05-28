@@ -29,7 +29,7 @@ class Webserver {
 
     generateAPIRouter() {
         const apiRouter = express.Router();
-        
+
         // Required parser middleware
         apiRouter.use(expressCookies());
 
@@ -44,13 +44,18 @@ class Webserver {
                 vanisUser = req.vanisUser = await this.app.users.findAuthedVanis(vanisToken);
             if (vanisUser == null) {
                 req.vanisPermissions = AUTH_LEVELS.NONE;
+                req.vanisPermission = "NONE";
                 res.clearCookie(VANIS_TOKEN_COOKIE);
-            } else if (vanisUser.moderator || this.config.admins.includes(vanisUser.discordID))
+            } else if (vanisUser.moderator || this.config.admins.includes(vanisUser.discordID)) {
                 req.vanisPermissions = AUTH_LEVELS.MOD;
-            else if (vanisUser.bannedUntil > new Date())
+                req.vanisPermission = "MOD";
+            } else if (vanisUser.bannedUntil > new Date()) {
                 req.vanisPermissions = AUTH_LEVELS.USER_BANNED;
-            else
+                req.vanisPermission = "USER_BANNED";
+            } else {
                 req.vanisPermissions = AUTH_LEVELS.USER;
+                req.vanisPermission = "USER";
+            }
 
             if (req.vanisPermissions !== AUTH_LEVELS.MOD) {
                 let origin = this.getOrigin(req);
@@ -70,7 +75,7 @@ class Webserver {
                 return void this.logger.warn(`Ignoring endpoint file ${file}: module export not properly defined`);
 
             if (this.config.maintenance && endpoint.closeDuringMaintenance) {
-                apiRouter[endpoint.method](endpoint.path, (_, res) => 
+                apiRouter[endpoint.method](endpoint.path, (_, res) =>
                     res.status(503).send("Server under maintenance"));
                 return void this.logger.warn(`Endpoint ${file} not applied because server under maintenance`);
             }
@@ -96,14 +101,14 @@ class Webserver {
     getOrigin(req) {
         let origin = req.get("origin") || req.get("referer") || ("https://" + req.get("host"));
 
-        if (origin && origin[origin.length - 1] == "/") 
+        if (origin && origin[origin.length - 1] == "/")
             origin = origin.slice(0, -1);
         return origin;
     }
 
     /** @param {string} origin */
-    checkOrigin(origin) { 
-        return !(this.allowedOrigins.length && 
+    checkOrigin(origin) {
+        return !(this.allowedOrigins.length &&
             !/^http(s?):\/\/localhost/.test(origin) &&
             !this.allowedOrigins.some(o => origin.startsWith(o)) &&
             !origin.startsWith("https://discordapp.com/oauth2/"));
@@ -115,7 +120,7 @@ class Webserver {
         app.set("trust proxy", 1);
         app.use(expressLogger(this.logger));
         app.use(nocache())
-        
+
         // Prevent cross-origin requests
         app.use((req, res, next) => {
             let origin = this.getOrigin(req);
@@ -124,18 +129,18 @@ class Webserver {
                 // this.logger.warn(`Blocked request from unknown origin: ${origin}`);
                 if (this.blocked[origin]) this.blocked[origin]++;
                 else this.blocked[origin] = 1;
-                
+
                 return void res.sendStatus(403);
             }
 
             res.ip = req.get("CF-Connecting-IP") || req.socket.remoteAddress;
-            
+
             this.logger.onAccess(`Request Origin: ${origin || "*"}`);
             res.set("Access-Control-Allow-Origin", origin || "*");
             res.set("Access-Control-Allow-Credentials", "true");
             next();
         });
-        
+
         app.use("/", this.generateAPIRouter());
 
         this.logger.debug("Webserver opening @", this.config.webLocation);

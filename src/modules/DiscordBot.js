@@ -1336,7 +1336,7 @@ class SkinsDiscordBot extends Client {
 
     /** @param {DiscordJS.MessageReaction} reaction */
     async filterModReaction(reaction) {
-
+        if (reaction == null) return 0;
         let userArray = reaction.users.array();
         let count = 0;
         for (let i in userArray) {

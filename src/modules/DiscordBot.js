@@ -1029,7 +1029,7 @@ class SkinsDiscordBot extends Client {
                 { url: `${this.config.webDomain}`, type: "WATCHING" });
         }
 
-        // pendingSkins = pendingSkins.slice(-25);
+        pendingSkins = pendingSkins.slice(-25);
 
         for (let skinID of this.reportedSet) {
             let skinDoc = await this.dbskins.findBySkinID(skinID);

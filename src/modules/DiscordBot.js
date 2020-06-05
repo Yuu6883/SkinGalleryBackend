@@ -78,7 +78,7 @@ class SkinsDiscordBot extends Client {
         this.notifChannel = this.findChannelByID(this.config.notifChannelID);
 
         if (!this.pendingChannel || !this.approvedChannel || !this.rejectedChannel ||
-            !this.deletedChannel || !this.notifChannel    || !this.debugChannel) 
+            !this.deletedChannel || !this.notifChannel    || !this.debugChannel)
             throw Error(`Can NOT find skin channels`);
 
         await this.updateMods();
@@ -113,7 +113,7 @@ class SkinsDiscordBot extends Client {
         if (message.content.startsWith(`${this.prefix}change `)) {
             this.changeID(message);
         }
-        
+
         if (message.content.startsWith(`${this.prefix}delete `)) {
             let skinID = message.content.split(" ")
                 .slice(1).join("")
@@ -194,7 +194,7 @@ class SkinsDiscordBot extends Client {
                 await message.channel.send(name + " is a " + (isMod ? "**mod**" : (isMiniMod ? "minimod lol" : "pleb")));
             }
         }
-        
+
         if (message.content.startsWith(`${this.prefix}purge `)) {
             let userID = message.content.replace(/\D/g, "").trim();
             this.purge(userID, message);
@@ -229,7 +229,7 @@ class SkinsDiscordBot extends Client {
         if (message.content == `${this.prefix}flush`) {
             await this.logger.flush(true);
         }
-        
+
         if (message.content == `${this.prefix}format`) {
             await message.channel.send(`Log format: \`${this.logger.format}\``);
         }
@@ -311,7 +311,7 @@ class SkinsDiscordBot extends Client {
         }
 
         if (message.content.startsWith(`${this.prefix}ban`)) {
-            let userID = message.content.split(" ").find(token => 
+            let userID = message.content.split(" ").find(token =>
                 /^<@!?\d+>$/.test(token) || /^\d+$/.test(token));
             userID && (userID = userID.replace(/\D/g, ""));
             this.ban(userID, message);
@@ -355,7 +355,7 @@ class SkinsDiscordBot extends Client {
 
             if (!/^\S{6}$/.test(skinID))
                 return await message.reply(`Invalid skinID: **${skinID}**`);
-            
+
             this.ownerOf(skinID, message);
         }
 
@@ -375,7 +375,7 @@ class SkinsDiscordBot extends Client {
 
     /** @param {DiscordJS.Message} message */
     async onPlebMessage(message) {
-        
+
     }
 
     /** @param {DiscordJS.Message} message */
@@ -452,7 +452,7 @@ class SkinsDiscordBot extends Client {
             content = content.replace(skinIDorURLRegex, "");
             match = skinIDorURLRegex.exec(content);
         }
-        
+
         if (reported.length) {
             message.reply(`Skin(s) reported: \`${reported.join(", ")}\``);
         } else {
@@ -460,8 +460,8 @@ class SkinsDiscordBot extends Client {
         }
     }
 
-    /** 
-     * @param {DiscordJS.Message} message 
+    /**
+     * @param {DiscordJS.Message} message
      */
     async changeID(message) {
         let [_, fromID, toID] = message.content.split(/ /g).filter(s => s);
@@ -481,7 +481,7 @@ class SkinsDiscordBot extends Client {
         }
         let toSkinDoc = await this.dbskins.findBySkinID(toID);
         if (toSkinDoc) {
-            return await message.reply(`There's already skin of this ID: ${this.config.webDomain}/` + 
+            return await message.reply(`There's already skin of this ID: ${this.config.webDomain}/` +
                 `${toSkinDoc.status == "approved" ? "s" : "p"}/${toID}`);
         }
         fromSkinDoc.skinID = toID;
@@ -489,13 +489,13 @@ class SkinsDiscordBot extends Client {
         if (this.config.env == "production")
             this.cloudflare.purgeCache(`${this.config.webDomain}/s/${fromID}`);
 
-        fs.renameSync(Path.resolve(SKIN_STATIC, `${fromID}.png`), 
+        fs.renameSync(Path.resolve(SKIN_STATIC, `${fromID}.png`),
                       Path.resolve(SKIN_STATIC, `${toID}.png`));
         await message.channel.send(`Done: ${this.config.webDomain}/s/${toID}`);
     }
 
-    /** 
-     * @param {DiscordJS.Message} message 
+    /**
+     * @param {DiscordJS.Message} message
      */
     async runEval(message) {
         let code = message.content.replace(`${this.prefix}eval `, "");
@@ -512,7 +512,7 @@ class SkinsDiscordBot extends Client {
                 depth: 0,
                 maxArrayLength: 100
             }).replace(new RegExp(this.config.discordBotToken, "g"), "secret bruh");
-    
+
             message.reply(new RichEmbed()
                 .setDescription(`**📥 Input**\n\`\`\`js\n${code}\n\`\`\`\n**📤 Output**\n\`\`\`js\n${output}\n\`\`\`\n**❔ Type:** \`${type}\``)
                 .setFooter(`executed in ${Number(end - start) / 1000000} milliseconds`, message.author.displayAvatarURL)
@@ -523,7 +523,7 @@ class SkinsDiscordBot extends Client {
 				depth: 0,
 				maxArrayLength: 0
             });
-            
+
             message.reply(new RichEmbed()
                 .setDescription( `**📥 Input**\n\`\`\`js\n${code}\n\`\`\`\n**❗ Error:**\n\`\`\`\n${error}\n\`\`\``)
                 .setFooter(`executed in ${Number(end - start) / 1000000} milliseconds`, message.author.displayAvatarURL)
@@ -532,8 +532,8 @@ class SkinsDiscordBot extends Client {
     }
 
     /**
-     * @param {string} userID 
-     * @param {DiscordJS.Message} message 
+     * @param {string} userID
+     * @param {DiscordJS.Message} message
      */
     async purge(userID, message) {
         let skins = await this.dbskins.findByOwnerID(userID);
@@ -549,8 +549,8 @@ class SkinsDiscordBot extends Client {
     }
 
     /**
-     * @param {string} skinID 
-     * @param {DiscordJS.Message} message 
+     * @param {string} skinID
+     * @param {DiscordJS.Message} message
      */
     async delete(skinID, message, silent = false) {
         if (!/^\w{6}$/.test(skinID))
@@ -561,22 +561,22 @@ class SkinsDiscordBot extends Client {
         if (skinDoc === null)
             return message.reply(`Can't find skin ID \`${skinID}\``);
 
-        let skinPath = skinDoc.status === "approved" ? 
+        let skinPath = skinDoc.status === "approved" ?
                             SKIN_STATIC : PENDING_SKIN_STATIC;
         skinPath += `/${skinDoc.skinID}.png`;
 
         let uid = this.moveToTrash(skinPath, skinDoc.status);
         uid += skinDoc.status;
 
-        await this.deleteReview(skinDoc.skinID, skinDoc.ownerID, 
+        await this.deleteReview(skinDoc.skinID, skinDoc.ownerID,
             skinDoc.skinName, skinDoc.status, `${this.config.webDomain}/d/${uid}`);
-        
+
         let success = await this.dbskins.deleteByID(skinID);
 
         if (this.config.env == "production")
-            await this.cloudflare.purgeCache(`${this.config.webDomain}/` + 
+            await this.cloudflare.purgeCache(`${this.config.webDomain}/` +
                 `${skinDoc.status == "approved" ? "s" : "p"}/${skinDoc.skinID}`);
-        
+
         if (!silent) {
             await message.channel.send(success ? `Skin \`${skinID}\` deleted` :
             `Failed to delete skin \`${skinID}\``);
@@ -584,8 +584,8 @@ class SkinsDiscordBot extends Client {
     }
 
     /**
-     * @param {string} skinID 
-     * @param {DiscordJS.Message} message 
+     * @param {string} skinID
+     * @param {DiscordJS.Message} message
      */
     async reject(skinID, message) {
         if (!/^\w{6}$/.test(skinID))
@@ -597,11 +597,11 @@ class SkinsDiscordBot extends Client {
             return message.reply(`Can't find skin ID \`${skinID}\``);
 
         if (skinDoc.status != "approved")
-            return message.reply(`\`${skinID}\`'s status is **${skinDoc.status}**. ` + 
+            return message.reply(`\`${skinID}\`'s status is **${skinDoc.status}**. ` +
                                  `You can only use \`${this.prefix}reject\` on an approved skin`);
-        
+
         let success = this.moveToPending(skinID);
-        
+
         if (this.config.env == "production")
             await this.cloudflare.purgeCache(`${this.config.webDomain}/s/${skinDoc.skinID}`);
 
@@ -626,15 +626,15 @@ class SkinsDiscordBot extends Client {
     }
 
     /**
-     * @param {string} userID 
-     * @param {DiscordJS.Message} message 
+     * @param {string} userID
+     * @param {DiscordJS.Message} message
      */
     async ban(userID, message) {
 
         const TIME_REGEX = /(\d+[s|h|d|m|y])/i;
         if (userID) {
             let banMatched = TIME_REGEX.exec(message.cleanContent);
-            
+
             if (banMatched) {
 
                 let banTime = banMatched[0];
@@ -678,8 +678,8 @@ class SkinsDiscordBot extends Client {
     }
 
     /**
-     * @param {string} userID 
-     * @param {DiscordJS.Message} message 
+     * @param {string} userID
+     * @param {DiscordJS.Message} message
      */
     async unban(userID, message) {
         if (userID) {
@@ -692,15 +692,15 @@ class SkinsDiscordBot extends Client {
                 await message.reply(`Yeet <@${userID}>`);
 
             message.reply(`User unbanned: \`${userID}\``);
-            
+
         } else {
             return message.reply(`Use ${this.prefix}unban \`/\\D+/\` to unban someone from Vanis Skin`);
         }
     }
 
     /**
-     * @param {string} userID 
-     * @param {DiscordJS.Message} message 
+     * @param {string} userID
+     * @param {DiscordJS.Message} message
      */
     async render(userID, message) {
         message.channel.startTyping();
@@ -728,8 +728,8 @@ class SkinsDiscordBot extends Client {
     }
 
     /**
-     * @param {string} userID 
-     * @param {DiscordJS.Message} message 
+     * @param {string} userID
+     * @param {DiscordJS.Message} message
      */
     async list(userID, message, limit = 10, reversed = false) {
 
@@ -780,7 +780,7 @@ class SkinsDiscordBot extends Client {
         });
 
         let embed = new RichEmbed()
-            .setTitle(`Skin Mod Scoreboard (${isTotal ? "total score" : 
+            .setTitle(`Skin Mod Scoreboard (${isTotal ? "total score" :
                 `since ${this.modScoreDate.getFullYear()}-${this.modScoreDate.getMonth() + 1}-${this.modScoreDate.getDate()}`})`)
             .setAuthor(this.user.username, this.user.avatarURL)
             .setDescription(content);
@@ -788,8 +788,8 @@ class SkinsDiscordBot extends Client {
     }
 
     /**
-     * @param {string} skinID 
-     * @param {DiscordJS.Message} message 
+     * @param {string} skinID
+     * @param {DiscordJS.Message} message
      */
     async ownerOf(skinID, message) {
         let skin = await this.dbskins.findBySkinID(skinID);
@@ -817,7 +817,7 @@ class SkinsDiscordBot extends Client {
             await this.updateReview().catch(e => this.logger.onError(e));
             this.reviewCycle = setTimeout(wrapper, this.config.reviewInterval);
         }
-        
+
         this.reviewCycle = setTimeout(wrapper, 0);
 
         return true;
@@ -834,8 +834,8 @@ class SkinsDiscordBot extends Client {
     }
 
     /**
-     * @param {string} skinID 
-     * @param {DiscordJS.Message} message 
+     * @param {string} skinID
+     * @param {DiscordJS.Message} message
      */
     async approveAll(message) {
 
@@ -882,10 +882,10 @@ class SkinsDiscordBot extends Client {
     }
 
     /**
-     * @param {string} ownerID 
-     * @param {NSFWPrediction} nsfwResult 
+     * @param {string} ownerID
+     * @param {NSFWPrediction} nsfwResult
      * @param {string} skinID
-     * @param {string} skinName 
+     * @param {string} skinName
      */
     async pendSkin(ownerID, nsfwResult, skinID, skinName = "", fromReport = false) {
 
@@ -900,7 +900,7 @@ class SkinsDiscordBot extends Client {
             .setColor(color)
             .setTitle(`Skin ${skinID}`)
             .setDescription(`\`${skinName.replace(/`/g, "\\`")}\` submitted by <@${ownerID}>`)
-            .setFooter(`${this.config.approveThreshold} ${this.config.approveEmoji} to approve | ` + 
+            .setFooter(`${this.config.approveThreshold} ${this.config.approveEmoji} to approve | ` +
                        `${this.config.rejectThreshold } ${this.config.rejectEmoji } to reject`)
             .setTimestamp();
 
@@ -915,7 +915,7 @@ class SkinsDiscordBot extends Client {
             if (nsfwResult.data) {
                 embed.attachFile(new Attachment(nsfwResult.data, `SPOILER_${skinName}.png`));
             } else {
-                embed.attachFile(new Attachment(`${fromReport ? SKIN_STATIC : PENDING_SKIN_STATIC}/${skinID}.png`, 
+                embed.attachFile(new Attachment(`${fromReport ? SKIN_STATIC : PENDING_SKIN_STATIC}/${skinID}.png`,
                     `SPOILER_${skinName}.png`));
             }
             embed.setImage(`attachment://SPOILER_${skinName}.png`);
@@ -928,21 +928,18 @@ class SkinsDiscordBot extends Client {
         /** @type {DiscordJS.Message} */
         let message = await this.pendingChannel.send(embed);
 
-        await message.react(this.config.approveEmoji);
-        await message.react(this.config.rejectEmoji);
-
         this.pendingCache[skinID] = message;
         return message;
     }
 
     /**
-     * @param {string} ownerID 
-     * @param {NSFWPrediction} nsfwResult 
+     * @param {string} ownerID
+     * @param {NSFWPrediction} nsfwResult
      * @param {string} skinID
-     * @param {string} skinName 
+     * @param {string} skinName
      */
     async approveSkin(ownerID, nsfwResult, skinID, skinName) {
-        
+
         // No color defaults to red (ERROR)
         nsfwResult.average_color = nsfwResult.average_color || "rgb(255,0,0)";
         let color = nsfwResult.average_color.replace(/\D/g, " ").match(/\S+/g).map(c => ~~c);
@@ -965,17 +962,17 @@ class SkinsDiscordBot extends Client {
             let url = `${this.config.webDomain}/s/${skinID}`;
             embed.setURL(url).setThumbnail(url);
         }
-            
+
         /** @type {DiscordJS.Message} */
         let message = await this.approvedChannel.send(embed);
         return message.id;
     }
 
     /**
-     * @param {string} ownerID 
-     * @param {NSFWPrediction} nsfwResult 
+     * @param {string} ownerID
+     * @param {NSFWPrediction} nsfwResult
      * @param {string} skinID
-     * @param {string} skinName 
+     * @param {string} skinName
      */
     async rejectSkin(ownerID, nsfwResult, skinID, skinName) {
 
@@ -987,7 +984,7 @@ class SkinsDiscordBot extends Client {
             .setTitle(`Skin ${skinID} Rejected`)
             .setDescription(`\`${skinName.replace(/`/g, "\\`")}\` submitted by <@${ownerID}>\n${nsfwResult.description || ""}`)
             .setTimestamp();
-        
+
         if (this.logger.config.DEBUG) {
             embed.description += `\n\`\`\`prolog\n${Table(nsfwResult)}\`\`\``;
         }
@@ -998,11 +995,11 @@ class SkinsDiscordBot extends Client {
         } else {
             if (nsfwResult.data)
                 embed.attachFile(new Attachment(nsfwResult.data, `SPOILER_${skinName}.png`));
-            else 
+            else
                 embed.attachFile(new Attachment(Path.resolve(PENDING_SKIN_STATIC, `${skinID}.png`), `SPOILER_${skinName}.png`));
             embed.setImage(`attachment://SPOILER_${skinName}.png`);
         }
-            
+
         /** @type {DiscordJS.Message} */
         let message = await this.rejectedChannel.send(embed).catch(_ => ({}));
         return message.id;
@@ -1024,16 +1021,16 @@ class SkinsDiscordBot extends Client {
 
         let length = pendingSkins.length;
         if (length) {
-            await this.user.setActivity(`with ${length} pending skins`, 
+            await this.user.setActivity(`with ${length} pending skins`,
                 { url: `${this.config.webDomain}`, type: "PLAYING" });
 
         } else {
-            await this.user.setActivity(`for next skin submission`, 
+            await this.user.setActivity(`for next skin submission`,
                 { url: `${this.config.webDomain}`, type: "WATCHING" });
         }
 
         // pendingSkins = pendingSkins.slice(-25);
-        
+
         for (let skinID of this.reportedSet) {
             let skinDoc = await this.dbskins.findBySkinID(skinID);
             skinDoc.status == "approved" && pendingSkins.push(skinDoc);
@@ -1049,7 +1046,7 @@ class SkinsDiscordBot extends Client {
 
         for (let skinDoc of pendingSkins) {
 
-            let message = this.pendingCache[skinDoc.skinID] ? 
+            let message = this.pendingCache[skinDoc.skinID] ?
                 this.pendingChannel.messages.get(this.pendingCache[skinDoc.skinID].id) : null;
 
             // Db might update before the message is sent, so wait a bit to repend
@@ -1088,7 +1085,7 @@ class SkinsDiscordBot extends Client {
     }
 
     /**
-     * @param {SkinDocument} skinDoc 
+     * @param {SkinDocument} skinDoc
      * @param {DiscordJS.MessageReaction} approvedReactions
      */
     async approvePending(skinDoc, approvedReactions) {
@@ -1102,7 +1099,7 @@ class SkinsDiscordBot extends Client {
         if (success) {
 
             let users = approvedReactions.users.filter(u => u !== this.user);
-            let extra = approvedReactions ? `This skin was approved by: \n**` + 
+            let extra = approvedReactions ? `This skin was approved by: \n**` +
                                                 users.map(u => `<@${u.id}>`).join(" ") + "**\n" :
                                             `Batch approved`;
 
@@ -1141,7 +1138,7 @@ class SkinsDiscordBot extends Client {
                         .setThumbnail(url)
                         .setURL(url)
                         .setDescription(`Skin URL: **\`${this.config.webDomain}/s/${skinDoc.skinID}\`**`);
-                    
+
                 } else {
                     // dev
                     skinEmbed.attachFile(new Attachment(`${SKIN_STATIC}/${skinDoc.skinID}.png`, skinDoc.skinName + ".png"));
@@ -1156,7 +1153,7 @@ class SkinsDiscordBot extends Client {
                         skinEmbed
                             .setDescription("This skin is private, please check out the website.")
                             .setURL(this.config.webDomain)
-                            .setThumbnail("");                                
+                            .setThumbnail("");
                     }
                     await this.notifChannel.send(`<@${skinDoc.ownerID}>`, skinEmbed).catch(console.error);
                 }
@@ -1167,14 +1164,14 @@ class SkinsDiscordBot extends Client {
     }
 
     /**
-     * @param {SkinDocument} skinDoc 
+     * @param {SkinDocument} skinDoc
      * @param {DiscordJS.MessageReaction} rejectReactions
      */
     async rejectPending(skinDoc, rejectReactions, fromReport = false) {
         skinDoc.status = "rejected";
         await skinDoc.save();
         let users = rejectReactions.users.filter(u => u !== this.user);
-        let extra = rejectReactions ? `This skin was rejected by: \n**` + 
+        let extra = rejectReactions ? `This skin was rejected by: \n**` +
                                         users.map(u => `<@${u.id}>`).join(" ") + "**\n" :
                                       "";
 
@@ -1198,7 +1195,7 @@ class SkinsDiscordBot extends Client {
             embed.setURL(url).setImage(url);
         } else {
             // dev
-            embed.attachFile(new Attachment(`${PENDING_SKIN_STATIC}/${skinDoc.skinID}.png`, 
+            embed.attachFile(new Attachment(`${PENDING_SKIN_STATIC}/${skinDoc.skinID}.png`,
                                             "SPOILER_" + skinDoc.skinName + ".png"));
             embed.setImage(`attachment://SPOILER_${skinDoc.skinName}.png`);
         }
@@ -1219,7 +1216,7 @@ class SkinsDiscordBot extends Client {
             if (this.config.env == "production")
                 skinEmbed.setImage(message.embeds[0].image.proxyURL);
             else {
-                skinEmbed.attachFile(new Attachment(`${PENDING_SKIN_STATIC}/${skinDoc.skinID}.png`, 
+                skinEmbed.attachFile(new Attachment(`${PENDING_SKIN_STATIC}/${skinDoc.skinID}.png`,
                                             "SPOILER_" + skinDoc.skinName + ".png"));
                 skinEmbed.setImage(`attachment://SPOILER_${skinDoc.skinName}.png`);
             }
@@ -1233,7 +1230,7 @@ class SkinsDiscordBot extends Client {
         }
     }
 
-    /** 
+    /**
      * @param {String} skinID
      * @param {String} ownerID
      * @param {String} skinName
@@ -1241,7 +1238,7 @@ class SkinsDiscordBot extends Client {
      * @param {string} newURL
      */
     async deleteReview(skinID, ownerID, skinName, status, newURL) {
-        
+
         if (status !== "pending" || !this.pendingCache[skinID]) {
             let embed = new RichEmbed()
                 .setTitle(`Skin ${skinName} deleted`)
@@ -1252,7 +1249,7 @@ class SkinsDiscordBot extends Client {
             await this.deletedChannel.send(embed);
             return;
         }
-        
+
         let message = this.pendingCache[skinID];
         delete this.pendingCache[skinID];
         let embed = this.copyEmbed(message.embeds[0]);
@@ -1322,8 +1319,8 @@ class SkinsDiscordBot extends Client {
         return true;
     }
 
-    /** 
-     * @param {string} path 
+    /**
+     * @param {string} path
      * @param {SkinStatus} status
      */
     moveToTrash(path, status) {
@@ -1380,8 +1377,8 @@ class SkinsDiscordBot extends Client {
         return r;
     }
 
-    /** 
-     * @param {string} discordID 
+    /**
+     * @param {string} discordID
      * @returns {boolean}
      */
     async isMod(discordID) {

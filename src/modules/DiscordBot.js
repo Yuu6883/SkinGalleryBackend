@@ -928,6 +928,9 @@ class SkinsDiscordBot extends Client {
         /** @type {DiscordJS.Message} */
         let message = await this.pendingChannel.send(embed);
 
+        await message.react("718370249677733920");
+        await message.react("718370228106428526");
+
         this.pendingCache[skinID] = message;
         return message;
     }

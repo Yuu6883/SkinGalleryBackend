@@ -435,7 +435,7 @@ class SkinsDiscordBot extends Client {
 
     /** @param {DiscordJS.Message} message */
     async reportSkin(message) {
-        const skinIDorURLRegex = /\b(https?:\/\/(skins.vanis.io|localhost)\/s\/)?(?<id>[a-z0-9]{6})\b/;
+        const skinIDorURLRegex = /\b(https?:\/\/(skins.vanis.io|skins-old.vanis.io|localhost)\/s\/)?(?<id>[a-z0-9]{6})\b/;
         let content = message.content.split(/\b/g).slice(1).join(" ");
         let match = skinIDorURLRegex.exec(content);
         let reported = [];

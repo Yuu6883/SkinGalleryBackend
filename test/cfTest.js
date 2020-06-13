@@ -1,6 +1,6 @@
 const runner = require("./runner");
 
-const DIE_LIST = 
+const DIE_LIST =
 [
         "fj8o1u",
         "36yxyq",
@@ -144,7 +144,7 @@ const DIE_LIST =
 ];
 
 runner(true).then(async app => {
-    app.cloudflare.purgeList.push(...DIE_LIST.map(id => `https://skins.vanis.io/p/${id}`));
+    app.cloudflare.purgeList.push(...DIE_LIST.map(id => `https://skins-old.vanis.io/p/${id}`));
     while (app.cloudflare.purgeList.length) {
         await app.cloudflare.applyPurge();
     }

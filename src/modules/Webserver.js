@@ -17,8 +17,7 @@ class Webserver {
         this.app = app;
         /** @type {import("http").Server} */
         this.webserver = null;
-        this.allowedOrigins =
-            app.config.webDomain ? [app.config.webDomain] : [];
+        this.allowedOrigins = ["https://skins.vanis.io", "https://skins-old.vanis.io"];
         this.allowedOrigins.push(VANIS_DOMAIN);
 
         this.blocked = {};

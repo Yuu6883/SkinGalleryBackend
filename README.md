@@ -3,7 +3,7 @@
 CLI entry point: `node cli/index.js`
 Programmatic entry point: `src/app.js` exports class `SkinGallery`
 
-## Skin System Documentation
+## Documentation
 1. `PUT /api/skin/:skinName`
  * An interval will check the reactions on the pending messages. (Must need \[CONFIGURABLE\] checkmark/cross reactions to approve/deny). If approved, move the image to public folder, update record in DB; if denied, delete image, update record in DB. Both ways will inform the user on Discord with DMs (or fallback to a default channel or no action).
     * A user will have \[CONFIGURABLE\] slots for skins (Include approved and pending). OR PAY ME TO GET EXTRA SLOT.

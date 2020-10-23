@@ -9,6 +9,7 @@ interface AppConfig {
 
     webLocation: string | number;
     webDomain:   string;
+    gameDomain:  string;
     maintenance: boolean;
     discordAppID:       string;
     discordAppSecret:   string;
@@ -46,7 +47,7 @@ interface UserEntry {
     discordID:      string;
     discordToken:   string;
     discordRefresh: string;
-    vanisToken:     string;
+    userToken:     string;
     cacheTimestamp: number;
     cacheInfo:      Map<string, string>;
     moderator:      boolean;
@@ -102,15 +103,6 @@ interface DiscordUser {
     locale: string;
 }
 
-interface VanisLoginInfo {
-    id: string;
-    username: string;
-    discriminator: string;
-    avatar: string;
-    moderator: boolean;
-    bannedUntil: Date;
-}
-
 interface NSFWPrediction {
     drawing: number;
     hentai: number;
@@ -123,8 +115,8 @@ interface NSFWPrediction {
 }
 
 declare type APIRequest = import("express").Request & {
-    vanisPermissions: number;
-    vanisUser?: UserDocument;
+    permissions: number;
+    user?: UserDocument;
 };
 declare type APIResponse = import("express").Response;
 

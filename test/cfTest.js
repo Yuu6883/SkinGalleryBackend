@@ -144,7 +144,7 @@ const DIE_LIST =
 ];
 
 runner(true).then(async app => {
-    app.cloudflare.purgeList.push(...DIE_LIST.map(id => `https://skins-old.vanis.io/p/${id}`));
+    app.cloudflare.purgeList.push(...DIE_LIST.map(id => `https://${app.config.webDomain}/p/${id}`));
     while (app.cloudflare.purgeList.length) {
         await app.cloudflare.applyPurge();
     }

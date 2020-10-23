@@ -20,7 +20,6 @@ mod_scores/*
 # Skins
 skins/*
 !skins/40[1-9].png
-!skins/vanis[1-9].png
 
 pending_skins/*
 !pending_skins/404.png

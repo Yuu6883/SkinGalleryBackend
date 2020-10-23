@@ -42,8 +42,8 @@ module.exports = {
     SKIN_STATIC: path.resolve(__dirname, "..", "skins"),
     PENDING_SKIN_STATIC: path.resolve(__dirname, "..", "pending_skins"),
     DELETED_SKIN_STATIC: path.resolve(__dirname, "..", "deleted_skins"),
-    VANIS_TOKEN_COOKIE: "vanis_skin_token",
-    VANIS_TOKEN_AGE: 30 * 24 * 60 * 60 * 1000,
+    GALLERY_TOKEN_COOKIE: "skin_gallery_token",
+    GALLERY_TOKEN_COOKIE_AGE: 30 * 24 * 60 * 60 * 1000,
     PERMISSIONS: p,
     AUTH_LEVELS: {
         NONE: NO_AUTH_LEVEL,

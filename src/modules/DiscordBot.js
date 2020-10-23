@@ -13,7 +13,6 @@ const UserCollection = require("../models/Users");
 const DiscordLogger = require("./DiscordLogger");
 const Provision = require("../models/Provision");
 const RenderSkins = require("./RenderSkin");
-const VanisLB = require("./VanisLeaderboard");
 
 const { Attachment, RichEmbed, Client } = DiscordJS;
 const { SKIN_STATIC, PENDING_SKIN_STATIC, DELETED_SKIN_STATIC } = require("../constant");
@@ -291,15 +290,6 @@ class SkinsDiscordBot extends Client {
             process.emit("SIGINT");
         }
 
-        if (message.content.startsWith(`${this.prefix}top`)) {
-            let top = message.content.split(" ")[1];
-            if (message.content.trim() == `${this.prefix}top`) top = 10;
-            if (top != ~~top || ~~top <= 0)
-                return message.reply(`Invalid option: ${top}`);
-
-            VanisLB(message, top);
-        }
-
         if (message.content.startsWith(`${this.prefix}reject `)) {
             let skinIDs = message.content.split(/ /g)
                 .slice(1).map(id => id
@@ -435,7 +425,7 @@ class SkinsDiscordBot extends Client {
 
     /** @param {DiscordJS.Message} message */
     async reportSkin(message) {
-        const skinIDorURLRegex = /\b(https?:\/\/(skins.vanis.io|skins-old.vanis.io|localhost)\/s\/)?(?<id>[a-z0-9]{6})\b/;
+        const skinIDorURLRegex = new RegExp(`\\b(https?:\\/\\/(${this.app.config.webDomain}|localhost)\\/s\\/)?(?<id>[a-z0-9]{6})\\b/`);
         let content = message.content.split(/\b/g).slice(1).join(" ");
         let match = skinIDorURLRegex.exec(content);
         let reported = [];
@@ -674,7 +664,7 @@ class SkinsDiscordBot extends Client {
             }
         }
 
-        return message.reply(`Use ${this.prefix}ban {**UserID**} {**BanTime**} {**BanReason**} to ban someone from Vanis Skin`);
+        return message.reply(`Use ${this.prefix}ban {**UserID**} {**BanTime**} {**BanReason**} to ban someone`);
     }
 
     /**
@@ -694,7 +684,7 @@ class SkinsDiscordBot extends Client {
             message.reply(`User unbanned: \`${userID}\``);
 
         } else {
-            return message.reply(`Use ${this.prefix}unban \`/\\D+/\` to unban someone from Vanis Skin`);
+            return message.reply(`Use ${this.prefix}unban \`/\\D+/\` to unban someone`);
         }
     }
 

@@ -4,13 +4,13 @@ const { hasPermission } = require("../constant");
 const endpoint = {
     async handler(req, res) {
 
-        if (!hasPermission("FAV_SKIN", req.vanisPermissions))
+        if (!hasPermission("FAV_SKIN", req.permissions))
             return void res.sendStatus(403);
 
         if (!this.provision.confirmSkinID(req.params.skinID))
             return void res.sendStatus(400);
         
-        let success = await this.users.removeFav(req.vanisUser, req.params.skinID);
+        let success = await this.users.removeFav(req.user, req.params.skinID);
         success && this.skins.restartUpdatePublic();
         
         res.json({ success });

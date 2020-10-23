@@ -16,10 +16,10 @@ const endpoint = {
         if (!this.provision.confirmSkinID(skinID) || !this.provision.confirmSkinName(name))
             return void res.sendStatus(400);
 
-        if (!hasPermission("MODIFY_SKIN", req.vanisPermissions))
+        if (!hasPermission("MODIFY_SKIN", req.permissions))
             return void res.sendStatus(403);
 
-        if (!(await this.skins.checkOwnership(req.vanisUser.discordID, skinID)))
+        if (!(await this.skins.checkOwnership(req.user.discordID, skinID)))
             return void res.sendStatus(404);
 
         let success = await this.skins.edit({skinID, name, isPublic: req.query.public == "true" });

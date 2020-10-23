@@ -4,10 +4,10 @@ const { hasPermission } = require("../constant");
 const endpoint = {
     async handler(req, res) {
 
-        if (!hasPermission("LOGGED_IN", req.vanisPermissions))
+        if (!hasPermission("LOGGED_IN", req.permissions))
             return void res.sendStatus(403);
 
-        if (!hasPermission("REJECT_SKIN", req.vanisPermissions))
+        if (!hasPermission("REJECT_SKIN", req.permissions))
             return void res.sendStatus(403);
 
         let skinID = req.params.skinID;
@@ -26,7 +26,7 @@ const endpoint = {
         let success = this.bot.moveToPending(skinDoc.skinID);
         
         this.bot.rejectSkin(skinDoc.ownerID, { description: 
-            `Rejected by <@${req.vanisUser.discordID}> through **/reject** endpoint` }, 
+            `Rejected by <@${req.user.discordID}> through **/reject** endpoint` }, 
             skinID, skinDoc.skinID);
 
         res.json({ success });

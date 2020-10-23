@@ -3,7 +3,7 @@ const { hasPermission } = require("../constant");
 /** @type {APIEndpointHandler} */
 const endpoint = {
     handler(req, res) {
-        if (!hasPermission("LOGIN", req.vanisPermissions))
+        if (!hasPermission("LOGIN", req.permissions))
             return void res.sendStatus(403);
         
         res.redirect(`https://discordapp.com/oauth2/authorize?client_id=${this.config.discordAppID}` + 

@@ -10,7 +10,7 @@ function getTiming(stamp) {
  * @param {import("express").Request} req
  */
 function getCaller(req) {
-    return `${req.method.toUpperCase()} ${req.path} HTTP/${req.httpVersion} ${req.socket.remoteAddress} ${req.headers["user-agent"]} ${req.headers["origin"] || "no origin"} (perms ${req.vanisPermission || "none set"})`;
+    return `${req.method.toUpperCase()} ${req.path} HTTP/${req.httpVersion} ${req.socket.remoteAddress} ${req.headers["user-agent"]} ${req.headers["origin"] || "no origin"} (perms ${req.userPermission || "none set"})`;
 }
 
 /**

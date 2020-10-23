@@ -1,13 +1,12 @@
 const fs = require("fs");
 const path = require("path");
 
-const { VANIS_TOKEN_COOKIE, AUTH_LEVELS } = require("../constant");
+const { GALLERY_TOKEN_COOKIE, AUTH_LEVELS } = require("../constant");
 
 const express = require("express");
 const expressCookies = require("cookie-parser");
 const nocache = require("nocache");
 const expressLogger = require("./ExpressLogger");
-const VANIS_DOMAIN = "https://vanis.io";
 
 class Webserver {
     /**
@@ -17,8 +16,8 @@ class Webserver {
         this.app = app;
         /** @type {import("http").Server} */
         this.webserver = null;
-        this.allowedOrigins = ["https://skins.vanis.io", "https://skins-old.vanis.io"];
-        this.allowedOrigins.push(VANIS_DOMAIN);
+        this.allowedOrigins = [`https://${this.app.config.webDomain}`, 
+            `https://${this.app.config.gameDomain}`];
 
         this.blocked = {};
     }
@@ -32,34 +31,34 @@ class Webserver {
         // Required parser middleware
         apiRouter.use(expressCookies());
 
-        // Try to authorize the Vanis side
+        // Try to authorize
         apiRouter.use(async (req, res, next) => {
             /** @type {string} */
-            const vanisToken = req.cookies[VANIS_TOKEN_COOKIE];
+            const userToken = req.cookies[GALLERY_TOKEN_COOKIE];
             /** @type {UserDocument} */
-            let vanisUser;
+            let user;
 
-            if (this.app.provision.confirmVanisToken(vanisToken))
-                vanisUser = req.vanisUser = await this.app.users.findAuthedVanis(vanisToken);
-            if (vanisUser == null) {
-                req.vanisPermissions = AUTH_LEVELS.NONE;
-                req.vanisPermission = "NONE";
-                res.clearCookie(VANIS_TOKEN_COOKIE);
-            } else if (vanisUser.moderator || this.config.admins.includes(vanisUser.discordID)) {
-                req.vanisPermissions = AUTH_LEVELS.MOD;
-                req.vanisPermission = "MOD";
-            } else if (vanisUser.bannedUntil > new Date()) {
-                req.vanisPermissions = AUTH_LEVELS.USER_BANNED;
-                req.vanisPermission = "USER_BANNED";
+            if (this.app.provision.confirmToken(userToken))
+                user = req.user = await this.app.users.findAuthed(userToken);
+            if (user == null) {
+                req.permissions = AUTH_LEVELS.NONE;
+                req.userPermission = "NONE";
+                res.clearCookie(GALLERY_TOKEN_COOKIE);
+            } else if (user.moderator || this.config.admins.includes(user.discordID)) {
+                req.permissions = AUTH_LEVELS.MOD;
+                req.userPermission = "MOD";
+            } else if (user.bannedUntil > new Date()) {
+                req.permissions = AUTH_LEVELS.USER_BANNED;
+                req.userPermission = "USER_BANNED";
             } else {
-                req.vanisPermissions = AUTH_LEVELS.USER;
-                req.vanisPermission = "USER";
+                req.permissions = AUTH_LEVELS.USER;
+                req.userPermission = "USER";
             }
-            this.logger.debug(`Request from token '${vanisToken}' identified as ${req.vanisPermission}`);
+            this.logger.debug(`Request from token '${userToken}' identified as ${req.userPermission}`);
 
-            if (req.vanisPermissions !== AUTH_LEVELS.MOD) {
+            if (req.permissions !== AUTH_LEVELS.MOD) {
                 let origin = this.getOrigin(req);
-                if (origin.startsWith("https://vanis.io")) {
+                if (origin.startsWith(`https://${this.app.config.gameDomain}`)) {
                     this.logger.onAccess(`Non-mod perms did not allow request from client`);
                     return void res.sendStatus(403);
                 }

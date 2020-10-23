@@ -3,7 +3,7 @@ const { hasPermission } = require("../constant");
 /** @type {APIEndpointHandler} */
 const endpoint = {
     async handler(req, res) {
-        if (!hasPermission("VIEW_PUBLIC_SKIN", req.vanisPermissions))
+        if (!hasPermission("VIEW_PUBLIC_SKIN", req.permissions))
             return void res.sendStatus(403);
 
         if (!this.skins.publicCache.cacheLength)

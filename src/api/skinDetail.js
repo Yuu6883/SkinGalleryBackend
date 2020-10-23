@@ -7,7 +7,7 @@ const endpoint = {
         if (!this.provision.confirmSkinID(req.params.skinID))
             return void res.sendStatus(400);
 
-        if (!hasPermission("LOGGED_IN", req.vanisPermissions))
+        if (!hasPermission("LOGGED_IN", req.permissions))
             return void res.sendStatus(403);
             
         let skinDoc = await this.skins.findBySkinID(req.params.skinID);

@@ -1,7 +1,7 @@
 {
-    "name": "vanis-skins",
+    "name": "skin-gallery",
     "version": "0.3.0",
-    "description": "Vanis.io skin system",
+    "description": "Skin system for Ogar projects",
     "license": "Apache-2.0",
     "scripts": {
         "dev": "pm2 start processes/dev.config.js && pm2 log",
@@ -12,10 +12,10 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/Yuu6883/VanisSkins.git"
+        "url": "https://github.com/Yuu6883/SkinGalleryBackend.git"
     },
     "bugs": {
-        "url": "https://github.com/Yuu6883/VanisSkins/issues"
+        "url": "https://github.com/Yuu6883/SkinGalleryBackend/issues"
     },
     "dependencies": {
         "@pm2/io": "^4.3.2",

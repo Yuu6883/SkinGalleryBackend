@@ -4,22 +4,22 @@ const { hasPermission } = require("../constant");
 const endpoint = {
     async handler(req, res) {
 
-        if (!req.vanisUser || 
-            !hasPermission("FAV_SKIN", req.vanisPermissions))
+        if (!req.user || 
+            !hasPermission("FAV_SKIN", req.permissions))
             return void res.sendStatus(403);
 
         if (req.params.userID == '@me') {
-            let skinDocs = await this.skins.findAll(req.vanisUser.favorites);
+            let skinDocs = await this.skins.findAll(req.user.favorites);
 
             // Some skin disappeared, might because rejected / deleted, so update user favorites
-            if (!req.vanisUser.favorites.every(s => skinDocs.some(d => d.skinID == s))) {
-                req.vanisUser.favorites = skinDocs.map(d => d.skinID);
-                await req.vanisUser.save();
+            if (!req.user.favorites.every(s => skinDocs.some(d => d.skinID == s))) {
+                req.user.favorites = skinDocs.map(d => d.skinID);
+                await req.user.save();
             }
 
             return void res.json(skinDocs);
         } else {
-            if (!hasPermission("LIST_OTHER_FAV", req.vanisPermissions))
+            if (!hasPermission("LIST_OTHER_FAV", req.permissions))
                 return void res.sendStatus(404);
 
             let userDoc = await this.users.find(req.params.userID);

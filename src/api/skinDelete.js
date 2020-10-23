@@ -8,7 +8,7 @@ const endpoint = {
         if (!this.provision.confirmSkinID(req.params.skinID))
             return void res.sendStatus(400);
 
-        if (!hasPermission("DELETE_SKIN", req.vanisPermissions))
+        if (!hasPermission("DELETE_SKIN", req.permissions))
             return void res.sendStatus(403);
             
         let skinDoc = await this.skins.findBySkinID(req.params.skinID);
@@ -16,8 +16,8 @@ const endpoint = {
         if (skinDoc === null)
             return void res.sendStatus(404);
 
-        if (!hasPermission("DELETE_OTHER_SKIN", req.vanisPermissions) &&
-            skinDoc.ownerID !== req.vanisUser.discordID)
+        if (!hasPermission("DELETE_OTHER_SKIN", req.permissions) &&
+            skinDoc.ownerID !== req.user.discordID)
             return void res.sendStatus(404);
 
         if (skinDoc.status === "pending") {

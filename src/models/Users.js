@@ -7,7 +7,7 @@ const UserSchema = new mongoose.Schema({
     discordRefresh: { type: String, required: false },
     cacheTimestamp: { type: Number, default: Date.now },
     cacheInfo:      { type: Map,    of: String },
-    vanisToken:     { type: String, required: false },
+    userToken:     { type: String, required: false },
     bannedUntil:    { type: Date,   required: false },
     bannedReason:   { type: String, required: false },
     moderator:      { type: Boolean,  default: false },
@@ -18,7 +18,7 @@ const UserSchema = new mongoose.Schema({
 });
 
 UserSchema.index({ discordID: 1 },  { unique: true });
-UserSchema.index({ vanisToken: 1 }, { unique: true, sparse: true });
+UserSchema.index({ userToken: 1 }, { unique: true, sparse: true });
 
 UserSchema.post("init", doc => {
     doc.limit = doc.limit || 60;
@@ -172,10 +172,10 @@ class UserCollection {
     }
 
     /**
-     * @param {string} vanisToken
+     * @param {string} userToken
      */
-    async findAuthedVanis(vanisToken) {
-        return await UserModel.findOne({ vanisToken });
+    async findAuthed(userToken) {
+        return await UserModel.findOne({ userToken });
     }
 
     /**
@@ -210,10 +210,10 @@ class UserCollection {
     }
 
     /**
-     * @param {string} vanisToken
+     * @param {string} userToken
      */
-    async countAuthedVanis(vanisToken) {
-        return await UserModel.countDocuments({ vanisToken });
+    async countAuthed(userToken) {
+        return await UserModel.countDocuments({ userToken });
     }
 
     /**
@@ -227,8 +227,8 @@ class UserCollection {
         user.discordToken = discordToken;
         user.discordRefresh = discordRefresh;
 
-        const token = await this.app.provision.generateVanisToken();
-        user.vanisToken = token;
+        const token = await this.app.provision.generateToken();
+        user.userToken = token;
         await user.save();
 
         return token;
@@ -242,7 +242,7 @@ class UserCollection {
         if (user == null) return false;
         user.discordToken = undefined;
         user.discordRefresh = undefined;
-        user.vanisToken = undefined;
+        user.userToken = undefined;
         await user.save();
         return true;
     }

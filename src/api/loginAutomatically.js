@@ -1,50 +1,50 @@
-const { VANIS_TOKEN_COOKIE, VANIS_TOKEN_AGE, hasPermission,
+const { GALLERY_TOKEN_COOKIE, GALLERY_TOKEN_COOKIE_AGE, hasPermission,
     MapToJson, JsonToMap } = require("../constant");
 
 /** @type {APIEndpointHandler} */
 const endpoint = {
     async handler(req, res) {
 
-        if (!hasPermission("LOGIN", req.vanisPermissions)) {
-            this.logger.inform("no permision", req.vanisUser, req.vanisPermissions);
-            return void res.clearCookie(VANIS_TOKEN_COOKIE).sendStatus(403);
+        if (!hasPermission("LOGIN", req.permissions)) {
+            this.logger.inform("no permision", req.user, req.permissions);
+            return void res.clearCookie(GALLERY_TOKEN_COOKIE).sendStatus(403);
         }
 
-        if (!req.vanisUser)
-            return void res.clearCookie(VANIS_TOKEN_COOKIE).sendStatus(403);
+        if (!req.user)
+            return void res.clearCookie(GALLERY_TOKEN_COOKIE).sendStatus(403);
 
         /** @type {DiscordUser} */
-        let discordUserInfo = MapToJson(req.vanisUser.cacheInfo || new Map());
+        let discordUserInfo = MapToJson(req.user.cacheInfo || new Map());
 
-        if (Date.now() - req.vanisUser.cacheTimestamp > this.config.userinfoCacheTime || !Object.keys(discordUserInfo).length) {
-            discordUserInfo = await this.provision.ensureDiscordAuthorization(req.vanisUser, true);
+        if (Date.now() - req.user.cacheTimestamp > this.config.userinfoCacheTime || !Object.keys(discordUserInfo).length) {
+            discordUserInfo = await this.provision.ensureDiscordAuthorization(req.user, true);
 
             if (discordUserInfo == null)
-                return void res.clearCookie(VANIS_TOKEN_COOKIE).sendStatus(500);
+                return void res.clearCookie(GALLERY_TOKEN_COOKIE).sendStatus(500);
 
-            req.vanisUser.cacheTimestamp = Date.now();
-            req.vanisUser.cacheInfo = JsonToMap(discordUserInfo);
+            req.user.cacheTimestamp = Date.now();
+            req.user.cacheInfo = JsonToMap(discordUserInfo);
 
-            await req.vanisUser.save();
+            await req.user.save();
         }
 
         if (!discordUserInfo || !Object.keys(discordUserInfo).length)
             // Failure at gateway
-            return void res.clearCookie(VANIS_TOKEN_COOKIE).sendStatus(500);
+            return void res.clearCookie(GALLERY_TOKEN_COOKIE).sendStatus(500);
 
-        res.cookie(VANIS_TOKEN_COOKIE, req.vanisUser.vanisToken, { maxAge: VANIS_TOKEN_AGE });
+        res.cookie(GALLERY_TOKEN_COOKIE, req.user.userToken, { maxAge: GALLERY_TOKEN_COOKIE_AGE });
 
         res.json({
             id: discordUserInfo.id,
             username: discordUserInfo.username,
             discriminator: discordUserInfo.discriminator,
             avatar: discordUserInfo.avatar,
-            moderator: req.vanisUser.moderator,
-            favorites: req.vanisUser.favorites,
-            bannedUntil: req.vanisUser.bannedUntil &&
-                         req.vanisUser.bannedUntil.getTime(),
-            bannedReason: req.vanisUser.bannedReason,
-            limit: req.vanisUser.limit
+            moderator: req.user.moderator,
+            favorites: req.user.favorites,
+            bannedUntil: req.user.bannedUntil &&
+                         req.user.bannedUntil.getTime(),
+            bannedReason: req.user.bannedReason,
+            limit: req.user.limit
         });
     },
     method: "post",

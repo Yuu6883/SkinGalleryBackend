@@ -6,7 +6,7 @@ const expressForms = require("body-parser");
 /** @type {APIEndpointHandler} */
 const endpoint = {
     async handler(req, res) {
-        if (!hasPermission("UPLOAD_SKIN", req.vanisPermissions))
+        if (!hasPermission("UPLOAD_SKIN", req.permissions))
             return void res.sendStatus(403);
 
         if (!this.provision.confirmSkinName(req.params.skinName))
@@ -15,15 +15,15 @@ const endpoint = {
         if (!this.provision.confirmPNG(req.body))
             return void res.sendStatus(400);
 
-        if ((await this.skins.countByOwnerID(req.vanisUser.discordID)) >= (req.vanisUser.limit || this.config.skinLimit)) {
-            this.logger.warn(`User ${req.vanisUser.discordID} tried to create more than ${this.config.skinLimit} skins`);
+        if ((await this.skins.countByOwnerID(req.user.discordID)) >= (req.user.limit || this.config.skinLimit)) {
+            this.logger.warn(`User ${req.user.discordID} tried to create more than ${this.config.skinLimit} skins`);
             return void res.json({ error: `You have maximum of ${this.config.skinLimit} slots for skins` });
         }
 
         if (this.config.limitPending) {
-            let limit = await this.skins.approvedCountByOwnerID(req.vanisUser.discordID);
+            let limit = await this.skins.approvedCountByOwnerID(req.user.discordID);
             limit = Math.ceil((limit + 1) / 10);
-            let curr  = await this.skins.pendingCountByOwnerID(req.vanisUser.discordID);
+            let curr  = await this.skins.pendingCountByOwnerID(req.user.discordID);
 
             if (curr >= limit)
                 return void res.json({ error: `You can have at most ${limit} pending skin` });
@@ -45,7 +45,7 @@ const endpoint = {
 
             // CUCKED
             if (nsfwStatus == "approved" && 
-                this.provision.createdRecently(req.vanisUser.discordID)) {
+                this.provision.createdRecently(req.user.discordID)) {
                 nsfwStatus = "pending";
                 cucked = true;
             }
@@ -55,24 +55,24 @@ const endpoint = {
             fs.writeFileSync(skinPath, imageBase64Data, "base64");
 
             if (nsfwStatus === "pending") {
-                this.bot.pendSkin(req.vanisUser.discordID, 
+                this.bot.pendSkin(req.user.discordID, 
                     result, skinID, cucked ? (req.params.skinName + " (new user)") : req.params.skinName);
             }
 
             if (nsfwStatus === "approved") {
-                this.bot.approveSkin(req.vanisUser.discordID, result, skinID, req.params.skinName);
+                this.bot.approveSkin(req.user.discordID, result, skinID, req.params.skinName);
             }
 
             if (nsfwStatus === "rejected") {
-                this.bot.rejectSkin(req.vanisUser.discordID, result, skinID, req.params.skinName);
+                this.bot.rejectSkin(req.user.discordID, result, skinID, req.params.skinName);
             }
 
-            let skinDoc = await this.skins.create(req.vanisUser.discordID, skinID, 
+            let skinDoc = await this.skins.create(req.user.discordID, skinID, 
                                     req.params.skinName, nsfwStatus, !!req.query.public);
 
             if (!skinDoc) {
                 // Autism strikes
-                this.logger.warn(`${req.vanisUser.discordID} tried to submit more than limit.`);
+                this.logger.warn(`${req.user.discordID} tried to submit more than limit.`);
                 res.sendStatus(403);
 
                 if (fs.existsSync(skinPath))

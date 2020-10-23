@@ -1,5 +1,5 @@
 const skinIDChars = "abcdefghijklmnopqrstuvwxyz1234567890";
-const vanisTokenChars = "abcdef1234567890";
+const tokenChars = "abcdef1234567890";
 
 /**
  * @param {string} chars
@@ -31,10 +31,10 @@ class Provision {
         return iteration;
     }
     
-    async generateVanisToken() {
+    async generateToken() {
         /** @type {string} */
         let iteration;
-        while (await this.app.users.countAuthedVanis(iteration = generateToken(vanisTokenChars, 32)) > 0) ;
+        while (await this.app.users.countAuthed(iteration = generateToken(tokenChars, 32)) > 0) ;
         return iteration;
     }
 
@@ -62,8 +62,8 @@ class Provision {
     /**
      * @param {string} str
      */
-    confirmVanisToken(str) {
-        return str && confirmToken(str, vanisTokenChars, 32);
+    confirmToken(str) {
+        return str && confirmToken(str, tokenChars, 32);
     }
 
     /**
@@ -107,13 +107,13 @@ class Provision {
             this.logger.onError(`Failed to refresh token: ${discordInfo.error} (${discordInfo.error_description})`);
             return null;
         }
-        // Reauthorize on Vanis
+        // Reauthorize
         await this.app.users.authorize(user.discordID, refreshResponse.access_token, refreshResponse.refresh_token);
         return await this.ensureDiscordAuthorization(user, false);
     }
 }
 
 Provision.generateToken = generateToken;
-Provision.letterDigits = vanisTokenChars;
+Provision.letterDigits = tokenChars;
 
 module.exports = Provision;

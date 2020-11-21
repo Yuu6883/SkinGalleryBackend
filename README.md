@@ -1,11 +1,11 @@
 # Skin Gallery (Backend) For Ogar Projects
 ## About This Project
-This was the codebase for `skins.vanis.io` but `@Luka` and `@Mid` had to rewrite this for some critical reasons. Now I'm making this open sourced since this is no longer used and I want people to know what I've worked on in my free time. This documentation is more about the **functionalities this project had** instead of **how to run it** (not too sure if it still runs). I don't think anyone should use this anymore either because Ogar clones are dying or the logistic flaws in this project. In my opinion, this is a fairly large solo project and I'm surprised it lasted for half a year with almost 100% uptime in a semi-production environment. Due to the popularity of the game, the gallery had about 3k daily active user and 60k total users. There are 193k skins by the end of its lifetime. 
+This was the codebase for `skins.vanis.io` but `@Luka` and `@Mid` had to rewrite this for some critical reasons. Now I'm making this open sourced since this is no longer used and I want people to know what I've worked on in my free time. This documentation is more about the **functionalities this project had** instead of **how to run it** (not too sure if it still runs). I don't think anyone should use this anymore, either because Ogar clones are dying or the design flaws in this project. In my opinion, this is a fairly large solo project and I'm surprised it lasted for half a year with almost 100% uptime in a semi-production environment. Due to the popularity of the game, the gallery had about 3k daily active user and 60k total users. There were 193k skins by the end of its lifetime. 
 
 ## Problems
-This project has a few critial problems on a low budget server
+This project had a few critial problems on a low budget server
 * Limited disk space: since the all the skins are saved as png files on the server, it takes **lots** of space. My VPS had 80GB storage and it ran out after half a year (which is why this project shut down. The devs decided to tell users that a new system will be implemented without migrating old skins, aka purging all the existing skins, since they want a fresh new server without disk filled up with images that's never going to be queried again).
-* An active review mod team: the project had about 10 volunteers (include myself in the early days) to just manually review user-uploaded content. Even though there's a nsfw filter/model, we decided to disable auto approve feature to reduce server workload (process gets killed sometimes because of out-of-memory error. Tensorflow.js definitely has memory leak somewhere or node garbage collector doesn't work). And also because of the toxicity nature Ogar clones community, when some malicious users kept uploading nsfw content that bypasses the filter on alts, 100% manual review was required.
+* An active review mod team: the project had about 10 volunteers (include myself in the early days) to just manually review user-uploaded content. Even though there's a nsfw filter/model, we decided to disable auto approve feature to reduce server workload (process gets killed sometimes because of out-of-memory error. Tensorflow.js definitely has memory leak somewhere or node garbage collector doesn't work). It was also because the toxicity nature of Ogar clones community; some malicious users kept uploading nsfw content that bypasses the filter on alts, and therefore 100% manual review was required.
 * Discord reliability: bot random disconnects, oauth2 redirect doesn't work, pending queue getting stuck, etc.
 
 ## Installation
@@ -20,6 +20,7 @@ Nginx and MongoDB is also required for this project. Samples of nginx config are
 
 ## Config
 There's insanely long list of configurable values, omitted here but if you want to run the app you need `cli/config.js` which should export an object of type `AppConfig` defined in `global.d.ts`.
+To serve the static content of the app, nginx is also required (`nginx.conf`)
 
 ## Endpoint Documentation
 
